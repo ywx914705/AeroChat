@@ -1,0 +1,28 @@
+{
+    "configurations": [
+        {
+            "name": "Linux",
+            "includePath": [
+                "/home/ywx/shareproject/AeroChat/include",
+                "/home/ywx/shareproject/AeroChat/src",
+                "/home/ywx/shareproject/AeroChat/**",
+                "/usr/include",
+                "/usr/local/include"
+            ],
+            "compilerPath": "/usr/bin/g++",
+            "cStandard": "c17",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "linux-gcc-x64",
+            "configurationProvider": "ms-vscode.cpptools",
+            "browse": {
+                "path": [
+                    "/home/ywx/shareproject/AeroChat/**",
+                    "/usr/include",
+                    "/usr/local/include"
+                ],
+                "limitSymbolsToIncludedHeaders": false
+            }
+        }
+    ],
+    "version": 4
+}

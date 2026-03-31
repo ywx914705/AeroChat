@@ -1,0 +1,1195 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>AeroChat · 极速聊天室</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://unpkg.com/dayjs@1.11.10/dayjs.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: #f0f2f5;
+            height: 100vh;
+            overflow: hidden;
+        }
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: #f0f0f0; }
+        ::-webkit-scrollbar-thumb { background: #c0c0c0; border-radius: 4px; }
+
+        .app-container {
+            height: 100vh;
+            width: 100%;
+            background: #fff;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* 登录页 - 清新风格 */
+        .login-page {
+            flex: 1;
+            background: #eef2f9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .login-card {
+            background: rgba(255,255,255,0.98);
+            border-radius: 32px;
+            width: 100%;
+            max-width: 360px;
+            padding: 32px 24px;
+            box-shadow: 0 20px 35px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.03);
+            backdrop-filter: blur(2px);
+        }
+        .login-header {
+            text-align: center;
+            margin-bottom: 28px;
+        }
+        .login-header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            color: #2c3e50;
+            letter-spacing: -0.5px;
+        }
+        .input-group {
+            margin-bottom: 18px;
+        }
+        .input-group input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #e2e8f0;
+            border-radius: 28px;
+            font-size: 15px;
+            background: #f8fafc;
+            transition: all 0.2s;
+        }
+        .input-group input:focus {
+            outline: none;
+            border-color: #07c160;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(7,193,96,0.1);
+        }
+        .login-btn {
+            width: 100%;
+            background: #07c160;
+            color: white;
+            border: none;
+            border-radius: 28px;
+            padding: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .login-btn:hover {
+            background: #06ad56;
+        }
+        .switch-mode {
+            text-align: center;
+            margin-top: 20px;
+            color: #07c160;
+            font-size: 14px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+        .switch-mode:hover {
+            text-decoration: underline;
+        }
+
+        /* 主布局（与之前相同） */
+        .main-layout {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
+        }
+        .sidebar {
+            width: 280px;
+            background: #fff;
+            border-right: 1px solid #e9ecef;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            flex-shrink: 0;
+        }
+        .user-card {
+            padding: 16px;
+            border-bottom: 1px solid #e9ecef;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .avatar {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            object-fit: cover;
+            background: #ddd;
+        }
+        .user-info {
+            flex: 1;
+            min-width: 0;
+        }
+        .user-name {
+            font-weight: 600;
+            font-size: 15px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+        .user-status {
+            font-size: 11px;
+            color: #10b981;
+            background: #e3f9ed;
+            padding: 2px 6px;
+            border-radius: 20px;
+        }
+        .user-actions {
+            display: flex;
+            gap: 8px;
+        }
+        .action-icon {
+            font-size: 20px;
+            cursor: pointer;
+            padding: 4px;
+            color: #8e8e93;
+        }
+        .action-icon:hover {
+            color: #3b82f6;
+        }
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid #e9ecef;
+            background: white;
+        }
+        .tab {
+            flex: 1;
+            text-align: center;
+            padding: 12px 0;
+            font-weight: 500;
+            font-size: 14px;
+            cursor: pointer;
+            color: #5f6f90;
+        }
+        .tab.active {
+            color: #07c160;
+            border-bottom: 2px solid #07c160;
+        }
+        .chat-list, .online-list {
+            flex: 1;
+            overflow-y: auto;
+        }
+        .chat-item, .online-user {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            border-bottom: 1px solid #f0f0f0;
+            cursor: pointer;
+        }
+        .chat-item:hover, .online-user:hover {
+            background: #f5f5f5;
+        }
+        .chat-item.active {
+            background: #eff6ff;
+        }
+        .chat-avatar, .online-avatar {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            margin-right: 12px;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+        .chat-avatar img, .online-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .chat-info, .online-info {
+            flex: 1;
+            min-width: 0;
+        }
+        .chat-name-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+        }
+        .chat-name {
+            font-weight: 500;
+            font-size: 15px;
+        }
+        .chat-time {
+            font-size: 11px;
+            color: #999;
+        }
+        .chat-preview {
+            font-size: 12px;
+            color: #666;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-top: 4px;
+        }
+        .unread-badge {
+            background: #fa5151;
+            color: white;
+            font-size: 10px;
+            font-weight: 500;
+            min-width: 18px;
+            height: 18px;
+            border-radius: 20px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 5px;
+            margin-left: 8px;
+        }
+        .group-badge {
+            background: #eef2ff;
+            color: #3b82f6;
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 12px;
+            margin-left: 6px;
+        }
+        .online-dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background: #07c160;
+            border-radius: 50%;
+            margin-right: 6px;
+        }
+        .online-name {
+            font-weight: 500;
+            font-size: 14px;
+        }
+        .online-account {
+            font-size: 11px;
+            color: #999;
+        }
+
+        .chat-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: #f5f5f5;
+            overflow: hidden;
+        }
+        .chat-header {
+            background: #fff;
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid #e9ecef;
+        }
+        .chat-header-title {
+            flex: 1;
+            font-weight: 600;
+            font-size: 18px;
+        }
+        .message-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .message-row {
+            display: flex;
+            align-items: flex-start;
+            max-width: 80%;
+        }
+        .message-row.self {
+            align-self: flex-end;
+            flex-direction: row-reverse;
+        }
+        .msg-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: #e4e4e4;
+            margin-right: 10px;
+            flex-shrink: 0;
+        }
+        .self .msg-avatar {
+            margin-right: 0;
+            margin-left: 10px;
+        }
+        .msg-bubble {
+            background: white;
+            border-radius: 20px;
+            padding: 8px 12px;
+            max-width: 100%;
+            box-shadow: 0 1px 1px rgba(0,0,0,0.05);
+        }
+        .self .msg-bubble {
+            background: #d9f0ec;
+        }
+        .msg-name {
+            font-size: 12px;
+            font-weight: 500;
+            color: #07c160;
+            margin-bottom: 4px;
+        }
+        .msg-text {
+            font-size: 14px;
+            line-height: 1.4;
+            word-break: break-word;
+        }
+        .msg-time {
+            font-size: 10px;
+            color: #999;
+            margin-top: 4px;
+            text-align: right;
+        }
+        .msg-pending {
+            opacity: 0.7;
+        }
+        .chat-input-area {
+            background: #fff;
+            padding: 12px 20px;
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            border-top: 1px solid #e9ecef;
+        }
+        .chat-input {
+            flex: 1;
+            border: none;
+            background: #f5f5f5;
+            border-radius: 24px;
+            padding: 10px 16px;
+            font-size: 15px;
+            resize: none;
+            font-family: inherit;
+        }
+        .chat-input:focus {
+            outline: none;
+            background: #fff;
+            box-shadow: 0 0 0 1px #07c160;
+        }
+        .send-btn {
+            background: #07c160;
+            color: white;
+            border: none;
+            border-radius: 24px;
+            padding: 8px 20px;
+            font-weight: 500;
+            cursor: pointer;
+        }
+        .toast {
+            position: fixed;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 24px;
+            font-size: 14px;
+            z-index: 2000;
+            pointer-events: none;
+        }
+        @media (max-width: 768px) {
+            .sidebar { width: 260px; }
+            .message-row { max-width: 90%; }
+            .msg-avatar { width: 32px; height: 32px; }
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <div class="app-container">
+            <!-- 登录页 -->
+            <div v-if="!isLoggedIn" class="login-page">
+                <div class="login-card">
+                    <div class="login-header"><h1>AeroChat</h1></div>
+                    <div v-if="!isRegisterMode">
+                        <div class="input-group"><input v-model="loginForm.account" placeholder="账号"></div>
+                        <div class="input-group"><input type="password" v-model="loginForm.password" placeholder="密码"></div>
+                        <button class="login-btn" @click="doLogin">登录</button>
+                    </div>
+                    <div v-else>
+                        <div class="input-group"><input v-model="registerForm.account" placeholder="账号"></div>
+                        <div class="input-group"><input type="password" v-model="registerForm.password" placeholder="密码"></div>
+                        <div class="input-group"><input v-model="registerForm.username" placeholder="昵称"></div>
+                        <button class="login-btn" @click="doRegister">注册</button>
+                    </div>
+                    <div class="switch-mode" @click="isRegisterMode = !isRegisterMode">{{ isRegisterMode ? '返回登录' : '没有账号？立即注册' }}</div>
+                </div>
+            </div>
+
+            <!-- 主界面 -->
+            <div v-else class="main-layout">
+                <div class="sidebar">
+                    <div class="user-card">
+                        <img class="avatar" :src="currentUser.avatarUrl" @error="e=>e.target.src='https://cdn-icons-png.flaticon.com/512/3135/3135715.png'">
+                        <div class="user-info">
+                            <div class="user-name">{{ currentUser.username }} <span class="user-status">在线</span></div>
+                            <div style="font-size:12px; color:#8e8e93;">{{ currentUser.account }}</div>
+                        </div>
+                        <div class="user-actions">
+                            <span class="action-icon" @click="updateAvatar">🖼️</span>
+                            <span class="action-icon" @click="updateNickname">✏️</span>
+                            <span class="action-icon" @click="refreshOnlineList">🔄</span>
+                            <span class="action-icon" @click="logout">🚪</span>
+                        </div>
+                    </div>
+                    <div class="tabs">
+                        <div class="tab" :class="{active: activeTab === 'chats'}" @click="activeTab='chats'">消息</div>
+                        <div class="tab" :class="{active: activeTab === 'online'}" @click="activeTab='online'">在线 · {{ onlineUsers.length }}</div>
+                    </div>
+                    <!-- 会话列表 -->
+                    <div v-show="activeTab === 'chats'" class="chat-list">
+                        <div style="padding: 8px 16px 4px; font-size:12px; color:#8a99b4;">群聊</div>
+                        <div v-for="group in sortedGroupConvs" :key="'group_'+group.id" class="chat-item" :class="{active: currentConv && currentConv.id === group.id && currentConv.type === 'group'}" @click="openConversation({id: group.id, type: 'group', name: group.name, avatar: group.avatar})">
+                            <div class="chat-avatar"><img :src="group.avatar || 'https://cdn-icons-png.flaticon.com/512/147/147144.png'"></div>
+                            <div class="chat-info">
+                                <div class="chat-name-row"><span class="chat-name">{{ group.name }}<span class="group-badge">群</span></span><span class="chat-time">{{ formatShortTime(group.lastTime) }}</span></div>
+                                <div class="chat-preview">{{ group.lastMsg || '暂无消息' }}</div>
+                            </div>
+                            <span v-if="group.unread > 0" class="unread-badge">{{ group.unread > 99 ? '99+' : group.unread }}</span>
+                        </div>
+                        <div style="padding: 8px 16px 4px; font-size:12px; color:#8a99b4;">私聊</div>
+                        <div v-for="conv in sortedPrivateConvs" :key="conv.id" class="chat-item" :class="{active: currentConv && currentConv.id === conv.id && currentConv.type === 'single'}" @click="openConversation({id: conv.id, type: 'single', name: conv.displayName, avatar: conv.avatar, targetUsername: conv.targetUsername})">
+                            <div class="chat-avatar"><img :src="conv.avatar || 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png'"></div>
+                            <div class="chat-info">
+                                <div class="chat-name-row">
+                                    <span class="chat-name">{{ conv.displayName }}</span>
+                                    <span class="chat-time">{{ formatShortTime(conv.lastTime) }}</span>
+                                </div>
+                                <div class="chat-preview" style="font-size: 11px; color: #999;">{{ conv.id }}</div>
+                                <div class="chat-preview">{{ conv.lastMsg || '暂无消息' }}</div>
+                            </div>
+                            <span v-if="conv.unread > 0" class="unread-badge">{{ conv.unread > 99 ? '99+' : conv.unread }}</span>
+                        </div>
+                        <div v-if="sortedPrivateConvs.length===0" style="text-align:center; padding:20px; color:#999;">暂无会话，点击在线用户开始聊天</div>
+                    </div>
+                    <!-- 在线用户列表 -->
+                    <div v-show="activeTab === 'online'" class="online-list">
+                        <div v-for="user in onlineUsers" :key="user.account" class="online-user" @click="startPrivateChat(user)">
+                            <div class="online-avatar"><img :src="user.avatar_url || 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png'"></div>
+                            <div class="online-info">
+                                <div class="online-name"><span class="online-dot"></span> {{ user.username }}</div>
+                                <div class="online-account">{{ user.account }}</div>
+                            </div>
+                        </div>
+                        <div v-if="onlineUsers.length===0" style="text-align:center; padding:40px; color:#999;">暂无其他在线用户</div>
+                    </div>
+                </div>
+
+                <div class="chat-area">
+                    <div class="chat-header">
+                        <div class="chat-header-title">{{ currentConv ? currentConv.name : '选择聊天' }}</div>
+                    </div>
+                    <div class="message-list" ref="msgList" @scroll="onMessageScroll">
+                        <div v-if="!currentConv" style="text-align:center; padding:40px; color:#999;">选择群聊或点击在线用户开始聊天</div>
+                        <template v-else>
+                            <div v-for="msg in currentMessages" :key="msg.msgId" :class="['message-row', msg.isSelf ? 'self' : '', msg.pending ? 'msg-pending' : '']">
+                                <img class="msg-avatar" :src="msg.fromAvatar || 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png'">
+                                <div class="msg-bubble">
+                                    <div class="msg-name">{{ msg.fromUsername }}</div>
+                                    <div class="msg-text">{{ msg.content }}</div>
+                                    <div class="msg-time">{{ formatFullTime(msg.sendTime) }}</div>
+                                </div>
+                            </div>
+                            <div v-if="loadingHistory" style="text-align:center; font-size:12px; padding:8px; color:#999;">加载历史中...</div>
+                        </template>
+                    </div>
+                    <div class="chat-input-area" v-if="currentConv">
+                        <textarea id="msgInput" class="chat-input" rows="1" placeholder="输入消息..." @keydown.enter.prevent="sendCurrentMessage"></textarea>
+                        <button class="send-btn" @click="sendCurrentMessage">发送</button>
+                    </div>
+                </div>
+            </div>
+            <div v-if="toastMsg" class="toast">{{ toastMsg }}</div>
+        </div>
+    </div>
+
+    <script>
+        const { createApp, ref, reactive, computed, onMounted, onUnmounted, nextTick } = Vue;
+        // ======================== WebSocket 地址 ========================
+        const WS_URL = "ws://26.tcp.cpolar.top:12515 ";
+        // =================================================================
+        const PRESET_GROUPS = [
+            { id: 1, name: '💻 编程技术交流', avatar: 'https://cdn-icons-png.flaticon.com/512/1998/1998592.png' },
+            { id: 2, name: '🍵 生活杂谈', avatar: 'https://cdn-icons-png.flaticon.com/512/3075/3075977.png' },
+            { id: 3, name: '🎮 游戏娱乐', avatar: 'https://cdn-icons-png.flaticon.com/512/3659/3659788.png' }
+        ];
+
+        // 安全时间戳转换
+        const toTimestamp = (ts) => {
+            if (ts === undefined || ts === null) return 0;
+            let num = typeof ts === 'number' ? ts : parseInt(ts);
+            if (isNaN(num)) return 0;
+            if (num > 1e12) num = Math.floor(num / 1000);
+            const nowSec = Math.floor(Date.now() / 1000);
+            if (num < 1577836800 || num > nowSec + 31536000) return 0;
+            return num;
+        };
+        const formatFullTime = (ts) => {
+            const sec = toTimestamp(ts);
+            return sec ? dayjs(sec * 1000).format('YYYY-MM-DD HH:mm:ss') : '';
+        };
+        const formatShortTime = (ts) => {
+            const sec = toTimestamp(ts);
+            return sec ? dayjs(sec * 1000).format('MM-DD HH:mm') : '';
+        };
+
+        class AeroWebSocket {
+            constructor(url, onMessage, onOpen, onClose, onError) {
+                this.url = url;
+                this.onMessage = onMessage;
+                this.onOpen = onOpen;
+                this.onClose = onClose;
+                this.onError = onError;
+                this.ws = null;
+                this.reconnectTimer = null;
+                this.shouldReconnect = true;
+                this.heartbeatTimer = null;
+                this.connect();
+            }
+            connect() {
+                try {
+                    this.ws = new WebSocket(this.url);
+                    this.ws.binaryType = "arraybuffer";
+                    this.ws.onopen = () => {
+                        if (this.onOpen) this.onOpen();
+                        if (this.reconnectTimer) clearTimeout(this.reconnectTimer);
+                        this.startHeartbeat();
+                    };
+                    this.ws.onmessage = (ev) => {
+                        let raw = ev.data;
+                        if (ev.data instanceof ArrayBuffer) raw = new TextDecoder("utf-8").decode(ev.data);
+                        const lines = raw.split('\n');
+                        for (let line of lines) {
+                            line = line.trim();
+                            if (!line) continue;
+                            try {
+                                const json = JSON.parse(line);
+                                this.onMessage(json);
+                            } catch(e) { console.warn("非JSON行:", line); }
+                        }
+                    };
+                    this.ws.onclose = () => {
+                        this.stopHeartbeat();
+                        if (this.onClose) this.onClose();
+                        if (this.shouldReconnect) this.reconnectTimer = setTimeout(() => this.connect(), 3000);
+                    };
+                    this.ws.onerror = (err) => {
+                        if (this.onError) this.onError(err);
+                    };
+                } catch (e) {
+                    if (this.shouldReconnect) this.reconnectTimer = setTimeout(() => this.connect(), 4000);
+                }
+            }
+            startHeartbeat() {
+                this.stopHeartbeat();
+                this.heartbeatTimer = setInterval(() => {
+                    if (this.ws && this.ws.readyState === WebSocket.OPEN) this.send({ type: 'ping' });
+                }, 25000);
+            }
+            stopHeartbeat() {
+                if (this.heartbeatTimer) clearInterval(this.heartbeatTimer);
+            }
+            send(obj) {
+                if (this.ws && this.ws.readyState === WebSocket.OPEN) this.ws.send(JSON.stringify(obj) + "\n");
+            }
+            close() {
+                this.shouldReconnect = false;
+                this.stopHeartbeat();
+                if (this.ws) this.ws.close();
+                if (this.reconnectTimer) clearTimeout(this.reconnectTimer);
+            }
+        }
+
+        createApp({
+            setup() {
+                const isLoggedIn = ref(false);
+                const isRegisterMode = ref(false);
+                const loginForm = reactive({ account: '', password: '' });
+                const registerForm = reactive({ account: '', password: '', username: '' });
+                const toastMsg = ref('');
+                const showToast = (msg) => { toastMsg.value = msg; setTimeout(() => { toastMsg.value = ''; }, 2000); };
+                
+                const currentUser = reactive({
+                    userId: null, account: '', username: '', avatarUrl: 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png'
+                });
+                const ws = ref(null);
+                const activeTab = ref('chats');
+                
+                const onlineUsers = ref([]);
+                let onlinePollTimer = null;
+                
+                const privateConvs = ref([]);
+                const groupMessages = reactive({ 1: [], 2: [], 3: [] });
+                const groupLastMsg = reactive({ 1: '', 2: '', 3: '' });
+                const groupLastTime = reactive({ 1: 0, 2: 0, 3: 0 });
+                const groupUnread = reactive({ 1: 0, 2: 0, 3: 0 });
+                
+                const currentConv = ref(null);
+                const loadingHistory = ref(false);
+                const msgIdSet = new Set();
+
+                const sortPrivateConvs = () => {
+                    privateConvs.value.sort((a,b) => (b.lastTime||0) - (a.lastTime||0));
+                };
+                
+                // 组合显示名称：用户名 + (账号)
+                const getDisplayName = (username, account) => {
+                    if (!username && !account) return '未知用户';
+                    if (username && account && username !== account) {
+                        return `${username} (${account})`;
+                    }
+                    return username || account;
+                };
+                
+                const findOrCreatePrivateConv = (targetAccount, targetUsername, avatar) => {
+                    if (!targetAccount) return null;
+                    let conv = privateConvs.value.find(c => c.id === targetAccount);
+                    if (!conv) {
+                        const displayName = getDisplayName(targetUsername, targetAccount);
+                        conv = {
+                            id: targetAccount,
+                            targetUsername: targetUsername || targetAccount,
+                            displayName: displayName,
+                            avatar: avatar || '',
+                            lastMsg: '',
+                            lastTime: 0,
+                            unread: 0,
+                            messages: []
+                        };
+                        privateConvs.value.unshift(conv);
+                    } else {
+                        const newDisplay = getDisplayName(targetUsername || conv.targetUsername, targetAccount);
+                        if (newDisplay !== conv.displayName) conv.displayName = newDisplay;
+                        if (targetUsername) conv.targetUsername = targetUsername;
+                        if (avatar && conv.avatar !== avatar) conv.avatar = avatar;
+                    }
+                    sortPrivateConvs();
+                    return conv;
+                };
+                
+                const addMessage = (convId, type, msgObj, isSelf) => {
+                    const key = `${msgObj.msgId}_${msgObj.from}`;
+                    if (msgIdSet.has(key)) return false;
+                    msgIdSet.add(key);
+                    let sendTime = toTimestamp(msgObj.sendTime);
+                    if (sendTime === 0) sendTime = Math.floor(Date.now() / 1000);
+                    const newMsg = {
+                        msgId: msgObj.msgId,
+                        fromUserId: msgObj.from,
+                        fromUsername: msgObj.from_username || (msgObj.from === currentUser.userId ? currentUser.username : '用户'),
+                        fromAvatar: msgObj.from_avatar || '',
+                        content: msgObj.content,
+                        sendTime: sendTime,
+                        isSelf: isSelf,
+                        pending: msgObj.pending || false
+                    };
+                    if (type === 'group') {
+                        const gid = parseInt(convId);
+                        if (!groupMessages[gid]) groupMessages[gid] = [];
+                        groupMessages[gid].push(newMsg);
+                        groupMessages[gid].sort((a,b)=> (a.sendTime||0)-(b.sendTime||0));
+                        groupLastMsg[gid] = msgObj.content;
+                        groupLastTime[gid] = sendTime;
+                        // 如果不是当前打开的群，增加未读计数
+                        if (!currentConv.value || currentConv.value.id !== gid || currentConv.value.type !== 'group') {
+                            groupUnread[gid]++;
+                            if (groupUnread[gid] > 99) groupUnread[gid] = 99;
+                        }
+                    } else {
+                        const conv = privateConvs.value.find(c => c.id === convId);
+                        if (conv) {
+                            conv.messages.push(newMsg);
+                            conv.messages.sort((a,b)=> (a.sendTime||0)-(b.sendTime||0));
+                            conv.lastMsg = msgObj.content;
+                            conv.lastTime = sendTime;
+                            if (!currentConv.value || currentConv.value.id !== conv.id || currentConv.value.type !== 'single') {
+                                conv.unread++;
+                                if (conv.unread > 99) conv.unread = 99;
+                            }
+                            const idx = privateConvs.value.findIndex(c => c.id === convId);
+                            if (idx !== -1) {
+                                privateConvs.value.unshift(privateConvs.value.splice(idx, 1)[0]);
+                            }
+                        }
+                    }
+                    if (currentConv.value && ((type === 'group' && currentConv.value.id == convId) || (type !== 'group' && currentConv.value.id === convId))) {
+                        nextTick(() => {
+                            const el = document.querySelector('.message-list');
+                            if (el) el.scrollTop = el.scrollHeight;
+                        });
+                    }
+                    return true;
+                };
+                
+                const addOptimisticMsg = (convId, type, content) => {
+                    const tempId = Date.now() + Math.random();
+                    const now = Math.floor(Date.now()/1000);
+                    const tempMsg = {
+                        msgId: tempId,
+                        from: currentUser.userId,
+                        from_username: currentUser.username,
+                        from_avatar: currentUser.avatarUrl,
+                        content: content,
+                        sendTime: now,
+                        pending: true
+                    };
+                    addMessage(convId, type, tempMsg, true);
+                    return tempMsg;
+                };
+                
+                const initConversations = (convs) => {
+                    if (!convs || !Array.isArray(convs)) return;
+                    // 重置群组未读
+                    groupUnread[1] = 0; groupUnread[2] = 0; groupUnread[3] = 0;
+                    groupLastMsg[1] = ''; groupLastMsg[2] = ''; groupLastMsg[3] = '';
+                    groupLastTime[1] = 0; groupLastTime[2] = 0; groupLastTime[3] = 0;
+                    privateConvs.value = [];
+                    
+                    for (const conv of convs) {
+                        if (conv.type === 'group') {
+                            const gid = parseInt(conv.id);
+                            if (gid >= 1 && gid <= 3) {
+                                groupLastMsg[gid] = conv.lastMsg || '';
+                                groupLastTime[gid] = toTimestamp(conv.lastTime);
+                                let unread = conv.unread || 0;
+                                if (unread > 99) unread = 99;
+                                groupUnread[gid] = unread;
+                            }
+                        } else if (conv.type === 'single') {
+                            let targetUsername = conv.name;
+                            const targetAccount = conv.id;
+                            // 过滤无效会话：name和id都是纯数字且相同，并且无法从在线用户匹配到真实用户名
+                            if (targetUsername && /^\d+$/.test(targetUsername) && targetUsername === targetAccount) {
+                                const online = onlineUsers.value.find(u => u.account === targetAccount);
+                                if (online && online.username) {
+                                    targetUsername = online.username;
+                                } else {
+                                    continue; // 无效会话，跳过
+                                }
+                            }
+                            const displayName = getDisplayName(targetUsername, targetAccount);
+                            const convObj = {
+                                id: targetAccount,
+                                targetUsername: targetUsername,
+                                displayName: displayName,
+                                avatar: conv.avatar || '',
+                                lastMsg: conv.lastMsg || '',
+                                lastTime: toTimestamp(conv.lastTime),
+                                unread: conv.unread || 0,
+                                messages: []
+                            };
+                            if (convObj.unread > 99) convObj.unread = 99;
+                            privateConvs.value.push(convObj);
+                        }
+                    }
+                    sortPrivateConvs();
+                };
+                
+                const handleServerMessage = (json) => {
+                    const type = json.type;
+                    if (type === 'login' && json.status === 'success') {
+                        currentUser.userId = json.userId;
+                        currentUser.username = json.username;
+                        currentUser.avatarUrl = json.avatar_url;
+                        currentUser.account = loginForm.account;
+                        isLoggedIn.value = true;
+                        showToast(`欢迎回来, ${json.username}`);
+                        ws.value.send({ type: 'pull_offline' });
+                        ws.value.send({ type: 'get_online_users' });
+                        ws.value.send({ type: 'get_conversations' });
+                        startOnlinePolling();
+                    } else if (type === 'register' && json.status === 'success') {
+                        showToast('注册成功，请登录');
+                        isRegisterMode.value = false;
+                        loginForm.account = json.account;
+                    } else if (type === 'online_users') {
+                        // 在线列表：只过滤掉当前登录用户自己，其他所有用户都显示
+                        onlineUsers.value = (json.users || []).filter(u => u.account !== currentUser.account);
+                        // 更新私聊会话显示名（可能从在线用户中获取到正确的用户名）
+                        for (let conv of privateConvs.value) {
+                            const online = onlineUsers.value.find(u => u.account === conv.id);
+                            if (online && online.username) {
+                                const newDisplay = getDisplayName(online.username, conv.id);
+                                if (newDisplay !== conv.displayName) {
+                                    conv.displayName = newDisplay;
+                                    conv.targetUsername = online.username;
+                                }
+                            }
+                        }
+                        sortPrivateConvs();
+                    } else if (type === 'conversations') {
+                        initConversations(json.conversations);
+                    } else if (type === 'single_message') {
+                        const fromId = json.from;
+                        const fromUsername = json.from_username;
+                        const fromAvatar = json.from_avatar;
+                        const content = json.content;
+                        const msgId = json.msgId;
+                        const toUsername = json.to;
+                        let targetAccount = '', targetUsername = '';
+                        if (fromId === currentUser.userId) {
+                            targetUsername = toUsername;
+                            const targetUser = onlineUsers.value.find(u => u.username === targetUsername);
+                            targetAccount = targetUser ? targetUser.account : targetUsername;
+                        } else {
+                            targetUsername = fromUsername;
+                            const targetUser = onlineUsers.value.find(u => u.username === targetUsername);
+                            targetAccount = targetUser ? targetUser.account : targetUsername;
+                        }
+                        if (!targetAccount) targetAccount = targetUsername;
+                        const conv = findOrCreatePrivateConv(targetAccount, targetUsername, fromAvatar);
+                        if (!conv) return;
+                        const pendingMsg = conv.messages.find(m => m.pending && m.content === content && m.fromUserId === fromId);
+                        if (pendingMsg) {
+                            pendingMsg.msgId = msgId;
+                            pendingMsg.pending = false;
+                            pendingMsg.sendTime = toTimestamp(json.sendTime) || Math.floor(Date.now()/1000);
+                            pendingMsg.fromUsername = fromUsername;
+                            pendingMsg.fromAvatar = fromAvatar;
+                            conv.messages.sort((a,b)=> (a.sendTime||0)-(b.sendTime||0));
+                        } else {
+                            addMessage(conv.id, 'single', { 
+                                from: fromId, 
+                                from_username: fromUsername, 
+                                from_avatar: fromAvatar, 
+                                content, 
+                                msgId, 
+                                sendTime: json.sendTime
+                            }, fromId === currentUser.userId);
+                        }
+                    } else if (type === 'group_message') {
+                        const groupId = json.groupId;
+                        if (groupId >= 1 && groupId <= 3) {
+                            const pendingMsg = groupMessages[groupId]?.find(m => m.pending && m.content === json.content && m.fromUserId === json.from);
+                            if (pendingMsg) {
+                                pendingMsg.msgId = json.msgId;
+                                pendingMsg.pending = false;
+                                pendingMsg.sendTime = toTimestamp(json.sendTime) || Math.floor(Date.now()/1000);
+                                pendingMsg.fromUsername = json.from_username;
+                                pendingMsg.fromAvatar = json.from_avatar;
+                                groupMessages[groupId].sort((a,b)=> (a.sendTime||0)-(b.sendTime||0));
+                                groupLastMsg[groupId] = json.content;
+                                groupLastTime[groupId] = pendingMsg.sendTime;
+                                // 增加未读（如果不是当前打开的群）
+                                if (!currentConv.value || currentConv.value.id !== groupId || currentConv.value.type !== 'group') {
+                                    groupUnread[groupId]++;
+                                    if (groupUnread[groupId] > 99) groupUnread[groupId] = 99;
+                                }
+                            } else {
+                                addMessage(groupId, 'group', { 
+                                    from: json.from, 
+                                    from_username: json.from_username, 
+                                    from_avatar: json.from_avatar, 
+                                    content: json.content, 
+                                    msgId: json.msgId, 
+                                    sendTime: json.sendTime
+                                }, json.from === currentUser.userId);
+                            }
+                        }
+                    } else if (type === 'offline_messages') {
+                        const msgs = json.messages || [];
+                        for (let msg of msgs) {
+                            if (msg.type === 0 && msg.groupId >=1 && msg.groupId<=3) {
+                                addMessage(msg.groupId, 'group', { 
+                                    from: msg.from, 
+                                    from_username: msg.from_username, 
+                                    from_avatar: msg.from_avatar, 
+                                    content: msg.content, 
+                                    msgId: msg.msgId, 
+                                    sendTime: msg.sendTime
+                                }, false);
+                            } else if (msg.type === 1) {
+                                const peerAccount = String(msg.from);
+                                const conv = findOrCreatePrivateConv(peerAccount, msg.from_username, msg.from_avatar);
+                                if (conv) addMessage(conv.id, 'single', { 
+                                    from: msg.from, 
+                                    from_username: msg.from_username, 
+                                    from_avatar: msg.from_avatar, 
+                                    content: msg.content, 
+                                    msgId: msg.msgId, 
+                                    sendTime: msg.sendTime
+                                }, false);
+                            }
+                        }
+                        if (msgs.length) showToast(`收到 ${msgs.length} 条离线消息`);
+                    } else if (type === 'load_history') {
+                        const history = json.messages || [];
+                        const targetId = json.targetId;
+                        const targetType = json.targetType;
+                        if (targetType === 'private') {
+                            const conv = privateConvs.value.find(c => c.displayName.includes(targetId) || c.id === targetId);
+                            if (conv) {
+                                const existingIds = new Set(conv.messages.map(m=>m.msgId));
+                                const newMsgs = history.filter(h=>!existingIds.has(h.msgId)).map(h=>({
+                                    msgId: h.msgId, 
+                                    fromUserId: h.from, 
+                                    fromUsername: h.from_username, 
+                                    fromAvatar: h.from_avatar,
+                                    content: h.content, 
+                                    sendTime: toTimestamp(h.sendTime), 
+                                    isSelf: h.from === currentUser.userId, 
+                                    pending: false
+                                }));
+                                conv.messages = [...newMsgs.reverse(), ...conv.messages];
+                                conv.messages.sort((a,b)=> (a.sendTime||0)-(b.sendTime||0));
+                                if (history.length > 0) {
+                                    const latest = history.reduce((a,b) => ((toTimestamp(a.sendTime)||0) > (toTimestamp(b.sendTime)||0) ? a : b));
+                                    conv.lastMsg = latest.content;
+                                    conv.lastTime = toTimestamp(latest.sendTime);
+                                    sortPrivateConvs();
+                                }
+                            }
+                        } else if (targetType === 'group' && [1,2,3].includes(parseInt(targetId))) {
+                            const gid = parseInt(targetId);
+                            const existingIds = new Set(groupMessages[gid].map(m=>m.msgId));
+                            const newMsgs = history.filter(h=>!existingIds.has(h.msgId)).map(h=>({
+                                msgId: h.msgId, 
+                                fromUserId: h.from, 
+                                fromUsername: h.from_username, 
+                                fromAvatar: h.from_avatar,
+                                content: h.content, 
+                                sendTime: toTimestamp(h.sendTime), 
+                                isSelf: h.from === currentUser.userId, 
+                                pending: false
+                            }));
+                            groupMessages[gid] = [...newMsgs.reverse(), ...groupMessages[gid]];
+                            groupMessages[gid].sort((a,b)=> (a.sendTime||0)-(b.sendTime||0));
+                            if (history.length > 0) {
+                                const latest = history.reduce((a,b) => ((toTimestamp(a.sendTime)||0) > (toTimestamp(b.sendTime)||0) ? a : b));
+                                groupLastMsg[gid] = latest.content;
+                                groupLastTime[gid] = toTimestamp(latest.sendTime);
+                            }
+                        }
+                        loadingHistory.value = false;
+                    } else if (type === 'update_avatar' && json.status === 'success') {
+                        currentUser.avatarUrl = json.avatar_url;
+                        showToast('头像已更新');
+                    } else if (type === 'update_username' && json.status === 'success') {
+                        currentUser.username = json.username;
+                        showToast('昵称已更新');
+                        ws.value.send({ type: 'get_online_users' });
+                    } else if (type === 'error') {
+                        showToast(json.message || '错误');
+                    } else if (type === 'welcome') {
+                        // ignore
+                    }
+                };
+                
+                const startOnlinePolling = () => {
+                    if (onlinePollTimer) clearInterval(onlinePollTimer);
+                    onlinePollTimer = setInterval(() => {
+                        if (ws.value && isLoggedIn.value) ws.value.send({ type: 'get_online_users' });
+                    }, 10000);
+                };
+                const stopOnlinePolling = () => {
+                    if (onlinePollTimer) clearInterval(onlinePollTimer);
+                };
+                const refreshOnlineList = () => {
+                    if (ws.value && isLoggedIn.value) {
+                        ws.value.send({ type: 'get_online_users' });
+                        showToast('已刷新在线列表');
+                    }
+                };
+                
+                const initWS = () => {
+                    if (ws.value) ws.value.close();
+                    ws.value = new AeroWebSocket(WS_URL, handleServerMessage,
+                        () => { if (isLoggedIn.value) { ws.value.send({ type: 'get_online_users' }); ws.value.send({ type: 'get_conversations' }); startOnlinePolling(); } },
+                        () => showToast('连接断开，重连中...'),
+                        () => {}
+                    );
+                };
+                
+                const doLogin = () => {
+                    if (!loginForm.account || !loginForm.password) { showToast('请输入账号和密码'); return; }
+                    if (!ws.value) initWS();
+                    ws.value.send({ type: 'login', account: loginForm.account, password: loginForm.password });
+                };
+                const doRegister = () => {
+                    if (!registerForm.account || !registerForm.password || !registerForm.username) { showToast('完整填写信息'); return; }
+                    if (!ws.value) initWS();
+                    ws.value.send({ type: 'register', account: registerForm.account, password: registerForm.password, username: registerForm.username });
+                };
+                
+                const openConversation = (conv) => {
+                    // 避免重复点击同一个会话
+                    if (currentConv.value && currentConv.value.id === conv.id && currentConv.value.type === conv.type) return;
+                    currentConv.value = conv;
+                    if (conv.type === 'group') {
+                        // 打开群聊时，未读清零
+                        groupUnread[conv.id] = 0;
+                        if (groupMessages[conv.id].length === 0) {
+                            loadingHistory.value = true;
+                            ws.value.send({ type: 'load_history', targetType: 'group', targetId: String(conv.id), limit: 30 });
+                        } else {
+                            nextTick(() => {
+                                const el = document.querySelector('.message-list');
+                                if (el) el.scrollTop = el.scrollHeight;
+                            });
+                        }
+                    } else {
+                        const c = privateConvs.value.find(p => p.id === conv.id);
+                        if (c) {
+                            c.unread = 0;
+                            if (c.messages.length === 0) {
+                                loadingHistory.value = true;
+                                ws.value.send({ type: 'load_history', targetType: 'private', targetId: c.targetUsername, limit: 30 });
+                            } else {
+                                nextTick(() => {
+                                    const el = document.querySelector('.message-list');
+                                    if (el) el.scrollTop = el.scrollHeight;
+                                });
+                            }
+                        }
+                    }
+                };
+                
+                const sendCurrentMessage = () => {
+                    if (!currentConv.value) return;
+                    const input = document.getElementById('msgInput');
+                    const content = input.value.trim();
+                    if (!content) return;
+                    if (currentConv.value.type === 'single') {
+                        let targetUsername = currentConv.value.targetUsername;
+                        if (!targetUsername) {
+                            const conv = privateConvs.value.find(c => c.id === currentConv.value.id);
+                            if (conv && conv.targetUsername) targetUsername = conv.targetUsername;
+                            else targetUsername = currentConv.value.name;
+                        }
+                        // 提取纯用户名（去掉括号内的账号）
+                        if (targetUsername.includes('(')) {
+                            targetUsername = targetUsername.split('(')[0].trim();
+                        }
+                        if (!targetUsername || /^\d+$/.test(targetUsername)) {
+                            showToast('无法发送：对方用户名无效');
+                            return;
+                        }
+                        addOptimisticMsg(currentConv.value.id, 'single', content);
+                        ws.value.send({ type: 'single_message', target: targetUsername, content: content });
+                    } else if (currentConv.value.type === 'group') {
+                        const groupId = parseInt(currentConv.value.id);
+                        addOptimisticMsg(currentConv.value.id, 'group', content);
+                        ws.value.send({ type: 'group_message', groupId: groupId, content: content });
+                    }
+                    input.value = '';
+                };
+                
+                const onMessageScroll = (e) => {
+                    const el = e.target;
+                    if (el.scrollTop < 100 && !loadingHistory.value && currentConv.value) {
+                        loadingHistory.value = true;
+                        if (currentConv.value.type === 'group') {
+                            ws.value.send({ type: 'load_history', targetType: 'group', targetId: String(currentConv.value.id), limit: 30 });
+                        } else {
+                            const conv = privateConvs.value.find(c => c.id === currentConv.value.id);
+                            if (conv && conv.targetUsername) {
+                                ws.value.send({ type: 'load_history', targetType: 'private', targetId: conv.targetUsername, limit: 30 });
+                            } else {
+                                ws.value.send({ type: 'load_history', targetType: 'private', targetId: currentConv.value.name, limit: 30 });
+                            }
+                        }
+                    }
+                };
+                
+                const updateAvatar = () => {
+                    const url = prompt('输入新头像URL', currentUser.avatarUrl);
+                    if (url && url.trim()) ws.value.send({ type: 'update_avatar', avatarUrl: url.trim() });
+                };
+                const updateNickname = () => {
+                    const name = prompt('输入新昵称', currentUser.username);
+                    if (name && name.trim()) ws.value.send({ type: 'update_username', username: name.trim() });
+                };
+                
+                const logout = () => {
+                    stopOnlinePolling();
+                    if (ws.value) ws.value.close();
+                    isLoggedIn.value = false;
+                    // 重置用户信息，避免残留
+                    currentUser.userId = null;
+                    currentUser.account = '';
+                    currentUser.username = '';
+                    currentUser.avatarUrl = 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png';
+                    privateConvs.value = [];
+                    groupMessages[1] = []; groupMessages[2] = []; groupMessages[3] = [];
+                    groupLastMsg[1] = ''; groupLastMsg[2] = ''; groupLastMsg[3] = '';
+                    groupLastTime[1] = 0; groupLastTime[2] = 0; groupLastTime[3] = 0;
+                    groupUnread[1] = 0; groupUnread[2] = 0; groupUnread[3] = 0;
+                    currentConv.value = null;
+                    onlineUsers.value = [];
+                    msgIdSet.clear();
+                };
+                
+                const startPrivateChat = (user) => {
+                    if (!user.account) return;
+                    const conv = findOrCreatePrivateConv(user.account, user.username, user.avatar_url);
+                    if (conv) {
+                        openConversation({ id: conv.id, type: 'single', name: conv.displayName, avatar: conv.avatar, targetUsername: conv.targetUsername });
+                        activeTab.value = 'chats';
+                    }
+                };
+                
+                // 群聊按最新消息时间降序排序（最新消息的在上方）
+                const sortedGroupConvs = computed(() => {
+                    return PRESET_GROUPS.map(g => ({
+                        id: g.id,
+                        type: 'group',
+                        name: g.name,
+                        avatar: g.avatar,
+                        lastMsg: groupLastMsg[g.id],
+                        lastTime: groupLastTime[g.id],
+                        unread: groupUnread[g.id]
+                    })).sort((a,b) => (b.lastTime||0) - (a.lastTime||0));
+                });
+                const sortedPrivateConvs = computed(() => {
+                    return [...privateConvs.value].sort((a,b) => (b.lastTime||0) - (a.lastTime||0));
+                });
+                const currentMessages = computed(() => {
+                    if (!currentConv.value) return [];
+                    if (currentConv.value.type === 'group') {
+                        return groupMessages[currentConv.value.id] || [];
+                    } else {
+                        const conv = privateConvs.value.find(c => c.id === currentConv.value.id);
+                        return conv ? conv.messages : [];
+                    }
+                });
+                
+                onMounted(() => {
+                    initWS();
+                });
+                onUnmounted(() => {
+                    stopOnlinePolling();
+                    if (ws.value) ws.value.close();
+                });
+                
+                return {
+                    isLoggedIn, isRegisterMode, loginForm, registerForm,
+                    doLogin, doRegister,
+                    currentUser, toastMsg, activeTab,
+                    onlineUsers, refreshOnlineList,
+                    sortedGroupConvs, sortedPrivateConvs,
+                    groupMessages, groupLastMsg, groupLastTime, groupUnread,
+                    currentConv, currentMessages, loadingHistory,
+                    openConversation, sendCurrentMessage, onMessageScroll,
+                    updateAvatar, updateNickname, logout, startPrivateChat,
+                    formatFullTime, formatShortTime
+                };
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>
