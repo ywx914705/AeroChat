@@ -76,7 +76,8 @@ sudo apt-get install libssl-dev
 ### 安装 RapidJSON（头文件库）
 sudo apt-get install rapidjson-dev
 ### 2. 克隆源码
-git clone https://github.com/your-username/aerochat.git
+git clone  https://github.com/ywx914705/AeroChat.git
+
 <img width="1163" height="215" alt="image" src="https://github.com/user-attachments/assets/7203b123-4aa5-4f25-ab87-607f891e3b03" />
 
 cd AeroChat
