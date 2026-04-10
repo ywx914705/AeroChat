@@ -27,7 +27,7 @@ AeroChat 是一个基于 **Reactor模式** 的 C++ 高性能聊天服务器，�
 
 | 类别       | 技术                                                         |
 | ---------- | ------------------------------------------------------------ |
-| 语言       | C++11以及部分c++14/c++11                                                  |
+| 语言       | C++11以及部分c++14/c++17                                                 |
 | 网络模型   | 主从Reactor,epoll（ET 模式）、非阻塞 I/O                                 |
 | 并发       | std::thread、std::atomic、moodycamel::ConcurrentQueue |
 | 数据库     | MySQL 8.0 + MySQL Connector/C API、Redis 6.0 + hiredis       |
