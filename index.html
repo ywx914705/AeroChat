@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>AeroChat · 极速聊天室</title>
-    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
-    <script src="https://unpkg.com/dayjs@1.11.10/dayjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dayjs@1.11.10/dayjs.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -15,125 +15,143 @@
         }
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            background: #f0f2f5;
+            background: #f1f5f9;
             height: 100vh;
             overflow: hidden;
         }
-        ::-webkit-scrollbar { width: 4px; }
-        ::-webkit-scrollbar-track { background: #f0f0f0; }
-        ::-webkit-scrollbar-thumb { background: #c0c0c0; border-radius: 4px; }
-
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
+        ::-webkit-scrollbar-track { background: #e2e8f0; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 10px; }
         .app-container {
             height: 100vh;
-            width: 100%;
-            background: #fff;
-            position: relative;
-            overflow: hidden;
             display: flex;
             flex-direction: column;
+            background: #ffffff;
+            overflow: hidden;
         }
-
-        /* 登录页 - 清新风格 */
         .login-page {
             flex: 1;
-            background: #eef2f9;
+            position: relative;
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 20px;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            overflow: hidden;
+        }
+        .login-page::before {
+            content: '';
+            position: absolute;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.05) 1px, transparent 1px);
+            background-size: 40px 40px;
+            animation: bgMove 40s linear infinite;
+            opacity: 0.4;
+        }
+        @keyframes bgMove {
+            from { transform: translate(0,0); }
+            to { transform: translate(40px,40px); }
         }
         .login-card {
-            background: rgba(255,255,255,0.98);
-            border-radius: 32px;
+            position: relative;
+            z-index: 2;
+            background: rgba(255,255,255,0.96);
+            backdrop-filter: blur(12px);
+            border-radius: 2rem;
             width: 100%;
-            max-width: 360px;
-            padding: 32px 24px;
-            box-shadow: 0 20px 35px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.03);
-            backdrop-filter: blur(2px);
+            max-width: 420px;
+            padding: 2.5rem 2rem;
+            box-shadow: 0 25px 45px rgba(0,0,0,0.2);
+            border: 1px solid rgba(255,255,255,0.3);
         }
         .login-header {
             text-align: center;
-            margin-bottom: 28px;
+            margin-bottom: 2rem;
         }
         .login-header h1 {
-            font-size: 28px;
+            font-size: 2.5rem;
             font-weight: 700;
-            color: #2c3e50;
-            letter-spacing: -0.5px;
+            background: linear-gradient(135deg, #2563eb, #7c3aed);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        .login-header p {
+            color: #64748b;
+            margin-top: 0.5rem;
+            font-size: 0.9rem;
         }
         .input-group {
-            margin-bottom: 18px;
+            margin-bottom: 1.2rem;
         }
         .input-group input {
             width: 100%;
-            padding: 12px 16px;
+            padding: 0.9rem 1.2rem;
             border: 1px solid #e2e8f0;
-            border-radius: 28px;
-            font-size: 15px;
+            border-radius: 3rem;
+            font-size: 0.95rem;
             background: #f8fafc;
             transition: all 0.2s;
         }
         .input-group input:focus {
             outline: none;
-            border-color: #07c160;
+            border-color: #3b82f6;
             background: white;
-            box-shadow: 0 0 0 3px rgba(7,193,96,0.1);
+            box-shadow: 0 0 0 3px rgba(59,130,246,0.1);
         }
         .login-btn {
             width: 100%;
-            background: #07c160;
+            background: linear-gradient(135deg, #2563eb, #7c3aed);
             color: white;
             border: none;
-            border-radius: 28px;
-            padding: 12px;
-            font-size: 16px;
+            border-radius: 3rem;
+            padding: 0.9rem;
+            font-size: 1rem;
             font-weight: 600;
             cursor: pointer;
-            transition: background 0.2s;
+            transition: transform 0.1s, box-shadow 0.2s;
         }
         .login-btn:hover {
-            background: #06ad56;
+            transform: translateY(-1px);
+            box-shadow: 0 8px 20px rgba(37,99,235,0.3);
         }
         .switch-mode {
             text-align: center;
-            margin-top: 20px;
-            color: #07c160;
-            font-size: 14px;
+            margin-top: 1.2rem;
+            color: #3b82f6;
+            font-size: 0.85rem;
             cursor: pointer;
-            font-weight: 500;
         }
-        .switch-mode:hover {
-            text-decoration: underline;
-        }
-
-        /* 主布局（与之前相同） */
         .main-layout {
             flex: 1;
             display: flex;
             overflow: hidden;
+            background: #f8fafc;
         }
         .sidebar {
-            width: 280px;
-            background: #fff;
-            border-right: 1px solid #e9ecef;
+            width: 300px;
+            background: white;
+            border-right: 1px solid #e2e8f0;
             display: flex;
             flex-direction: column;
             overflow-y: auto;
             flex-shrink: 0;
         }
         .user-card {
-            padding: 16px;
-            border-bottom: 1px solid #e9ecef;
+            padding: 1rem 1.2rem;
+            border-bottom: 1px solid #eef2ff;
             display: flex;
             align-items: center;
             gap: 12px;
         }
         .avatar {
-            width: 44px;
-            height: 44px;
+            width: 48px;
+            height: 48px;
             border-radius: 50%;
             object-fit: cover;
-            background: #ddd;
+            cursor: pointer;
+            border: 2px solid white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
         .user-info {
             flex: 1;
@@ -141,49 +159,131 @@
         }
         .user-name {
             font-weight: 600;
-            font-size: 15px;
+            font-size: 1rem;
             display: flex;
             align-items: center;
             gap: 6px;
             flex-wrap: wrap;
         }
         .user-status {
-            font-size: 11px;
-            color: #10b981;
-            background: #e3f9ed;
-            padding: 2px 6px;
+            font-size: 0.7rem;
+            background: #dcfce7;
+            color: #16a34a;
+            padding: 2px 8px;
             border-radius: 20px;
         }
         .user-actions {
             display: flex;
-            gap: 8px;
+            gap: 6px;
         }
         .action-icon {
-            font-size: 20px;
+            font-size: 1.2rem;
             cursor: pointer;
-            padding: 4px;
-            color: #8e8e93;
+            padding: 6px;
+            color: #64748b;
+            border-radius: 50%;
+            transition: all 0.2s;
         }
         .action-icon:hover {
+            background: #f1f5f9;
             color: #3b82f6;
         }
         .tabs {
             display: flex;
-            border-bottom: 1px solid #e9ecef;
+            border-bottom: 1px solid #eef2ff;
             background: white;
         }
         .tab {
             flex: 1;
             text-align: center;
-            padding: 12px 0;
+            padding: 0.8rem 0;
             font-weight: 500;
-            font-size: 14px;
+            font-size: 0.85rem;
             cursor: pointer;
-            color: #5f6f90;
+            color: #64748b;
+            transition: all 0.2s;
         }
         .tab.active {
-            color: #07c160;
-            border-bottom: 2px solid #07c160;
+            color: #3b82f6;
+            border-bottom: 2px solid #3b82f6;
+            background: #eff6ff;
+        }
+        .hall-container {
+            padding: 1rem;
+            background: #f8fafc;
+        }
+        .hall-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            padding-left: 0.5rem;
+            color: #0f172a;
+        }
+        .channel-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1rem;
+        }
+        .channel-card {
+            background: white;
+            border-radius: 1rem;
+            padding: 1rem;
+            transition: all 0.2s;
+            border: 1px solid #e2e8f0;
+            cursor: pointer;
+        }
+        .channel-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+            border-color: #cbd5e1;
+        }
+        .channel-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+        .channel-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 1rem;
+            object-fit: cover;
+        }
+        .channel-name {
+            font-weight: 700;
+            font-size: 1rem;
+        }
+        .channel-desc {
+            font-size: 0.75rem;
+            color: #64748b;
+            margin: 8px 0;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .channel-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.7rem;
+            color: #475569;
+            margin-top: 8px;
+        }
+        .join-btn {
+            background: #eef2ff;
+            color: #3b82f6;
+            border: none;
+            border-radius: 2rem;
+            padding: 4px 12px;
+            font-size: 0.7rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .join-btn.joined {
+            background: #dcfce7;
+            color: #16a34a;
         }
         .chat-list, .online-list {
             flex: 1;
@@ -192,12 +292,13 @@
         .chat-item, .online-user {
             display: flex;
             align-items: center;
-            padding: 12px 16px;
-            border-bottom: 1px solid #f0f0f0;
+            padding: 0.8rem 1rem;
+            border-bottom: 1px solid #f1f5f9;
             cursor: pointer;
+            transition: background 0.1s;
         }
         .chat-item:hover, .online-user:hover {
-            background: #f5f5f5;
+            background: #f8fafc;
         }
         .chat-item.active {
             background: #eff6ff;
@@ -209,6 +310,7 @@
             margin-right: 12px;
             overflow: hidden;
             flex-shrink: 0;
+            cursor: pointer;
         }
         .chat-avatar img, .online-avatar img {
             width: 100%;
@@ -226,25 +328,24 @@
         }
         .chat-name {
             font-weight: 500;
-            font-size: 15px;
+            font-size: 0.9rem;
         }
         .chat-time {
-            font-size: 11px;
-            color: #999;
+            font-size: 0.65rem;
+            color: #94a3b8;
         }
         .chat-preview {
-            font-size: 12px;
-            color: #666;
+            font-size: 0.75rem;
+            color: #64748b;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
             margin-top: 4px;
         }
         .unread-badge {
-            background: #fa5151;
+            background: #ef4444;
             color: white;
-            font-size: 10px;
-            font-weight: 500;
+            font-size: 0.7rem;
             min-width: 18px;
             height: 18px;
             border-radius: 20px;
@@ -257,54 +358,68 @@
         .group-badge {
             background: #eef2ff;
             color: #3b82f6;
-            font-size: 10px;
+            font-size: 0.65rem;
             padding: 2px 6px;
-            border-radius: 12px;
+            border-radius: 20px;
             margin-left: 6px;
         }
         .online-dot {
             display: inline-block;
             width: 8px;
             height: 8px;
-            background: #07c160;
+            background: #22c55e;
             border-radius: 50%;
             margin-right: 6px;
         }
         .online-name {
             font-weight: 500;
-            font-size: 14px;
+            font-size: 0.85rem;
         }
         .online-account {
-            font-size: 11px;
-            color: #999;
+            font-size: 0.7rem;
+            color: #94a3b8;
         }
-
+        .search-bar {
+            padding: 12px;
+            border-bottom: 1px solid #eef2ff;
+        }
+        .search-bar button {
+            width: 100%;
+            background: #f1f5f9;
+            border: 1px solid #e2e8f0;
+            border-radius: 2rem;
+            padding: 8px;
+            font-size: 0.8rem;
+            color: #475569;
+            cursor: pointer;
+        }
         .chat-area {
             flex: 1;
             display: flex;
             flex-direction: column;
-            background: #f5f5f5;
+            background: #ffffff;
             overflow: hidden;
         }
         .chat-header {
-            background: #fff;
-            padding: 12px 20px;
+            background: white;
+            padding: 0.8rem 1.5rem;
             display: flex;
             align-items: center;
-            border-bottom: 1px solid #e9ecef;
+            border-bottom: 1px solid #eef2ff;
         }
         .chat-header-title {
             flex: 1;
             font-weight: 600;
-            font-size: 18px;
+            font-size: 1rem;
         }
         .message-list {
             flex: 1;
             overflow-y: auto;
-            padding: 16px 20px;
+            padding: 1rem 1.5rem;
             display: flex;
             flex-direction: column;
             gap: 12px;
+            background: #fafcff;
         }
         .message-row {
             display: flex;
@@ -322,6 +437,7 @@
             background: #e4e4e4;
             margin-right: 10px;
             flex-shrink: 0;
+            cursor: pointer;
         }
         .self .msg-avatar {
             margin-right: 0;
@@ -329,207 +445,531 @@
         }
         .msg-bubble {
             background: white;
-            border-radius: 20px;
-            padding: 8px 12px;
+            border-radius: 1.2rem;
+            padding: 8px 14px;
             max-width: 100%;
-            box-shadow: 0 1px 1px rgba(0,0,0,0.05);
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
         }
         .self .msg-bubble {
             background: #d9f0ec;
         }
         .msg-name {
-            font-size: 12px;
-            font-weight: 500;
-            color: #07c160;
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: #3b82f6;
             margin-bottom: 4px;
+            cursor: pointer;
         }
         .msg-text {
-            font-size: 14px;
+            font-size: 0.85rem;
             line-height: 1.4;
             word-break: break-word;
         }
         .msg-time {
-            font-size: 10px;
-            color: #999;
+            font-size: 0.6rem;
+            color: #94a3b8;
             margin-top: 4px;
             text-align: right;
         }
         .msg-pending {
-            opacity: 0.7;
+            opacity: 0.6;
         }
         .chat-input-area {
-            background: #fff;
-            padding: 12px 20px;
+            background: white;
+            padding: 0.8rem 1.5rem;
             display: flex;
             gap: 12px;
             align-items: center;
-            border-top: 1px solid #e9ecef;
+            border-top: 1px solid #eef2ff;
         }
         .chat-input {
             flex: 1;
             border: none;
-            background: #f5f5f5;
-            border-radius: 24px;
+            background: #f1f5f9;
+            border-radius: 2rem;
             padding: 10px 16px;
-            font-size: 15px;
+            font-size: 0.85rem;
             resize: none;
             font-family: inherit;
         }
         .chat-input:focus {
             outline: none;
-            background: #fff;
-            box-shadow: 0 0 0 1px #07c160;
+            background: white;
+            box-shadow: 0 0 0 2px #3b82f6;
         }
         .send-btn {
-            background: #07c160;
+            background: #3b82f6;
             color: white;
             border: none;
-            border-radius: 24px;
+            border-radius: 2rem;
             padding: 8px 20px;
             font-weight: 500;
             cursor: pointer;
+        }
+        .modal-mask {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            backdrop-filter: blur(4px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 3000;
+        }
+        .modal-container {
+            width: 380px;
+            background: white;
+            border-radius: 1.5rem;
+            overflow: hidden;
+            animation: slideUp 0.2s ease;
+        }
+        @keyframes slideUp {
+            from { transform: translateY(30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .profile-header {
+            background: linear-gradient(135deg, #2563eb, #7c3aed);
+            padding: 1.8rem;
+            text-align: center;
+        }
+        .profile-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            border: 3px solid white;
+            object-fit: cover;
+            margin-bottom: 12px;
+        }
+        .profile-name {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: white;
+        }
+        .profile-account {
+            font-size: 0.8rem;
+            color: rgba(255,255,255,0.8);
+            margin-top: 4px;
+        }
+        .profile-status {
+            font-size: 0.75rem;
+            margin-top: 8px;
+            font-weight: 500;
+        }
+        .profile-status.online {
+            color: #bbf7d0;
+        }
+        .profile-status.offline {
+            color: #fecaca;
+        }
+        .profile-send-btn {
+            width: calc(100% - 2rem);
+            margin: 1rem;
+            background: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 2rem;
+            padding: 10px;
+            font-weight: 500;
+            cursor: pointer;
+        }
+        .modal-close {
+            text-align: center;
+            padding: 12px;
+            border-top: 1px solid #eef2ff;
+            cursor: pointer;
+            color: #64748b;
+        }
+        .search-modal .modal-container {
+            width: 400px;
+        }
+        .search-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #e2e8f0;
+            border-radius: 2rem;
+            font-size: 0.9rem;
+            margin-bottom: 12px;
         }
         .toast {
             position: fixed;
             bottom: 100px;
             left: 50%;
             transform: translateX(-50%);
-            background: rgba(0,0,0,0.7);
+            background: rgba(0,0,0,0.75);
+            backdrop-filter: blur(8px);
             color: white;
-            padding: 8px 16px;
-            border-radius: 24px;
-            font-size: 14px;
-            z-index: 2000;
+            padding: 8px 20px;
+            border-radius: 40px;
+            font-size: 0.85rem;
+            z-index: 4000;
             pointer-events: none;
         }
+        .loading-trigger {
+            text-align: center;
+            padding: 10px;
+            font-size: 12px;
+            color: #94a3b8;
+            cursor: pointer;
+        }
+        .mobile-header {
+            display: none;
+            background: white;
+            padding: 0.8rem 1rem;
+            border-bottom: 1px solid #eef2ff;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .menu-btn {
+            font-size: 1.5rem;
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #3b82f6;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+        .bottom-nav {
+            display: none;
+            background: white;
+            border-top: 1px solid #eef2ff;
+            padding: 8px 0 12px;
+            justify-content: space-around;
+            flex-shrink: 0;
+            padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+        }
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            font-size: 12px;
+            color: #64748b;
+            cursor: pointer;
+        }
+        .nav-item.active {
+            color: #3b82f6;
+        }
+        .nav-icon {
+            font-size: 22px;
+        }
+        .drawer {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 280px;
+            height: 100%;
+            background: white;
+            z-index: 1000;
+            transform: translateX(-100%);
+            transition: transform 0.3s ease;
+            box-shadow: 2px 0 12px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+        .drawer.open {
+            transform: translateX(0);
+        }
+        .drawer-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.4);
+            z-index: 999;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.2s;
+        }
+        .drawer-overlay.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+        .drawer-user {
+            padding: 24px 20px;
+            background: linear-gradient(135deg, #2563eb, #7c3aed);
+            color: white;
+            text-align: center;
+        }
+        .drawer-avatar {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            border: 3px solid white;
+            margin-bottom: 12px;
+            object-fit: cover;
+        }
+        .drawer-name {
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+        .drawer-account {
+            font-size: 0.8rem;
+            opacity: 0.8;
+        }
+        .drawer-menu {
+            flex: 1;
+            padding: 12px 0;
+        }
+        .drawer-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 20px;
+            cursor: pointer;
+            font-size: 1rem;
+            color: #1e293b;
+        }
+        .drawer-item:active {
+            background: #f1f5f9;
+        }
+        .drawer-footer {
+            padding: 20px;
+            border-top: 1px solid #eef2ff;
+        }
+        .logout-btn {
+            width: 100%;
+            background: #fee2e2;
+            color: #dc2626;
+            border: none;
+            border-radius: 2rem;
+            padding: 10px;
+            font-weight: 500;
+            cursor: pointer;
+        }
         @media (max-width: 768px) {
-            .sidebar { width: 260px; }
+            .sidebar { display: none; }
+            .mobile-header { display: flex; }
+            .bottom-nav { display: flex; }
+            .main-layout { flex-direction: column; }
+            .chat-area { flex: 1; }
+            .chat-header { display: none; }
+            .message-list { padding: 0.8rem; }
             .message-row { max-width: 90%; }
-            .msg-avatar { width: 32px; height: 32px; }
+        }
+        @media (min-width: 769px) {
+            .mobile-header, .bottom-nav, .drawer, .drawer-overlay { display: none; }
+        }
+        .fallback-error {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            font-size: 1.2rem;
+            color: red;
+            background: white;
+            text-align: center;
+            padding: 20px;
         }
     </style>
 </head>
 <body>
-    <div id="app">
-        <div class="app-container">
-            <!-- 登录页 -->
-            <div v-if="!isLoggedIn" class="login-page">
-                <div class="login-card">
-                    <div class="login-header"><h1>AeroChat</h1></div>
-                    <div v-if="!isRegisterMode">
-                        <div class="input-group"><input v-model="loginForm.account" placeholder="账号"></div>
-                        <div class="input-group"><input type="password" v-model="loginForm.password" placeholder="密码"></div>
-                        <button class="login-btn" @click="doLogin">登录</button>
+<div id="app">
+    <div v-if="libraryError" class="fallback-error">
+        ⚠️ 页面加载失败，请检查网络后刷新重试。<br>如果问题持续，请手动清除浏览器缓存。
+    </div>
+    <div v-else class="app-container">
+        <div v-if="!isLoggedIn" class="login-page">
+            <div class="login-card">
+                <div class="login-header">
+                    <h1>AeroChat</h1>
+                    <p>极速 · 安全 · 自由</p>
+                </div>
+                <div v-if="!isRegisterMode">
+                    <div class="input-group"><input v-model="loginForm.account" placeholder="账号"></div>
+                    <div class="input-group"><input type="password" v-model="loginForm.password" placeholder="密码"></div>
+                    <button class="login-btn" @click="doLogin">登录</button>
+                </div>
+                <div v-else>
+                    <div class="input-group"><input v-model="registerForm.account" placeholder="账号"></div>
+                    <div class="input-group"><input type="password" v-model="registerForm.password" placeholder="密码"></div>
+                    <div class="input-group"><input v-model="registerForm.username" placeholder="昵称"></div>
+                    <button class="login-btn" @click="doRegister">注册</button>
+                </div>
+                <div class="switch-mode" @click="isRegisterMode = !isRegisterMode">{{ isRegisterMode ? '返回登录' : '没有账号？立即注册' }}</div>
+            </div>
+        </div>
+
+        <div v-else class="main-layout">
+            <div class="sidebar">
+                <div class="user-card">
+                    <img class="avatar" :src="currentUser.avatarUrl" @error="e=>e.target.src=defaultAvatar" @click="openUserProfile(currentUser.account, currentUser.username, currentUser.avatarUrl)">
+                    <div class="user-info">
+                        <div class="user-name">{{ currentUser.username }} <span class="user-status">在线</span></div>
+                        <div style="font-size:11px; color:#64748b;">{{ currentUser.account }}</div>
                     </div>
-                    <div v-else>
-                        <div class="input-group"><input v-model="registerForm.account" placeholder="账号"></div>
-                        <div class="input-group"><input type="password" v-model="registerForm.password" placeholder="密码"></div>
-                        <div class="input-group"><input v-model="registerForm.username" placeholder="昵称"></div>
-                        <button class="login-btn" @click="doRegister">注册</button>
+                    <div class="user-actions">
+                        <span class="action-icon" @click="updateAvatar">🖼️</span>
+                        <span class="action-icon" @click="updateNickname">✏️</span>
+                        <span class="action-icon" @click="refreshOnlineList">🔄</span>
+                        <span class="action-icon" @click="logout">🚪</span>
                     </div>
-                    <div class="switch-mode" @click="isRegisterMode = !isRegisterMode">{{ isRegisterMode ? '返回登录' : '没有账号？立即注册' }}</div>
+                </div>
+                <div class="tabs">
+                    <div class="tab" :class="{active: activeTab === 'hall'}" @click="activeTab='hall'">大厅</div>
+                    <div class="tab" :class="{active: activeTab === 'chats'}" @click="activeTab='chats'">消息</div>
+                    <div class="tab" :class="{active: activeTab === 'online'}" @click="activeTab='online'">在线 · {{ onlineTotal }}</div>
+                </div>
+                <div v-show="activeTab === 'hall'" class="hall-container">
+                    <div class="hall-title">🏠 热门频道</div>
+                    <div class="channel-grid">
+                        <div v-for="channel in allChannels" :key="channel.id" class="channel-card">
+                            <div class="channel-header">
+                                <img class="channel-avatar" :src="channel.avatar" @error="e=>e.target.src=defaultAvatar">
+                                <div class="channel-name">{{ channel.name }}</div>
+                            </div>
+                            <div class="channel-desc">{{ channel.description }}</div>
+                            <div class="channel-meta">
+                                <span>👥 {{ channel.memberCount }}/{{ channel.maxMembers }}</span>
+                                <button class="join-btn" :class="{joined: isJoinedChannel(channel.id)}" @click.stop="toggleJoinChannel(channel.id)">
+                                    {{ isJoinedChannel(channel.id) ? '已加入' : '加入' }}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div v-show="activeTab === 'chats'" class="chat-list">
+                    <div style="padding: 8px 16px 4px; font-size:11px; color:#8a99b4;">我的频道</div>
+                    <div v-for="group in joinedChannels" :key="'group_'+group.id" class="chat-item" :class="{active: currentConv && currentConv.id === group.id && currentConv.type === 'group'}" @click="openConversation({id: group.id, type: 'group', name: group.name, avatar: group.avatar})">
+                        <div class="chat-avatar"><img :src="group.avatar || defaultAvatar"></div>
+                        <div class="chat-info">
+                            <div class="chat-name-row"><span class="chat-name">{{ group.name }}<span class="group-badge">频道</span></span><span class="chat-time">{{ formatShortTime(group.lastTime) }}</span></div>
+                            <div class="chat-preview">{{ group.lastMsg || '暂无消息' }}</div>
+                        </div>
+                        <span v-if="group.unread > 0" class="unread-badge">{{ group.unread > 99 ? '99+' : group.unread }}</span>
+                    </div>
+                    <div v-if="joinedChannels.length === 0" style="text-align:center; padding:20px; color:#94a3b8;">暂未加入任何频道，请去大厅加入</div>
+                    <div style="padding: 8px 16px 4px; font-size:11px; color:#8a99b4;">私聊</div>
+                    <div v-for="conv in privateConvs" :key="conv.id" class="chat-item" :class="{active: currentConv && currentConv.id === conv.id && currentConv.type === 'single'}" @click="openConversation(conv)">
+                        <div class="chat-avatar" @click.stop="openUserProfile(conv.id, conv.targetUsername, conv.avatar)"><img :src="conv.avatar || defaultAvatar"></div>
+                        <div class="chat-info">
+                            <div class="chat-name-row"><span class="chat-name">{{ conv.displayName }}</span><span class="chat-time">{{ formatShortTime(conv.lastTime) }}</span></div>
+                            <div class="chat-preview">{{ conv.lastMsg || '暂无消息' }}</div>
+                        </div>
+                        <span v-if="conv.unread > 0" class="unread-badge">{{ conv.unread > 99 ? '99+' : conv.unread }}</span>
+                    </div>
+                    <div v-if="privateConvs.length===0" style="text-align:center; padding:20px; color:#94a3b8;">暂无会话，搜索用户开始聊天</div>
+                </div>
+                <div v-show="activeTab === 'online'" class="online-list">
+                    <div class="search-bar"><button @click="openSearchModal">🔍 搜索用户</button></div>
+                    <div v-for="user in onlineUsers" :key="user.account" class="online-user" @click="openUserProfile(user.account, user.username, user.avatar_url)">
+                        <div class="online-avatar"><img :src="user.avatar_url || defaultAvatar"></div>
+                        <div class="online-info">
+                            <div class="online-name"><span class="online-dot"></span> {{ user.username }}</div>
+                            <div class="online-account">{{ user.account }}</div>
+                        </div>
+                    </div>
+                    <div v-if="onlineUsers.length === 0 && !loadingOnline" style="text-align:center; padding:40px;">暂无其他在线用户</div>
+                    <div v-if="loadingOnline" style="text-align:center; padding:20px;">加载中...</div>
+                    <div v-if="!loadingOnline && onlineUsers.length > 0 && onlineUsers.length < onlineTotal" class="loading-trigger" @click="loadMoreOnlineUsers">加载更多 ({{ onlineUsers.length }}/{{ onlineTotal }})</div>
                 </div>
             </div>
 
-            <!-- 主界面 -->
-            <div v-else class="main-layout">
-                <div class="sidebar">
-                    <div class="user-card">
-                        <img class="avatar" :src="currentUser.avatarUrl" @error="e=>e.target.src='https://cdn-icons-png.flaticon.com/512/3135/3135715.png'">
-                        <div class="user-info">
-                            <div class="user-name">{{ currentUser.username }} <span class="user-status">在线</span></div>
-                            <div style="font-size:12px; color:#8e8e93;">{{ currentUser.account }}</div>
-                        </div>
-                        <div class="user-actions">
-                            <span class="action-icon" @click="updateAvatar">🖼️</span>
-                            <span class="action-icon" @click="updateNickname">✏️</span>
-                            <span class="action-icon" @click="refreshOnlineList">🔄</span>
-                            <span class="action-icon" @click="logout">🚪</span>
-                        </div>
-                    </div>
-                    <div class="tabs">
-                        <div class="tab" :class="{active: activeTab === 'chats'}" @click="activeTab='chats'">消息</div>
-                        <div class="tab" :class="{active: activeTab === 'online'}" @click="activeTab='online'">在线 · {{ onlineUsers.length }}</div>
-                    </div>
-                    <!-- 会话列表 -->
-                    <div v-show="activeTab === 'chats'" class="chat-list">
-                        <div style="padding: 8px 16px 4px; font-size:12px; color:#8a99b4;">群聊</div>
-                        <div v-for="group in sortedGroupConvs" :key="'group_'+group.id" class="chat-item" :class="{active: currentConv && currentConv.id === group.id && currentConv.type === 'group'}" @click="openConversation({id: group.id, type: 'group', name: group.name, avatar: group.avatar})">
-                            <div class="chat-avatar"><img :src="group.avatar || 'https://cdn-icons-png.flaticon.com/512/147/147144.png'"></div>
-                            <div class="chat-info">
-                                <div class="chat-name-row"><span class="chat-name">{{ group.name }}<span class="group-badge">群</span></span><span class="chat-time">{{ formatShortTime(group.lastTime) }}</span></div>
-                                <div class="chat-preview">{{ group.lastMsg || '暂无消息' }}</div>
-                            </div>
-                            <span v-if="group.unread > 0" class="unread-badge">{{ group.unread > 99 ? '99+' : group.unread }}</span>
-                        </div>
-                        <div style="padding: 8px 16px 4px; font-size:12px; color:#8a99b4;">私聊</div>
-                        <div v-for="conv in sortedPrivateConvs" :key="conv.id" class="chat-item" :class="{active: currentConv && currentConv.id === conv.id && currentConv.type === 'single'}" @click="openConversation({id: conv.id, type: 'single', name: conv.displayName, avatar: conv.avatar, targetUsername: conv.targetUsername})">
-                            <div class="chat-avatar"><img :src="conv.avatar || 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png'"></div>
-                            <div class="chat-info">
-                                <div class="chat-name-row">
-                                    <span class="chat-name">{{ conv.displayName }}</span>
-                                    <span class="chat-time">{{ formatShortTime(conv.lastTime) }}</span>
-                                </div>
-                                <div class="chat-preview" style="font-size: 11px; color: #999;">{{ conv.id }}</div>
-                                <div class="chat-preview">{{ conv.lastMsg || '暂无消息' }}</div>
-                            </div>
-                            <span v-if="conv.unread > 0" class="unread-badge">{{ conv.unread > 99 ? '99+' : conv.unread }}</span>
-                        </div>
-                        <div v-if="sortedPrivateConvs.length===0" style="text-align:center; padding:20px; color:#999;">暂无会话，点击在线用户开始聊天</div>
-                    </div>
-                    <!-- 在线用户列表 -->
-                    <div v-show="activeTab === 'online'" class="online-list">
-                        <div v-for="user in onlineUsers" :key="user.account" class="online-user" @click="startPrivateChat(user)">
-                            <div class="online-avatar"><img :src="user.avatar_url || 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png'"></div>
-                            <div class="online-info">
-                                <div class="online-name"><span class="online-dot"></span> {{ user.username }}</div>
-                                <div class="online-account">{{ user.account }}</div>
-                            </div>
-                        </div>
-                        <div v-if="onlineUsers.length===0" style="text-align:center; padding:40px; color:#999;">暂无其他在线用户</div>
-                    </div>
-                </div>
+            <div class="mobile-header">
+                <button class="menu-btn" @click="drawerOpen = true">☰</button>
+                <div class="chat-header-title">{{ currentConv ? currentConv.name : 'AeroChat' }}</div>
+                <div style="width:32px;"></div>
+            </div>
 
-                <div class="chat-area">
-                    <div class="chat-header">
-                        <div class="chat-header-title">{{ currentConv ? currentConv.name : '选择聊天' }}</div>
-                    </div>
-                    <div class="message-list" ref="msgList" @scroll="onMessageScroll">
-                        <div v-if="!currentConv" style="text-align:center; padding:40px; color:#999;">选择群聊或点击在线用户开始聊天</div>
-                        <template v-else>
-                            <div v-for="msg in currentMessages" :key="msg.msgId" :class="['message-row', msg.isSelf ? 'self' : '', msg.pending ? 'msg-pending' : '']">
-                                <img class="msg-avatar" :src="msg.fromAvatar || 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png'">
-                                <div class="msg-bubble">
-                                    <div class="msg-name">{{ msg.fromUsername }}</div>
-                                    <div class="msg-text">{{ msg.content }}</div>
-                                    <div class="msg-time">{{ formatFullTime(msg.sendTime) }}</div>
-                                </div>
+            <div class="chat-area">
+                <div class="chat-header">
+                    <div class="chat-header-title">{{ currentConv ? currentConv.name : 'AeroChat' }}</div>
+                </div>
+                <div class="message-list" ref="msgList" @scroll="onMessageScroll">
+                    <div v-if="!currentConv" style="text-align:center; padding:40px; color:#94a3b8;">选择一个频道或私聊开始聊天</div>
+                    <template v-else>
+                        <div v-for="msg in currentMessages" :key="msg.msgId" :class="['message-row', msg.isSelf ? 'self' : '']">
+                            <img class="msg-avatar" :src="msg.fromAvatar || defaultAvatar" @click="openUserProfileByMsg(msg)">
+                            <div class="msg-bubble">
+                                <div class="msg-name" @click="openUserProfileByMsg(msg)">{{ msg.fromUsername }}</div>
+                                <div class="msg-text">{{ msg.content }}</div>
+                                <div class="msg-time">{{ formatFullTime(msg.sendTime) }}</div>
                             </div>
-                            <div v-if="loadingHistory" style="text-align:center; font-size:12px; padding:8px; color:#999;">加载历史中...</div>
-                        </template>
-                    </div>
-                    <div class="chat-input-area" v-if="currentConv">
-                        <textarea id="msgInput" class="chat-input" rows="1" placeholder="输入消息..." @keydown.enter.prevent="sendCurrentMessage"></textarea>
-                        <button class="send-btn" @click="sendCurrentMessage">发送</button>
-                    </div>
+                        </div>
+                        <div v-if="loadingHistory" style="text-align:center; font-size:12px; padding:8px; color:#94a3b8;">加载历史中...</div>
+                    </template>
+                </div>
+                <div class="chat-input-area" v-if="currentConv">
+                    <textarea class="chat-input" rows="1" placeholder="输入消息..." v-model="inputMsg" @keydown.enter.prevent="sendCurrentMessage"></textarea>
+                    <button class="send-btn" @click="sendCurrentMessage">发送</button>
                 </div>
             </div>
-            <div v-if="toastMsg" class="toast">{{ toastMsg }}</div>
+
+            <div class="bottom-nav">
+                <div class="nav-item" :class="{active: activeTab === 'hall'}" @click="activeTab='hall'; closeDrawer()"><span class="nav-icon">🏠</span><span>大厅</span></div>
+                <div class="nav-item" :class="{active: activeTab === 'chats'}" @click="activeTab='chats'; closeDrawer()"><span class="nav-icon">💬</span><span>消息</span></div>
+                <div class="nav-item" :class="{active: activeTab === 'online'}" @click="activeTab='online'; closeDrawer()"><span class="nav-icon">👥</span><span>在线 · {{ onlineTotal }}</span></div>
+            </div>
+        </div>
+        <div v-if="toastMsg" class="toast">{{ toastMsg }}</div>
+    </div>
+
+    <div class="drawer-overlay" :class="{visible: drawerOpen}" @click="drawerOpen = false"></div>
+    <div class="drawer" :class="{open: drawerOpen}">
+        <div class="drawer-user">
+            <img class="drawer-avatar" :src="currentUser.avatarUrl" @error="e=>e.target.src=defaultAvatar">
+            <div class="drawer-name">{{ currentUser.username }}</div>
+            <div class="drawer-account">{{ currentUser.account }}</div>
+        </div>
+        <div class="drawer-menu">
+            <div class="drawer-item" @click="openUserProfile(currentUser.account, currentUser.username, currentUser.avatarUrl); drawerOpen=false">👤 我的主页</div>
+            <div class="drawer-item" @click="updateAvatar(); drawerOpen=false">🖼️ 更换头像</div>
+            <div class="drawer-item" @click="updateNickname(); drawerOpen=false">✏️ 修改昵称</div>
+            <div class="drawer-item" @click="refreshOnlineList(); drawerOpen=false">🔄 刷新在线</div>
+            <div class="drawer-item" @click="openSearchModal(); drawerOpen=false">🔍 搜索用户</div>
+        </div>
+        <div class="drawer-footer"><button class="logout-btn" @click="logout">退出登录</button></div>
+    </div>
+
+    <div v-if="profileModal.visible" class="modal-mask" @click.self="closeProfileModal">
+        <div class="modal-container">
+            <div class="profile-header">
+                <img class="profile-avatar" :src="profileModal.avatarUrl" @error="e=>e.target.src=defaultAvatar">
+                <div class="profile-name">{{ profileModal.username }}</div>
+                <div class="profile-account">{{ profileModal.account }}</div>
+                <div class="profile-status" :class="profileModal.online ? 'online' : 'offline'">{{ profileModal.online ? '● 在线' : '○ 离线' }}</div>
+            </div>
+            <button class="profile-send-btn" @click="sendMessageFromProfile">💬 发消息</button>
+            <div class="modal-close" @click="closeProfileModal">关闭</div>
         </div>
     </div>
 
-    <script>
-        const { createApp, ref, reactive, computed, onMounted, onUnmounted, nextTick } = Vue;
-        // ======================== WebSocket 地址 ========================
-        const WS_URL = "ws://26.tcp.cpolar.top:12515 ";
-        // =================================================================
-        const PRESET_GROUPS = [
-            { id: 1, name: '💻 编程技术交流', avatar: 'https://cdn-icons-png.flaticon.com/512/1998/1998592.png' },
-            { id: 2, name: '🍵 生活杂谈', avatar: 'https://cdn-icons-png.flaticon.com/512/3075/3075977.png' },
-            { id: 3, name: '🎮 游戏娱乐', avatar: 'https://cdn-icons-png.flaticon.com/512/3659/3659788.png' }
-        ];
+    <div v-if="searchModalVisible" class="modal-mask" @click.self="closeSearchModal">
+        <div class="modal-container search-modal">
+            <div style="padding:20px;">
+                <input type="text" class="search-input" v-model="searchKeyword" placeholder="输入账号或昵称" @keyup.enter="doSearch">
+                <button class="login-btn" style="margin-top:12px;" @click="doSearch">搜索</button>
+                <div class="search-result-list" style="max-height:300px; overflow-y:auto; margin-top:12px;">
+                    <div v-for="user in searchResults" :key="user.account" class="search-result-item" @click="openUserProfile(user.account, user.username, user.avatar_url); closeSearchModal()" style="display:flex; align-items:center; padding:8px; border-bottom:1px solid #eee; cursor:pointer;">
+                        <img :src="user.avatar_url || defaultAvatar" style="width:40px; height:40px; border-radius:50%; margin-right:12px;">
+                        <div><div>{{ user.username }}</div><div style="font-size:12px; color:#666;">{{ user.account }}</div></div>
+                    </div>
+                    <div v-if="searchResults.length===0 && searchKeyword" style="text-align:center; padding:20px;">未找到用户</div>
+                </div>
+            </div>
+            <div class="modal-close" @click="closeSearchModal">取消</div>
+        </div>
+    </div>
+</div>
 
-        // 安全时间戳转换
+<script>
+    (function() {
+        if (typeof Vue === 'undefined' || typeof dayjs === 'undefined') {
+            document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;font-size:1.2rem;color:red;background:white;text-align:center;padding:20px;">⚠️ 页面加载失败，请检查网络后刷新重试。<br>如果问题持续，请手动清除浏览器缓存。</div>';
+            return;
+        }
+        const { createApp, ref, reactive, computed, onMounted, onUnmounted, nextTick } = Vue;
+        const WS_URL = "ws://26.tcp.cpolar.top:14145";
+        const defaultAvatar = "https://cdn-icons-png.flaticon.com/512/3135/3135715.png";
+
         const toTimestamp = (ts) => {
             if (ts === undefined || ts === null) return 0;
             let num = typeof ts === 'number' ? ts : parseInt(ts);
@@ -545,7 +985,12 @@
         };
         const formatShortTime = (ts) => {
             const sec = toTimestamp(ts);
-            return sec ? dayjs(sec * 1000).format('MM-DD HH:mm') : '';
+            if (!sec) return '';
+            const now = dayjs();
+            const date = dayjs(sec * 1000);
+            if (now.diff(date, 'day') === 0) return date.format('HH:mm');
+            if (now.diff(date, 'year') === 0) return date.format('MM-DD');
+            return date.format('YYYY-MM-DD');
         };
 
         class AeroWebSocket {
@@ -605,7 +1050,11 @@
                 if (this.heartbeatTimer) clearInterval(this.heartbeatTimer);
             }
             send(obj) {
-                if (this.ws && this.ws.readyState === WebSocket.OPEN) this.ws.send(JSON.stringify(obj) + "\n");
+                if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+                    this.ws.send(JSON.stringify(obj) + "\n");
+                    return true;
+                }
+                return false;
             }
             close() {
                 this.shouldReconnect = false;
@@ -617,52 +1066,103 @@
 
         createApp({
             setup() {
+                const libraryError = ref(false);
                 const isLoggedIn = ref(false);
                 const isRegisterMode = ref(false);
                 const loginForm = reactive({ account: '', password: '' });
                 const registerForm = reactive({ account: '', password: '', username: '' });
                 const toastMsg = ref('');
                 const showToast = (msg) => { toastMsg.value = msg; setTimeout(() => { toastMsg.value = ''; }, 2000); };
-                
-                const currentUser = reactive({
-                    userId: null, account: '', username: '', avatarUrl: 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png'
-                });
+                const drawerOpen = ref(false);
+                const inputMsg = ref('');
+
+                const currentUser = reactive({ userId: null, account: '', username: '', avatarUrl: defaultAvatar });
                 const ws = ref(null);
-                const activeTab = ref('chats');
-                
+                const activeTab = ref('hall');
                 const onlineUsers = ref([]);
-                let onlinePollTimer = null;
-                
+                const onlineTotal = ref(0);
+                const onlinePage = ref(1);
+                const loadingOnline = ref(false);
+                const allChannels = ref([]);
+                const joinedChannels = ref([]);
                 const privateConvs = ref([]);
-                const groupMessages = reactive({ 1: [], 2: [], 3: [] });
-                const groupLastMsg = reactive({ 1: '', 2: '', 3: '' });
-                const groupLastTime = reactive({ 1: 0, 2: 0, 3: 0 });
-                const groupUnread = reactive({ 1: 0, 2: 0, 3: 0 });
-                
                 const currentConv = ref(null);
                 const loadingHistory = ref(false);
                 const msgIdSet = new Set();
+                const groupMessages = reactive({});
+                const groupLastMsg = reactive({});
+                const groupLastTime = reactive({});
+                const groupUnread = reactive({});
 
-                const sortPrivateConvs = () => {
-                    privateConvs.value.sort((a,b) => (b.lastTime||0) - (a.lastTime||0));
-                };
-                
-                // 组合显示名称：用户名 + (账号)
-                const getDisplayName = (username, account) => {
-                    if (!username && !account) return '未知用户';
-                    if (username && account && username !== account) {
-                        return `${username} (${account})`;
+                const userIdToAccount = new Map();
+
+                const searchModalVisible = ref(false);
+                const searchKeyword = ref('');
+                const searchResults = ref([]);
+                const profileModal = reactive({ visible: false, account: '', username: '', avatarUrl: '', online: false });
+
+                const pendingJoinedGroups = ref(null);
+
+                const initGroupStores = () => {
+                    for (let i = 1; i <= 8; i++) {
+                        if (!groupMessages[i]) groupMessages[i] = [];
+                        if (groupLastMsg[i] === undefined) groupLastMsg[i] = '';
+                        if (groupLastTime[i] === undefined) groupLastTime[i] = 0;
+                        if (groupUnread[i] === undefined) groupUnread[i] = 0;
                     }
-                    return username || account;
                 };
-                
+                initGroupStores();
+
+                const fetchOnlineUsers = (page, size = 200) => {
+                    if (loadingOnline.value) return;
+                    loadingOnline.value = true;
+                    if (ws.value) ws.value.send({ type: 'get_online_users', page, size });
+                };
+                const loadMoreOnlineUsers = () => {
+                    if (onlineUsers.value.length < onlineTotal.value && !loadingOnline.value) fetchOnlineUsers(onlinePage.value + 1);
+                };
+                const refreshOnlineList = () => {
+                    onlineUsers.value = []; onlinePage.value = 1; onlineTotal.value = 0;
+                    fetchOnlineUsers(1);
+                    showToast('已刷新在线列表');
+                };
+
+                const isJoinedChannel = (groupId) => joinedChannels.value.some(c => c.id === groupId);
+                const toggleJoinChannel = (groupId) => {
+                    if (isJoinedChannel(groupId)) {
+                        ws.value.send({ type: 'leave_group', groupId: groupId });
+                    } else {
+                        ws.value.send({ type: 'join_group', groupId: groupId });
+                    }
+                };
+
+                const addJoinedChannel = (channel) => {
+                    if (!joinedChannels.value.find(c => c.id === channel.id)) {
+                        joinedChannels.value.push({
+                            id: channel.id,
+                            name: channel.name,
+                            avatar: channel.avatar,
+                            lastMsg: '',
+                            lastTime: 0,
+                            unread: 0,
+                        });
+                    }
+                };
+                const removeJoinedChannel = (groupId) => {
+                    const idx = joinedChannels.value.findIndex(c => c.id === groupId);
+                    if (idx !== -1) joinedChannels.value.splice(idx, 1);
+                    if (currentConv.value && currentConv.value.type === 'group' && currentConv.value.id === groupId) currentConv.value = null;
+                };
+
                 const findOrCreatePrivateConv = (targetAccount, targetUsername, avatar) => {
                     if (!targetAccount) return null;
                     let conv = privateConvs.value.find(c => c.id === targetAccount);
                     if (!conv) {
-                        const displayName = getDisplayName(targetUsername, targetAccount);
+                        const displayName = targetUsername || targetAccount;
                         conv = {
                             id: targetAccount,
+                            type: 'single',
+                            targetAccount: targetAccount,
                             targetUsername: targetUsername || targetAccount,
                             displayName: displayName,
                             avatar: avatar || '',
@@ -673,523 +1173,491 @@
                         };
                         privateConvs.value.unshift(conv);
                     } else {
-                        const newDisplay = getDisplayName(targetUsername || conv.targetUsername, targetAccount);
-                        if (newDisplay !== conv.displayName) conv.displayName = newDisplay;
-                        if (targetUsername) conv.targetUsername = targetUsername;
+                        if (targetUsername && conv.displayName !== targetUsername) conv.displayName = targetUsername;
                         if (avatar && conv.avatar !== avatar) conv.avatar = avatar;
+                        conv.targetUsername = targetUsername || conv.targetUsername;
+                        conv.targetAccount = targetAccount;
+                        if (conv.type !== 'single') conv.type = 'single';
                     }
-                    sortPrivateConvs();
                     return conv;
                 };
-                
-                const addMessage = (convId, type, msgObj, isSelf) => {
+
+                const addOrUpdateMessage = (type, id, msgObj, isSelf) => {
                     const key = `${msgObj.msgId}_${msgObj.from}`;
                     if (msgIdSet.has(key)) return false;
-                    msgIdSet.add(key);
-                    let sendTime = toTimestamp(msgObj.sendTime);
-                    if (sendTime === 0) sendTime = Math.floor(Date.now() / 1000);
+                    let pendingMsg = null;
+                    if (type === 'group') {
+                        const gid = parseInt(id);
+                        pendingMsg = groupMessages[gid]?.find(m => m.pending && m.content === msgObj.content && m.fromUserId === currentUser.userId);
+                        if (pendingMsg) {
+                            pendingMsg.msgId = msgObj.msgId;
+                            pendingMsg.sendTime = toTimestamp(msgObj.sendTime) || Math.floor(Date.now()/1000);
+                            pendingMsg.fromUsername = msgObj.from_username;
+                            pendingMsg.fromAvatar = msgObj.from_avatar;
+                            pendingMsg.pending = false;
+                            msgIdSet.add(key);
+                            groupMessages[gid].sort((a,b)=> (a.sendTime||0)-(b.sendTime||0));
+                            groupLastMsg[gid] = msgObj.content;
+                            groupLastTime[gid] = pendingMsg.sendTime;
+                            if (!currentConv.value || currentConv.value.id !== gid || currentConv.value.type !== 'group') {
+                                groupUnread[gid]++;
+                                if (groupUnread[gid] > 99) groupUnread[gid] = 99;
+                                const chan = joinedChannels.value.find(c => c.id === gid);
+                                if (chan) {
+                                    chan.lastMsg = msgObj.content;
+                                    chan.lastTime = pendingMsg.sendTime;
+                                    chan.unread = groupUnread[gid];
+                                }
+                            }
+                            return true;
+                        }
+                    } else {
+                        const conv = privateConvs.value.find(c => c.id === id);
+                        if (conv) {
+                            pendingMsg = conv.messages.find(m => m.pending && m.content === msgObj.content && m.fromUserId === currentUser.userId);
+                            if (pendingMsg) {
+                                pendingMsg.msgId = msgObj.msgId;
+                                pendingMsg.sendTime = toTimestamp(msgObj.sendTime) || Math.floor(Date.now()/1000);
+                                pendingMsg.fromUsername = msgObj.from_username;
+                                pendingMsg.fromAvatar = msgObj.from_avatar;
+                                pendingMsg.pending = false;
+                                msgIdSet.add(key);
+                                conv.messages.sort((a,b)=> (a.sendTime||0)-(b.sendTime||0));
+                                conv.lastMsg = msgObj.content;
+                                conv.lastTime = pendingMsg.sendTime;
+                                if (!currentConv.value || currentConv.value.id !== conv.id || currentConv.value.type !== 'single') {
+                                    conv.unread++;
+                                    if (conv.unread > 99) conv.unread = 99;
+                                }
+                                const idx = privateConvs.value.findIndex(c => c.id === id);
+                                if (idx !== -1) privateConvs.value.unshift(privateConvs.value.splice(idx, 1)[0]);
+                                return true;
+                            }
+                        }
+                    }
                     const newMsg = {
-                        msgId: msgObj.msgId,
-                        fromUserId: msgObj.from,
+                        msgId: msgObj.msgId, fromUserId: msgObj.from,
                         fromUsername: msgObj.from_username || (msgObj.from === currentUser.userId ? currentUser.username : '用户'),
-                        fromAvatar: msgObj.from_avatar || '',
-                        content: msgObj.content,
-                        sendTime: sendTime,
-                        isSelf: isSelf,
-                        pending: msgObj.pending || false
+                        fromAvatar: msgObj.from_avatar || '', content: msgObj.content,
+                        sendTime: toTimestamp(msgObj.sendTime) || Math.floor(Date.now()/1000), isSelf: isSelf, pending: false
                     };
                     if (type === 'group') {
-                        const gid = parseInt(convId);
+                        const gid = parseInt(id);
                         if (!groupMessages[gid]) groupMessages[gid] = [];
                         groupMessages[gid].push(newMsg);
                         groupMessages[gid].sort((a,b)=> (a.sendTime||0)-(b.sendTime||0));
                         groupLastMsg[gid] = msgObj.content;
-                        groupLastTime[gid] = sendTime;
-                        // 如果不是当前打开的群，增加未读计数
+                        groupLastTime[gid] = newMsg.sendTime;
                         if (!currentConv.value || currentConv.value.id !== gid || currentConv.value.type !== 'group') {
                             groupUnread[gid]++;
                             if (groupUnread[gid] > 99) groupUnread[gid] = 99;
+                            const chan = joinedChannels.value.find(c => c.id === gid);
+                            if (chan) {
+                                chan.lastMsg = msgObj.content;
+                                chan.lastTime = newMsg.sendTime;
+                                chan.unread = groupUnread[gid];
+                            }
                         }
                     } else {
-                        const conv = privateConvs.value.find(c => c.id === convId);
+                        const conv = privateConvs.value.find(c => c.id === id);
                         if (conv) {
                             conv.messages.push(newMsg);
                             conv.messages.sort((a,b)=> (a.sendTime||0)-(b.sendTime||0));
                             conv.lastMsg = msgObj.content;
-                            conv.lastTime = sendTime;
+                            conv.lastTime = newMsg.sendTime;
                             if (!currentConv.value || currentConv.value.id !== conv.id || currentConv.value.type !== 'single') {
                                 conv.unread++;
                                 if (conv.unread > 99) conv.unread = 99;
                             }
-                            const idx = privateConvs.value.findIndex(c => c.id === convId);
-                            if (idx !== -1) {
-                                privateConvs.value.unshift(privateConvs.value.splice(idx, 1)[0]);
-                            }
+                            const idx = privateConvs.value.findIndex(c => c.id === id);
+                            if (idx !== -1) privateConvs.value.unshift(privateConvs.value.splice(idx, 1)[0]);
                         }
                     }
-                    if (currentConv.value && ((type === 'group' && currentConv.value.id == convId) || (type !== 'group' && currentConv.value.id === convId))) {
-                        nextTick(() => {
-                            const el = document.querySelector('.message-list');
-                            if (el) el.scrollTop = el.scrollHeight;
-                        });
+                    msgIdSet.add(key);
+                    return true;
+                };
+
+                const addOptimisticMsg = (type, id, content) => {
+                    const tempId = Date.now() + Math.random();
+                    const now = Math.floor(Date.now()/1000);
+                    if (type === 'group') {
+                        const gid = parseInt(id);
+                        if (!groupMessages[gid]) groupMessages[gid] = [];
+                        groupMessages[gid].push({ msgId: tempId, fromUserId: currentUser.userId, fromUsername: currentUser.username, fromAvatar: currentUser.avatarUrl, content, sendTime: now, isSelf: true, pending: true });
+                        groupMessages[gid].sort((a,b)=> (a.sendTime||0)-(b.sendTime||0));
+                        groupLastMsg[gid] = content;
+                        groupLastTime[gid] = now;
+                        if (!currentConv.value || currentConv.value.id !== gid || currentConv.value.type !== 'group') {
+                            groupUnread[gid]++;
+                            if (groupUnread[gid] > 99) groupUnread[gid] = 99;
+                            const chan = joinedChannels.value.find(c => c.id === gid);
+                            if (chan) {
+                                chan.lastMsg = content;
+                                chan.lastTime = now;
+                                chan.unread = groupUnread[gid];
+                            }
+                        }
+                    } else {
+                        const conv = privateConvs.value.find(c => c.id === id);
+                        if (conv) {
+                            conv.messages.push({ msgId: tempId, fromUserId: currentUser.userId, fromUsername: currentUser.username, fromAvatar: currentUser.avatarUrl, content, sendTime: now, isSelf: true, pending: true });
+                            conv.messages.sort((a,b)=> (a.sendTime||0)-(b.sendTime||0));
+                            conv.lastMsg = content;
+                            conv.lastTime = now;
+                            if (!currentConv.value || currentConv.value.id !== conv.id || currentConv.value.type !== 'single') {
+                                conv.unread++;
+                                if (conv.unread > 99) conv.unread = 99;
+                            }
+                            const idx = privateConvs.value.findIndex(c => c.id === id);
+                            if (idx !== -1) privateConvs.value.unshift(privateConvs.value.splice(idx, 1)[0]);
+                        }
+                    }
+                    if (currentConv.value && ((type === 'group' && currentConv.value.id == id) || (type !== 'group' && currentConv.value.id === id))) {
+                        nextTick(() => { const el = document.querySelector('.message-list'); if (el) el.scrollTop = el.scrollHeight; });
                     }
                     return true;
                 };
-                
-                const addOptimisticMsg = (convId, type, content) => {
-                    const tempId = Date.now() + Math.random();
-                    const now = Math.floor(Date.now()/1000);
-                    const tempMsg = {
-                        msgId: tempId,
-                        from: currentUser.userId,
-                        from_username: currentUser.username,
-                        from_avatar: currentUser.avatarUrl,
-                        content: content,
-                        sendTime: now,
-                        pending: true
-                    };
-                    addMessage(convId, type, tempMsg, true);
-                    return tempMsg;
-                };
-                
-                const initConversations = (convs) => {
-                    if (!convs || !Array.isArray(convs)) return;
-                    // 重置群组未读
-                    groupUnread[1] = 0; groupUnread[2] = 0; groupUnread[3] = 0;
-                    groupLastMsg[1] = ''; groupLastMsg[2] = ''; groupLastMsg[3] = '';
-                    groupLastTime[1] = 0; groupLastTime[2] = 0; groupLastTime[3] = 0;
-                    privateConvs.value = [];
-                    
-                    for (const conv of convs) {
-                        if (conv.type === 'group') {
-                            const gid = parseInt(conv.id);
-                            if (gid >= 1 && gid <= 3) {
-                                groupLastMsg[gid] = conv.lastMsg || '';
-                                groupLastTime[gid] = toTimestamp(conv.lastTime);
-                                let unread = conv.unread || 0;
-                                if (unread > 99) unread = 99;
-                                groupUnread[gid] = unread;
-                            }
-                        } else if (conv.type === 'single') {
-                            let targetUsername = conv.name;
-                            const targetAccount = conv.id;
-                            // 过滤无效会话：name和id都是纯数字且相同，并且无法从在线用户匹配到真实用户名
-                            if (targetUsername && /^\d+$/.test(targetUsername) && targetUsername === targetAccount) {
-                                const online = onlineUsers.value.find(u => u.account === targetAccount);
-                                if (online && online.username) {
-                                    targetUsername = online.username;
-                                } else {
-                                    continue; // 无效会话，跳过
-                                }
-                            }
-                            const displayName = getDisplayName(targetUsername, targetAccount);
-                            const convObj = {
-                                id: targetAccount,
-                                targetUsername: targetUsername,
-                                displayName: displayName,
-                                avatar: conv.avatar || '',
-                                lastMsg: conv.lastMsg || '',
-                                lastTime: toTimestamp(conv.lastTime),
-                                unread: conv.unread || 0,
-                                messages: []
-                            };
-                            if (convObj.unread > 99) convObj.unread = 99;
-                            privateConvs.value.push(convObj);
-                        }
-                    }
-                    sortPrivateConvs();
-                };
-                
+
                 const handleServerMessage = (json) => {
                     const type = json.type;
                     if (type === 'login' && json.status === 'success') {
-                        currentUser.userId = json.userId;
-                        currentUser.username = json.username;
-                        currentUser.avatarUrl = json.avatar_url;
-                        currentUser.account = loginForm.account;
-                        isLoggedIn.value = true;
-                        showToast(`欢迎回来, ${json.username}`);
+                        currentUser.userId = json.userId; currentUser.username = json.username; currentUser.avatarUrl = json.avatar_url || defaultAvatar; currentUser.account = loginForm.account;
+                        isLoggedIn.value = true; showToast(`欢迎回来, ${json.username}`);
+                        onlineTotal.value = json.online_count || 0; fetchOnlineUsers(1);
+                        pendingJoinedGroups.value = json.joinedGroups || [];
+                        ws.value.send({ type: 'get_groups' });
                         ws.value.send({ type: 'pull_offline' });
-                        ws.value.send({ type: 'get_online_users' });
                         ws.value.send({ type: 'get_conversations' });
-                        startOnlinePolling();
                     } else if (type === 'register' && json.status === 'success') {
-                        showToast('注册成功，请登录');
-                        isRegisterMode.value = false;
-                        loginForm.account = json.account;
-                    } else if (type === 'online_users') {
-                        // 在线列表：只过滤掉当前登录用户自己，其他所有用户都显示
-                        onlineUsers.value = (json.users || []).filter(u => u.account !== currentUser.account);
-                        // 更新私聊会话显示名（可能从在线用户中获取到正确的用户名）
-                        for (let conv of privateConvs.value) {
-                            const online = onlineUsers.value.find(u => u.account === conv.id);
-                            if (online && online.username) {
-                                const newDisplay = getDisplayName(online.username, conv.id);
-                                if (newDisplay !== conv.displayName) {
-                                    conv.displayName = newDisplay;
-                                    conv.targetUsername = online.username;
+                        showToast('注册成功，请登录'); isRegisterMode.value = false; loginForm.account = json.account;
+                    } else if (type === 'group_list') {
+                        allChannels.value = json.groups || [];
+                        if (pendingJoinedGroups.value && pendingJoinedGroups.value.length) {
+                            joinedChannels.value = allChannels.value.filter(ch => pendingJoinedGroups.value.includes(ch.id));
+                            joinedChannels.value.forEach(ch => {
+                                ch.lastMsg = ch.lastMsg || '';
+                                ch.lastTime = ch.lastTime || 0;
+                                ch.unread = 0;
+                            });
+                            pendingJoinedGroups.value = null;
+                        }
+                    } else if (type === 'conversations') {
+                        const convMap = new Map();
+                        for (let conv of (json.conversations || [])) {
+                            if (conv.type === 'single') {
+                                let accountId = conv.id;
+                                if (/^\d+$/.test(accountId) && accountId.length < 6) {
+                                    const realAccount = userIdToAccount.get(parseInt(accountId));
+                                    if (realAccount) accountId = realAccount;
+                                }
+                                if (!convMap.has(accountId)) {
+                                    convMap.set(accountId, {
+                                        id: accountId,
+                                        type: 'single',
+                                        targetAccount: accountId,
+                                        targetUsername: conv.name || accountId,
+                                        displayName: conv.name || accountId,
+                                        avatar: conv.avatar || '',
+                                        lastMsg: conv.lastMsg || '',
+                                        lastTime: toTimestamp(conv.lastTime),
+                                        unread: conv.unread || 0,
+                                        messages: []
+                                    });
+                                } else {
+                                    const existing = convMap.get(accountId);
+                                    existing.unread = Math.max(existing.unread, conv.unread || 0);
+                                    if (toTimestamp(conv.lastTime) > existing.lastTime) {
+                                        existing.lastTime = toTimestamp(conv.lastTime);
+                                        existing.lastMsg = conv.lastMsg || '';
+                                    }
                                 }
                             }
                         }
-                        sortPrivateConvs();
-                    } else if (type === 'conversations') {
-                        initConversations(json.conversations);
-                    } else if (type === 'single_message') {
-                        const fromId = json.from;
-                        const fromUsername = json.from_username;
-                        const fromAvatar = json.from_avatar;
-                        const content = json.content;
-                        const msgId = json.msgId;
-                        const toUsername = json.to;
-                        let targetAccount = '', targetUsername = '';
-                        if (fromId === currentUser.userId) {
-                            targetUsername = toUsername;
-                            const targetUser = onlineUsers.value.find(u => u.username === targetUsername);
-                            targetAccount = targetUser ? targetUser.account : targetUsername;
-                        } else {
-                            targetUsername = fromUsername;
-                            const targetUser = onlineUsers.value.find(u => u.username === targetUsername);
-                            targetAccount = targetUser ? targetUser.account : targetUsername;
+                        privateConvs.value = Array.from(convMap.values());
+                        privateConvs.value.sort((a,b)=> (b.lastTime||0)-(a.lastTime||0));
+                    } else if (type === 'join_group' && json.status === 'success') {
+                        const channel = allChannels.value.find(c => c.id === json.groupId);
+                        if (channel) {
+                            channel.memberCount++;
+                            addJoinedChannel(channel);
+                            showToast(`已加入 ${channel.name}`);
                         }
-                        if (!targetAccount) targetAccount = targetUsername;
-                        const conv = findOrCreatePrivateConv(targetAccount, targetUsername, fromAvatar);
-                        if (!conv) return;
-                        const pendingMsg = conv.messages.find(m => m.pending && m.content === content && m.fromUserId === fromId);
-                        if (pendingMsg) {
-                            pendingMsg.msgId = msgId;
-                            pendingMsg.pending = false;
-                            pendingMsg.sendTime = toTimestamp(json.sendTime) || Math.floor(Date.now()/1000);
-                            pendingMsg.fromUsername = fromUsername;
-                            pendingMsg.fromAvatar = fromAvatar;
-                            conv.messages.sort((a,b)=> (a.sendTime||0)-(b.sendTime||0));
-                        } else {
-                            addMessage(conv.id, 'single', { 
-                                from: fromId, 
-                                from_username: fromUsername, 
-                                from_avatar: fromAvatar, 
-                                content, 
-                                msgId, 
-                                sendTime: json.sendTime
-                            }, fromId === currentUser.userId);
+                    } else if (type === 'leave_group' && json.status === 'success') {
+                        const channel = allChannels.value.find(c => c.id === json.groupId);
+                        if (channel) {
+                            channel.memberCount--;
+                            removeJoinedChannel(json.groupId);
+                            showToast(`已退出 ${channel.name}`);
+                        }
+                    } else if (type === 'online_users') {
+                        const { users, page, total } = json;
+                        if (page === 1) onlineUsers.value = users || [];
+                        else onlineUsers.value.push(...(users || []));
+                        onlineTotal.value = total !== undefined ? total : onlineTotal.value;
+                        onlinePage.value = page; loadingOnline.value = false;
+                        for (const u of (users || [])) {
+                            if (u.userId) userIdToAccount.set(u.userId, u.account);
+                        }
+                    } else if (type === 'online_update') {
+                        const { action, account, username, avatar_url } = json;
+                        if (action === 'join') {
+                            if (!onlineUsers.value.find(u => u.account === account)) { onlineUsers.value.push({ account, username, avatar_url }); onlineTotal.value++; }
+                        } else if (action === 'leave') {
+                            const idx = onlineUsers.value.findIndex(u => u.account === account);
+                            if (idx !== -1) { onlineUsers.value.splice(idx, 1); onlineTotal.value--; }
                         }
                     } else if (type === 'group_message') {
-                        const groupId = json.groupId;
-                        if (groupId >= 1 && groupId <= 3) {
-                            const pendingMsg = groupMessages[groupId]?.find(m => m.pending && m.content === json.content && m.fromUserId === json.from);
-                            if (pendingMsg) {
-                                pendingMsg.msgId = json.msgId;
-                                pendingMsg.pending = false;
-                                pendingMsg.sendTime = toTimestamp(json.sendTime) || Math.floor(Date.now()/1000);
-                                pendingMsg.fromUsername = json.from_username;
-                                pendingMsg.fromAvatar = json.from_avatar;
-                                groupMessages[groupId].sort((a,b)=> (a.sendTime||0)-(b.sendTime||0));
-                                groupLastMsg[groupId] = json.content;
-                                groupLastTime[groupId] = pendingMsg.sendTime;
-                                // 增加未读（如果不是当前打开的群）
-                                if (!currentConv.value || currentConv.value.id !== groupId || currentConv.value.type !== 'group') {
-                                    groupUnread[groupId]++;
-                                    if (groupUnread[groupId] > 99) groupUnread[groupId] = 99;
-                                }
-                            } else {
-                                addMessage(groupId, 'group', { 
-                                    from: json.from, 
-                                    from_username: json.from_username, 
-                                    from_avatar: json.from_avatar, 
-                                    content: json.content, 
-                                    msgId: json.msgId, 
-                                    sendTime: json.sendTime
-                                }, json.from === currentUser.userId);
-                            }
+                        if (json.groupId >= 1 && json.groupId <= 8) {
+                            addOrUpdateMessage('group', json.groupId, { from: json.from, from_username: json.from_username, from_avatar: json.from_avatar, content: json.content, msgId: json.msgId, sendTime: json.sendTime }, json.from === currentUser.userId);
+                            if (currentConv.value && currentConv.value.type === 'group' && currentConv.value.id == json.groupId) nextTick(() => { const el = document.querySelector('.message-list'); if (el) el.scrollTop = el.scrollHeight; });
                         }
+                    } else if (type === 'single_message') {
+                        let targetAccount = '', targetUsername = '';
+                        if (json.from === currentUser.userId) {
+                            targetUsername = json.to;
+                            const targetUser = onlineUsers.value.find(u => u.username === targetUsername);
+                            targetAccount = targetUser ? targetUser.account : targetUsername;
+                        } else {
+                            targetUsername = json.from_username;
+                            const targetUser = onlineUsers.value.find(u => u.username === targetUsername);
+                            targetAccount = targetUser ? targetUser.account : targetUsername;
+                            if (!targetAccount) targetAccount = targetUsername;
+                        }
+                        const conv = findOrCreatePrivateConv(targetAccount, targetUsername, json.from_avatar);
+                        if (conv) {
+                            const isSelf = (json.from === currentUser.userId);
+                            addOrUpdateMessage('single', conv.id, { from: json.from, from_username: json.from_username, from_avatar: json.from_avatar, content: json.content, msgId: json.msgId, sendTime: json.sendTime }, isSelf);
+                            if (!isSelf && (!currentConv.value || currentConv.value.id !== conv.id || currentConv.value.type !== 'single')) {
+                                showToast(`新消息来自 ${json.from_username}`);
+                            }
+                            if (currentConv.value && currentConv.value.type === 'single' && currentConv.value.id === conv.id) nextTick(() => { const el = document.querySelector('.message-list'); if (el) el.scrollTop = el.scrollHeight; });
+                        }
+                    } else if (type === 'single_message_ack') {
+                        // 已发送确认，无需额外处理
                     } else if (type === 'offline_messages') {
-                        const msgs = json.messages || [];
-                        for (let msg of msgs) {
-                            if (msg.type === 0 && msg.groupId >=1 && msg.groupId<=3) {
-                                addMessage(msg.groupId, 'group', { 
-                                    from: msg.from, 
-                                    from_username: msg.from_username, 
-                                    from_avatar: msg.from_avatar, 
-                                    content: msg.content, 
-                                    msgId: msg.msgId, 
-                                    sendTime: msg.sendTime
-                                }, false);
+                        let offlineCount = 0;
+                        for (let msg of (json.messages || [])) {
+                            if (msg.type === 0 && msg.groupId >=1 && msg.groupId<=8) {
+                                addOrUpdateMessage('group', msg.groupId, { from: msg.from, from_username: msg.from_username, from_avatar: msg.from_avatar, content: msg.content, msgId: msg.msgId, sendTime: msg.sendTime }, false);
                             } else if (msg.type === 1) {
-                                const peerAccount = String(msg.from);
-                                const conv = findOrCreatePrivateConv(peerAccount, msg.from_username, msg.from_avatar);
-                                if (conv) addMessage(conv.id, 'single', { 
-                                    from: msg.from, 
-                                    from_username: msg.from_username, 
-                                    from_avatar: msg.from_avatar, 
-                                    content: msg.content, 
-                                    msgId: msg.msgId, 
-                                    sendTime: msg.sendTime
-                                }, false);
+                                const conv = findOrCreatePrivateConv(String(msg.from), msg.from_username, msg.from_avatar);
+                                if (conv) {
+                                    addOrUpdateMessage('single', conv.id, { from: msg.from, from_username: msg.from_username, from_avatar: msg.from_avatar, content: msg.content, msgId: msg.msgId, sendTime: msg.sendTime }, false);
+                                    offlineCount++;
+                                }
                             }
                         }
-                        if (msgs.length) showToast(`收到 ${msgs.length} 条离线消息`);
+                        if (offlineCount > 0) showToast(`您有 ${offlineCount} 条离线消息`);
                     } else if (type === 'load_history') {
-                        const history = json.messages || [];
-                        const targetId = json.targetId;
-                        const targetType = json.targetType;
+                        const history = json.messages || [], targetType = json.targetType, targetId = json.targetId;
                         if (targetType === 'private') {
-                            const conv = privateConvs.value.find(c => c.displayName.includes(targetId) || c.id === targetId);
+                            const conv = privateConvs.value.find(c => c.id === targetId);
                             if (conv) {
                                 const existingIds = new Set(conv.messages.map(m=>m.msgId));
                                 const newMsgs = history.filter(h=>!existingIds.has(h.msgId)).map(h=>({
-                                    msgId: h.msgId, 
-                                    fromUserId: h.from, 
-                                    fromUsername: h.from_username, 
+                                    msgId: h.msgId,
+                                    fromUserId: h.from,
+                                    fromUsername: h.from_username,
                                     fromAvatar: h.from_avatar,
-                                    content: h.content, 
-                                    sendTime: toTimestamp(h.sendTime), 
-                                    isSelf: h.from === currentUser.userId, 
+                                    content: h.content,
+                                    sendTime: toTimestamp(h.sendTime),
+                                    isSelf: (h.from === currentUser.userId),
                                     pending: false
                                 }));
                                 conv.messages = [...newMsgs.reverse(), ...conv.messages];
                                 conv.messages.sort((a,b)=> (a.sendTime||0)-(b.sendTime||0));
-                                if (history.length > 0) {
-                                    const latest = history.reduce((a,b) => ((toTimestamp(a.sendTime)||0) > (toTimestamp(b.sendTime)||0) ? a : b));
-                                    conv.lastMsg = latest.content;
-                                    conv.lastTime = toTimestamp(latest.sendTime);
-                                    sortPrivateConvs();
-                                }
                             }
-                        } else if (targetType === 'group' && [1,2,3].includes(parseInt(targetId))) {
+                        } else if (targetType === 'group') {
                             const gid = parseInt(targetId);
-                            const existingIds = new Set(groupMessages[gid].map(m=>m.msgId));
-                            const newMsgs = history.filter(h=>!existingIds.has(h.msgId)).map(h=>({
-                                msgId: h.msgId, 
-                                fromUserId: h.from, 
-                                fromUsername: h.from_username, 
-                                fromAvatar: h.from_avatar,
-                                content: h.content, 
-                                sendTime: toTimestamp(h.sendTime), 
-                                isSelf: h.from === currentUser.userId, 
-                                pending: false
-                            }));
-                            groupMessages[gid] = [...newMsgs.reverse(), ...groupMessages[gid]];
-                            groupMessages[gid].sort((a,b)=> (a.sendTime||0)-(b.sendTime||0));
-                            if (history.length > 0) {
-                                const latest = history.reduce((a,b) => ((toTimestamp(a.sendTime)||0) > (toTimestamp(b.sendTime)||0) ? a : b));
-                                groupLastMsg[gid] = latest.content;
-                                groupLastTime[gid] = toTimestamp(latest.sendTime);
+                            if (gid>=1 && gid<=8) {
+                                const existingIds = new Set(groupMessages[gid].map(m=>m.msgId));
+                                const newMsgs = history.filter(h=>!existingIds.has(h.msgId)).map(h=>({
+                                    msgId: h.msgId,
+                                    fromUserId: h.from,
+                                    fromUsername: h.from_username,
+                                    fromAvatar: h.from_avatar,
+                                    content: h.content,
+                                    sendTime: toTimestamp(h.sendTime),
+                                    isSelf: (h.from === currentUser.userId),
+                                    pending: false
+                                }));
+                                groupMessages[gid] = [...newMsgs.reverse(), ...groupMessages[gid]];
+                                groupMessages[gid].sort((a,b)=> (a.sendTime||0)-(b.sendTime||0));
                             }
                         }
                         loadingHistory.value = false;
+                    } else if (type === 'search_users') {
+                        searchResults.value = json.users || [];
+                        for (const u of searchResults.value) {
+                            if (u.userId) userIdToAccount.set(u.userId, u.account);
+                        }
+                    } else if (type === 'user_profile') {
+                        profileModal.username = json.username; profileModal.account = json.account; profileModal.avatarUrl = json.avatar_url; profileModal.online = onlineUsers.value.some(u => u.account === json.account); profileModal.visible = true;
                     } else if (type === 'update_avatar' && json.status === 'success') {
-                        currentUser.avatarUrl = json.avatar_url;
-                        showToast('头像已更新');
+                        currentUser.avatarUrl = json.avatar_url; showToast('头像已更新');
                     } else if (type === 'update_username' && json.status === 'success') {
-                        currentUser.username = json.username;
-                        showToast('昵称已更新');
-                        ws.value.send({ type: 'get_online_users' });
+                        currentUser.username = json.username; showToast('昵称已更新');
                     } else if (type === 'error') {
-                        showToast(json.message || '错误');
-                    } else if (type === 'welcome') {
-                        // ignore
+                        if (json.message === 'Not logged in') { showToast('登录已过期，请重新登录'); logout(); }
+                        else showToast(json.message || '错误');
                     }
                 };
-                
-                const startOnlinePolling = () => {
-                    if (onlinePollTimer) clearInterval(onlinePollTimer);
-                    onlinePollTimer = setInterval(() => {
-                        if (ws.value && isLoggedIn.value) ws.value.send({ type: 'get_online_users' });
-                    }, 10000);
-                };
-                const stopOnlinePolling = () => {
-                    if (onlinePollTimer) clearInterval(onlinePollTimer);
-                };
-                const refreshOnlineList = () => {
-                    if (ws.value && isLoggedIn.value) {
-                        ws.value.send({ type: 'get_online_users' });
-                        showToast('已刷新在线列表');
-                    }
-                };
-                
-                const initWS = () => {
-                    if (ws.value) ws.value.close();
-                    ws.value = new AeroWebSocket(WS_URL, handleServerMessage,
-                        () => { if (isLoggedIn.value) { ws.value.send({ type: 'get_online_users' }); ws.value.send({ type: 'get_conversations' }); startOnlinePolling(); } },
-                        () => showToast('连接断开，重连中...'),
-                        () => {}
-                    );
-                };
-                
-                const doLogin = () => {
-                    if (!loginForm.account || !loginForm.password) { showToast('请输入账号和密码'); return; }
-                    if (!ws.value) initWS();
-                    ws.value.send({ type: 'login', account: loginForm.account, password: loginForm.password });
-                };
-                const doRegister = () => {
-                    if (!registerForm.account || !registerForm.password || !registerForm.username) { showToast('完整填写信息'); return; }
-                    if (!ws.value) initWS();
-                    ws.value.send({ type: 'register', account: registerForm.account, password: registerForm.password, username: registerForm.username });
-                };
-                
+
                 const openConversation = (conv) => {
-                    // 避免重复点击同一个会话
+                    if (conv && !conv.type) {
+                        if (conv.id >= 1 && conv.id <= 8) conv.type = 'group';
+                        else conv.type = 'single';
+                    }
                     if (currentConv.value && currentConv.value.id === conv.id && currentConv.value.type === conv.type) return;
                     currentConv.value = conv;
+                    loadingHistory.value = true;
                     if (conv.type === 'group') {
-                        // 打开群聊时，未读清零
                         groupUnread[conv.id] = 0;
-                        if (groupMessages[conv.id].length === 0) {
-                            loadingHistory.value = true;
-                            ws.value.send({ type: 'load_history', targetType: 'group', targetId: String(conv.id), limit: 30 });
-                        } else {
-                            nextTick(() => {
-                                const el = document.querySelector('.message-list');
-                                if (el) el.scrollTop = el.scrollHeight;
-                            });
-                        }
+                        const chan = joinedChannels.value.find(c => c.id === conv.id);
+                        if (chan) chan.unread = 0;
+                        ws.value.send({ type: 'load_history', targetType: 'group', targetId: String(conv.id), limit: 30, offset: 0 });
                     } else {
                         const c = privateConvs.value.find(p => p.id === conv.id);
                         if (c) {
                             c.unread = 0;
-                            if (c.messages.length === 0) {
-                                loadingHistory.value = true;
-                                ws.value.send({ type: 'load_history', targetType: 'private', targetId: c.targetUsername, limit: 30 });
-                            } else {
-                                nextTick(() => {
-                                    const el = document.querySelector('.message-list');
-                                    if (el) el.scrollTop = el.scrollHeight;
-                                });
-                            }
+                            ws.value.send({ type: 'load_history', targetType: 'private', targetId: c.id, limit: 30, offset: 0 });
+                        } else {
+                            ws.value.send({ type: 'load_history', targetType: 'private', targetId: conv.id, limit: 30, offset: 0 });
                         }
                     }
+                    if (window.innerWidth <= 768) drawerOpen.value = false;
                 };
-                
-                const sendCurrentMessage = () => {
+
+                const sendCurrentMessage = async () => {
                     if (!currentConv.value) return;
-                    const input = document.getElementById('msgInput');
-                    const content = input.value.trim();
+                    const content = inputMsg.value.trim();
                     if (!content) return;
+                    if (!ws.value || !ws.value.ws || ws.value.ws.readyState !== WebSocket.OPEN) {
+                        showToast('连接已断开，请稍后重试');
+                        return;
+                    }
                     if (currentConv.value.type === 'single') {
-                        let targetUsername = currentConv.value.targetUsername;
-                        if (!targetUsername) {
+                        let targetAccount = currentConv.value.targetAccount;
+                        if (!targetAccount) {
                             const conv = privateConvs.value.find(c => c.id === currentConv.value.id);
-                            if (conv && conv.targetUsername) targetUsername = conv.targetUsername;
-                            else targetUsername = currentConv.value.name;
+                            if (conv) targetAccount = conv.targetAccount || conv.id;
+                            else targetAccount = currentConv.value.id;
                         }
-                        // 提取纯用户名（去掉括号内的账号）
-                        if (targetUsername.includes('(')) {
-                            targetUsername = targetUsername.split('(')[0].trim();
-                        }
-                        if (!targetUsername || /^\d+$/.test(targetUsername)) {
-                            showToast('无法发送：对方用户名无效');
+                        if (!targetAccount) {
+                            showToast('无法发送：对方账号无效');
                             return;
                         }
-                        addOptimisticMsg(currentConv.value.id, 'single', content);
-                        ws.value.send({ type: 'single_message', target: targetUsername, content: content });
+                        addOptimisticMsg('single', currentConv.value.id, content);
+                        ws.value.send({ type: 'single_message', target: targetAccount, content: content });
                     } else if (currentConv.value.type === 'group') {
-                        const groupId = parseInt(currentConv.value.id);
-                        addOptimisticMsg(currentConv.value.id, 'group', content);
-                        ws.value.send({ type: 'group_message', groupId: groupId, content: content });
+                        addOptimisticMsg('group', currentConv.value.id, content);
+                        ws.value.send({ type: 'group_message', groupId: parseInt(currentConv.value.id), content: content });
                     }
-                    input.value = '';
+                    inputMsg.value = '';
                 };
-                
+
                 const onMessageScroll = (e) => {
                     const el = e.target;
                     if (el.scrollTop < 100 && !loadingHistory.value && currentConv.value) {
                         loadingHistory.value = true;
+                        const currentOffset = currentConv.value.type === 'group' ? (groupMessages[currentConv.value.id]?.length || 0) : (privateConvs.value.find(c => c.id === currentConv.value.id)?.messages.length || 0);
                         if (currentConv.value.type === 'group') {
-                            ws.value.send({ type: 'load_history', targetType: 'group', targetId: String(currentConv.value.id), limit: 30 });
+                            ws.value.send({ type: 'load_history', targetType: 'group', targetId: String(currentConv.value.id), limit: 30, offset: currentOffset });
                         } else {
                             const conv = privateConvs.value.find(c => c.id === currentConv.value.id);
-                            if (conv && conv.targetUsername) {
-                                ws.value.send({ type: 'load_history', targetType: 'private', targetId: conv.targetUsername, limit: 30 });
+                            if (conv) {
+                                ws.value.send({ type: 'load_history', targetType: 'private', targetId: conv.id, limit: 30, offset: currentOffset });
                             } else {
-                                ws.value.send({ type: 'load_history', targetType: 'private', targetId: currentConv.value.name, limit: 30 });
+                                ws.value.send({ type: 'load_history', targetType: 'private', targetId: currentConv.value.id, limit: 30, offset: currentOffset });
                             }
                         }
                     }
                 };
-                
-                const updateAvatar = () => {
-                    const url = prompt('输入新头像URL', currentUser.avatarUrl);
-                    if (url && url.trim()) ws.value.send({ type: 'update_avatar', avatarUrl: url.trim() });
+
+                const openSearchModal = () => { searchKeyword.value = ''; searchResults.value = []; searchModalVisible.value = true; if (window.innerWidth <= 768) drawerOpen.value = false; };
+                const closeSearchModal = () => { searchModalVisible.value = false; };
+                const doSearch = () => { if (!searchKeyword.value.trim()) return; ws.value.send({ type: 'search_users', keyword: searchKeyword.value.trim(), limit: 20 }); };
+                const updateAvatar = () => { const url = prompt('输入新头像URL', currentUser.avatarUrl); if (url && url.trim()) ws.value.send({ type: 'update_avatar', avatarUrl: url.trim() }); };
+                const updateNickname = () => { const name = prompt('输入新昵称', currentUser.username); if (name && name.trim()) ws.value.send({ type: 'update_username', username: name.trim() }); };
+                const openUserProfile = (account, username, avatarUrl) => { if (!account) return; ws.value.send({ type: 'get_user_profile', account: account }); if (window.innerWidth <= 768) drawerOpen.value = false; };
+                const openUserProfileByMsg = (msg) => {
+                    if (msg.isSelf) openUserProfile(currentUser.account, currentUser.username, currentUser.avatarUrl);
+                    else { const targetUser = onlineUsers.value.find(u => u.username === msg.fromUsername); if (targetUser) openUserProfile(targetUser.account, targetUser.username, targetUser.avatar_url); else openUserProfile(msg.fromUsername, msg.fromUsername, msg.fromAvatar); }
                 };
-                const updateNickname = () => {
-                    const name = prompt('输入新昵称', currentUser.username);
-                    if (name && name.trim()) ws.value.send({ type: 'update_username', username: name.trim() });
+                const closeProfileModal = () => { profileModal.visible = false; };
+                const sendMessageFromProfile = () => {
+                    if (profileModal.account === currentUser.account) { showToast('不能给自己发消息'); closeProfileModal(); return; }
+                    closeProfileModal();
+                    const conv = findOrCreatePrivateConv(profileModal.account, profileModal.username, profileModal.avatarUrl);
+                    if (conv) { openConversation(conv); activeTab.value = 'chats'; }
                 };
-                
+                const closeDrawer = () => { drawerOpen.value = false; };
                 const logout = () => {
-                    stopOnlinePolling();
                     if (ws.value) ws.value.close();
-                    isLoggedIn.value = false;
-                    // 重置用户信息，避免残留
-                    currentUser.userId = null;
-                    currentUser.account = '';
-                    currentUser.username = '';
-                    currentUser.avatarUrl = 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png';
-                    privateConvs.value = [];
-                    groupMessages[1] = []; groupMessages[2] = []; groupMessages[3] = [];
-                    groupLastMsg[1] = ''; groupLastMsg[2] = ''; groupLastMsg[3] = '';
-                    groupLastTime[1] = 0; groupLastTime[2] = 0; groupLastTime[3] = 0;
-                    groupUnread[1] = 0; groupUnread[2] = 0; groupUnread[3] = 0;
-                    currentConv.value = null;
-                    onlineUsers.value = [];
-                    msgIdSet.clear();
+                    isLoggedIn.value = false; currentUser.userId = null; currentUser.account = ''; currentUser.username = ''; currentUser.avatarUrl = defaultAvatar;
+                    privateConvs.value = []; joinedChannels.value = [];
+                    for (let i=1;i<=8;i++) { groupMessages[i] = []; groupLastMsg[i] = ''; groupLastTime[i] = 0; groupUnread[i] = 0; }
+                    currentConv.value = null; onlineUsers.value = []; onlineTotal.value = 0; searchResults.value = []; msgIdSet.clear(); activeTab.value = 'hall'; drawerOpen.value = false; inputMsg.value = '';
+                    userIdToAccount.clear();
                 };
-                
-                const startPrivateChat = (user) => {
-                    if (!user.account) return;
-                    const conv = findOrCreatePrivateConv(user.account, user.username, user.avatar_url);
-                    if (conv) {
-                        openConversation({ id: conv.id, type: 'single', name: conv.displayName, avatar: conv.avatar, targetUsername: conv.targetUsername });
-                        activeTab.value = 'chats';
+
+                const initWS = () => {
+                    if (ws.value) ws.value.close();
+                    ws.value = new AeroWebSocket(WS_URL, handleServerMessage,
+                        () => {
+                            if (isLoggedIn.value && currentUser.account && loginForm.password) {
+                                ws.value.send({ type: 'login', account: currentUser.account, password: loginForm.password });
+                            }
+                        },
+                        () => showToast('连接断开，重连中...'),
+                        () => {}
+                    );
+                };
+                const doLogin = () => {
+                    if (!loginForm.account || !loginForm.password) { showToast('请输入账号和密码'); return; }
+                    if (!ws.value) initWS();
+                    if (ws.value && ws.value.ws && ws.value.ws.readyState === WebSocket.OPEN) {
+                        ws.value.send({ type: 'login', account: loginForm.account, password: loginForm.password });
+                    } else {
+                        const checkInterval = setInterval(() => {
+                            if (ws.value && ws.value.ws && ws.value.ws.readyState === WebSocket.OPEN) {
+                                clearInterval(checkInterval);
+                                ws.value.send({ type: 'login', account: loginForm.account, password: loginForm.password });
+                            }
+                        }, 100);
                     }
                 };
-                
-                // 群聊按最新消息时间降序排序（最新消息的在上方）
-                const sortedGroupConvs = computed(() => {
-                    return PRESET_GROUPS.map(g => ({
-                        id: g.id,
-                        type: 'group',
-                        name: g.name,
-                        avatar: g.avatar,
-                        lastMsg: groupLastMsg[g.id],
-                        lastTime: groupLastTime[g.id],
-                        unread: groupUnread[g.id]
-                    })).sort((a,b) => (b.lastTime||0) - (a.lastTime||0));
-                });
-                const sortedPrivateConvs = computed(() => {
-                    return [...privateConvs.value].sort((a,b) => (b.lastTime||0) - (a.lastTime||0));
-                });
+                const doRegister = () => { if (!registerForm.account || !registerForm.password || !registerForm.username) { showToast('完整填写信息'); return; } if (!ws.value) initWS(); ws.value.send({ type: 'register', account: registerForm.account, password: registerForm.password, username: registerForm.username }); };
+
                 const currentMessages = computed(() => {
                     if (!currentConv.value) return [];
-                    if (currentConv.value.type === 'group') {
-                        return groupMessages[currentConv.value.id] || [];
-                    } else {
-                        const conv = privateConvs.value.find(c => c.id === currentConv.value.id);
-                        return conv ? conv.messages : [];
-                    }
+                    if (currentConv.value.type === 'group') return groupMessages[currentConv.value.id] || [];
+                    else { const conv = privateConvs.value.find(c => c.id === currentConv.value.id); return conv ? conv.messages : []; }
                 });
-                
-                onMounted(() => {
-                    initWS();
-                });
-                onUnmounted(() => {
-                    stopOnlinePolling();
-                    if (ws.value) ws.value.close();
-                });
-                
+
+                onMounted(() => { initWS(); });
+                onUnmounted(() => { if (ws.value) ws.value.close(); });
+
                 return {
-                    isLoggedIn, isRegisterMode, loginForm, registerForm,
-                    doLogin, doRegister,
-                    currentUser, toastMsg, activeTab,
-                    onlineUsers, refreshOnlineList,
-                    sortedGroupConvs, sortedPrivateConvs,
-                    groupMessages, groupLastMsg, groupLastTime, groupUnread,
+                    libraryError,
+                    isLoggedIn, isRegisterMode, loginForm, registerForm, doLogin, doRegister,
+                    currentUser, toastMsg, activeTab, drawerOpen, inputMsg,
+                    onlineUsers, onlineTotal, loadingOnline, loadMoreOnlineUsers,
+                    allChannels, joinedChannels, privateConvs,
                     currentConv, currentMessages, loadingHistory,
+                    searchModalVisible, searchKeyword, searchResults,
+                    profileModal,
                     openConversation, sendCurrentMessage, onMessageScroll,
-                    updateAvatar, updateNickname, logout, startPrivateChat,
-                    formatFullTime, formatShortTime
+                    refreshOnlineList, openSearchModal, closeSearchModal, doSearch,
+                    updateAvatar, updateNickname, logout,
+                    openUserProfile, openUserProfileByMsg, closeProfileModal, sendMessageFromProfile,
+                    formatFullTime, formatShortTime,
+                    isJoinedChannel, toggleJoinChannel,
+                    closeDrawer, defaultAvatar
                 };
             }
         }).mount('#app');
-    </script>
+    })();
+</script>
 </body>
 </html>

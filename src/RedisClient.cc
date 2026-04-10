@@ -154,6 +154,35 @@ long long RedisClient::scard(const std::string& key) {
     return ret;
 }
 
+// SSCAN 实现
+size_t RedisClient::sscan(const std::string& key, size_t cursor, std::vector<std::string>& result, int count) {
+    redisContext* ctx = getContext();
+    if (!ctx) return 0;
+    redisReply* reply = (redisReply*)redisCommand(ctx, "SSCAN %s %zu COUNT %d", key.c_str(), cursor, count);
+    if (!reply || reply->type != REDIS_REPLY_ARRAY || reply->elements != 2) {
+        if (reply) freeReplyObject(reply);
+        releaseContext(ctx);
+        return 0;
+    }
+    // 解析 cursor
+    size_t next_cursor = 0;
+    if (reply->element[0]->type == REDIS_REPLY_STRING) {
+        next_cursor = std::stoull(reply->element[0]->str);
+    }
+    // 解析结果数组
+    redisReply* elements = reply->element[1];
+    if (elements->type == REDIS_REPLY_ARRAY) {
+        for (size_t i = 0; i < elements->elements; ++i) {
+            if (elements->element[i]->type == REDIS_REPLY_STRING) {
+                result.emplace_back(elements->element[i]->str, elements->element[i]->len);
+            }
+        }
+    }
+    freeReplyObject(reply);
+    releaseContext(ctx);
+    return next_cursor;
+}
+
 long long RedisClient::rpush(const std::string& key, const std::string& value) {
     redisContext* ctx = getContext();
     if (!ctx) return -1;
@@ -355,7 +384,6 @@ void RedisClient::subscribe(const std::string& channel, std::function<void(const
     subThread_ = std::make_unique<std::thread>([this]() {
         redisContext* ctx = redisConnect(host_.c_str(), port_);
         if (!ctx || ctx->err) {
-            // 修复字符串拼接错误
             LOG_ERROR(std::string("[Redis] subscribe connect failed: ") + (ctx ? ctx->errstr : "null"));
             if (ctx) redisFree(ctx);
             subRunning_ = false;

@@ -1,42 +1,35 @@
 #include "MessageRouter.hpp"
+#include "AeroQueue.hpp"
 #include "ConnectionManager.hpp"
 #include "DBManager.hpp"
-#include "Log.hpp"
 #include "EventLoop.hpp"
-#include "AeroQueue.hpp"
+#include "Log.hpp"
 #include "rapidjson/document.h"
-#include "rapidjson/writer.h"
 #include "rapidjson/stringbuffer.h"
+#include "rapidjson/writer.h"
+#include <algorithm>
 #include <iostream>
 #include <unordered_map>
-#include <algorithm>
 #include <vector>
 
-struct GroupInfo {
-    int id;
-    std::string name;
-    std::string avatar;
-};
-
-static const std::vector<GroupInfo> PRESET_GROUPS = {
-    {1, "💻 编程技术交流", "https://cdn-icons-png.flaticon.com/512/1998/1998592.png"},
-    {2, "🍵 生活杂谈", "https://cdn-icons-png.flaticon.com/512/3075/3075977.png"},
-    {3, "🎮 游戏娱乐", "https://cdn-icons-png.flaticon.com/512/3659/3659788.png"}
-};
-
-MessageRouter& MessageRouter::instance() {
+MessageRouter &MessageRouter::instance() {
     static MessageRouter instance;
     return instance;
 }
 
 MessageRouter::MessageRouter()
-    : session_(SessionManager::instance())
-    , group_(GroupManager::instance())
-    , store_(MessageStore::instance()) {}
+    : session_(SessionManager::instance()), group_(GroupManager::instance()),
+      store_(MessageStore::instance()) {}
 
-void MessageRouter::onMessage(int fd, const std::string& rawMsg, std::shared_ptr<User> user) {
+void MessageRouter::onMessage(int fd, const std::string &rawMsg,
+                              std::shared_ptr<User> user) {
+    std::string msg = rawMsg;
+    msg.erase(0, msg.find_first_not_of(" \t\n\r"));
+    msg.erase(msg.find_last_not_of(" \t\n\r") + 1);
+    if (msg.empty()) return;
+
     rapidjson::Document doc;
-    doc.Parse(rawMsg.c_str());
+    doc.Parse(msg.c_str());
     if (doc.HasParseError() || !doc.IsObject()) {
         LOG_ERROR("[onMessage] JSON parse error from fd " + std::to_string(fd));
         sendErrorResponse(fd, "Invalid JSON format");
@@ -58,43 +51,38 @@ void MessageRouter::onMessage(int fd, const std::string& rawMsg, std::shared_ptr
         }
         std::string account = doc["account"].GetString();
         std::string password = doc["password"].GetString();
+		//将登录操作作为任务投递到 AeroQueue
         AeroQueue::instance().post([this, fd, user, account, password]() {
             doLogin(fd, user, account, password);
         });
-    }
-    else if (type == "group_message") {
+    } else if (type == "group_message") {
         if (!doc.HasMember("content") || !doc["content"].IsString()) {
             sendErrorResponse(fd, "Missing content");
             return;
         }
         int groupId = 1;
-        std::string rawGroupId;
         if (doc.HasMember("groupId") && doc["groupId"].IsInt()) {
             groupId = doc["groupId"].GetInt();
-            rawGroupId = std::to_string(groupId);
         } else if (doc.HasMember("groupId") && doc["groupId"].IsString()) {
-            rawGroupId = doc["groupId"].GetString();
             try {
-                groupId = std::stoi(rawGroupId);
-            } catch (const std::exception& e) {
-                LOG_ERROR("[onMessage] groupId string to int failed: " + rawGroupId);
-                sendErrorResponse(fd, "Invalid groupId format");
+                groupId = std::stoi(doc["groupId"].GetString());
+            } catch (...) {
+                sendErrorResponse(fd, "Invalid groupId");
                 return;
             }
         } else {
-            sendErrorResponse(fd, "Missing or invalid groupId");
+            sendErrorResponse(fd, "Missing groupId");
             return;
         }
-        if (groupId < 1 || groupId > 3) {
-            sendErrorResponse(fd, "Invalid group ID (must be 1-3)");
+        if (groupId < 1 || groupId > 8) {
+            sendErrorResponse(fd, "Invalid group ID (must be 1-8)");
             return;
         }
         std::string content = doc["content"].GetString();
         AeroQueue::instance().post([this, fd, user, groupId, content]() {
             doGroupMessage(fd, user, groupId, content);
         });
-    }
-    else if (type == "single_message") {
+    } else if (type == "single_message") {
         if (!doc.HasMember("target") || !doc.HasMember("content") ||
             !doc["target"].IsString() || !doc["content"].IsString()) {
             sendErrorResponse(fd, "Missing target or content");
@@ -105,13 +93,9 @@ void MessageRouter::onMessage(int fd, const std::string& rawMsg, std::shared_ptr
         AeroQueue::instance().post([this, fd, user, target, content]() {
             doSingleMessage(fd, user, target, content);
         });
-    }
-    else if (type == "pull_offline") {
-        AeroQueue::instance().post([this, fd, user]() {
-            doPullOffline(fd, user);
-        });
-    }
-    else if (type == "load_history") {
+    } else if (type == "pull_offline") {
+        AeroQueue::instance().post([this, fd, user]() { doPullOffline(fd, user); });
+    } else if (type == "load_history") {
         if (!doc.HasMember("targetType") || !doc.HasMember("targetId") ||
             !doc["targetType"].IsString() || !doc["targetId"].IsString()) {
             sendErrorResponse(fd, "Missing targetType or targetId (must be strings)");
@@ -120,18 +104,13 @@ void MessageRouter::onMessage(int fd, const std::string& rawMsg, std::shared_ptr
         std::string targetType = doc["targetType"].GetString();
         std::string targetId = doc["targetId"].GetString();
         int limit = 50;
-        if (doc.HasMember("limit")) {
-            if (doc["limit"].IsInt()) {
-                limit = doc["limit"].GetInt();
-            } else if (doc["limit"].IsString()) {
-                try { limit = std::stoi(doc["limit"].GetString()); } catch (...) {}
-            }
-        }
-        AeroQueue::instance().post([this, fd, user, targetType, targetId, limit]() {
-            doLoadHistory(fd, user, targetType, targetId, limit);
+        int offset = 0;
+        if (doc.HasMember("limit") && doc["limit"].IsInt()) limit = doc["limit"].GetInt();
+        if (doc.HasMember("offset") && doc["offset"].IsInt()) offset = doc["offset"].GetInt();
+        AeroQueue::instance().post([this, fd, user, targetType, targetId, limit, offset]() {
+            doLoadHistoryPaginated(fd, user, targetType, targetId, limit, offset);
         });
-    }
-    else if (type == "update_avatar") {
+    } else if (type == "update_avatar") {
         if (!doc.HasMember("avatarUrl") || !doc["avatarUrl"].IsString()) {
             sendErrorResponse(fd, "Missing avatarUrl");
             return;
@@ -140,8 +119,7 @@ void MessageRouter::onMessage(int fd, const std::string& rawMsg, std::shared_ptr
         AeroQueue::instance().post([this, fd, user, avatarUrl]() {
             doUpdateAvatar(fd, user, avatarUrl);
         });
-    }
-    else if (type == "update_username") {
+    } else if (type == "update_username") {
         if (!doc.HasMember("username") || !doc["username"].IsString()) {
             sendErrorResponse(fd, "Missing username");
             return;
@@ -150,10 +128,10 @@ void MessageRouter::onMessage(int fd, const std::string& rawMsg, std::shared_ptr
         AeroQueue::instance().post([this, fd, user, newUsername]() {
             doUpdateUsername(fd, user, newUsername);
         });
-    }
-    else if (type == "register") {
-        if (!doc.HasMember("account") || !doc.HasMember("password") || !doc.HasMember("username") ||
-            !doc["account"].IsString() || !doc["password"].IsString() || !doc["username"].IsString()) {
+    } else if (type == "register") {
+        if (!doc.HasMember("account") || !doc.HasMember("password") ||
+            !doc.HasMember("username") || !doc["account"].IsString() ||
+            !doc["password"].IsString() || !doc["username"].IsString()) {
             sendErrorResponse(fd, "Missing account/password/username");
             return;
         }
@@ -163,18 +141,55 @@ void MessageRouter::onMessage(int fd, const std::string& rawMsg, std::shared_ptr
         AeroQueue::instance().post([this, fd, account, password, username]() {
             doRegister(fd, account, password, username);
         });
-    }
-    else if (type == "ping") {
+    } else if (type == "ping") {
         doHeartbeat(fd, user);
-    }
-    else if (type == "get_online_users") {
-        // 前端已改用推送，此接口不再需要，但为了兼容返回空列表
-        doGetOnlineUsers(fd, user);
-    }
-    else if (type == "get_conversations") {
-        doGetConversations(fd, user);
-    }
-    else if (type == "search_users") {
+    } else if (type == "join_group") {
+        if (!doc.HasMember("groupId") || !doc["groupId"].IsInt()) {
+            sendErrorResponse(fd, "Missing groupId");
+            return;
+        }
+        int groupId = doc["groupId"].GetInt();
+        AeroQueue::instance().post([this, fd, user, groupId]() {
+            doJoinGroup(fd, user, groupId);
+        });
+    } else if (type == "leave_group") {
+        if (!doc.HasMember("groupId") || !doc["groupId"].IsInt()) {
+            sendErrorResponse(fd, "Missing groupId");
+            return;
+        }
+        int groupId = doc["groupId"].GetInt();
+        AeroQueue::instance().post([this, fd, user, groupId]() {
+            doLeaveGroup(fd, user, groupId);
+        });
+    } else if (type == "get_groups") {
+        AeroQueue::instance().post([this, fd]() { doGetGroups(fd); });
+    } else if (type == "get_conversations") {
+        AeroQueue::instance().post([this, fd, user]() { doGetConversations(fd, user); });
+    } else if (type == "get_group_members") {
+        if (!doc.HasMember("groupId") || !doc["groupId"].IsInt()) {
+            sendErrorResponse(fd, "Missing groupId");
+            return;
+        }
+        int groupId = doc["groupId"].GetInt();
+        int offset = 0;
+        int limit = 200;
+        if (doc.HasMember("offset") && doc["offset"].IsInt()) offset = doc["offset"].GetInt();
+        if (doc.HasMember("limit") && doc["limit"].IsInt()) limit = doc["limit"].GetInt();
+        AeroQueue::instance().post([this, fd, groupId, offset, limit]() {
+            doGetGroupMembersPaginated(fd, groupId, offset, limit);
+        });
+    } else if (type == "get_online_users") {
+        int page = 1;
+        int size = 200;
+        if (doc.HasMember("page") && doc["page"].IsInt()) page = doc["page"].GetInt();
+        if (doc.HasMember("size") && doc["size"].IsInt()) size = doc["size"].GetInt();
+        if (page < 1) page = 1;
+        if (size < 1) size = 1;
+        if (size > 500) size = 500;
+        AeroQueue::instance().post([this, fd, page, size]() {
+            doGetOnlineUsersPaginated(fd, page, size);
+        });
+    } else if (type == "search_users") {
         if (!doc.HasMember("keyword") || !doc["keyword"].IsString()) {
             sendErrorResponse(fd, "Missing keyword");
             return;
@@ -188,8 +203,7 @@ void MessageRouter::onMessage(int fd, const std::string& rawMsg, std::shared_ptr
         AeroQueue::instance().post([this, fd, user, keyword, limit]() {
             doSearchUsers(fd, user, keyword, limit);
         });
-    }
-    else if (type == "get_user_profile") {
+    } else if (type == "get_user_profile") {
         if (!doc.HasMember("account") || !doc["account"].IsString()) {
             sendErrorResponse(fd, "Missing account");
             return;
@@ -198,28 +212,29 @@ void MessageRouter::onMessage(int fd, const std::string& rawMsg, std::shared_ptr
         AeroQueue::instance().post([this, fd, user, targetAccount]() {
             doGetUserProfile(fd, user, targetAccount);
         });
-    }
-    else {
-        LOG_ERROR("[onMessage] unknown type: " + type + " from fd " + std::to_string(fd));
+    } else {
         sendErrorResponse(fd, "Unknown message type");
     }
 }
 
-void MessageRouter::sendErrorResponse(int fd, const std::string& errorMsg) {
+void MessageRouter::sendErrorResponse(int fd, const std::string &errorMsg) {
     rapidjson::Document resp;
     resp.SetObject();
-    auto& alloc = resp.GetAllocator();
+    auto &alloc = resp.GetAllocator();
     resp.AddMember("type", "error", alloc);
     resp.AddMember("message", rapidjson::StringRef(errorMsg.c_str()), alloc);
     rapidjson::StringBuffer buffer;
     rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
     resp.Accept(writer);
-    std::string msg = buffer.GetString() + std::string("\n");
+    std::string msg = std::string(buffer.GetString()) + "\n";
     ConnectionManager::instance().sendToUser(fd, msg);
 }
 
-void MessageRouter::doLogin(int fd, std::shared_ptr<User> user, const std::string& account, const std::string& password) {
-    DBManager& db = DBManager::getInstance();
+// 登录 
+void MessageRouter::doLogin(int fd, std::shared_ptr<User> user,
+                            const std::string &account,
+                            const std::string &password) {
+    DBManager &db = DBManager::getInstance();
     int userId = 0;
     std::string username;
     std::string avatarUrl;
@@ -241,47 +256,36 @@ void MessageRouter::doLogin(int fd, std::shared_ptr<User> user, const std::strin
     user->setUserId(userId);
     user->setLoggedIn(true);
 
-    GroupManager& gm = GroupManager::instance();
-    for (int gid = 1; gid <= 3; ++gid) {
-        gm.addUserToGroup(gid, userId);
-    }
-
+    auto userGroups = group_.getUserGroups(userId);
     store_.asyncRebuildConversations(userId, false);
-
-    // 获取在线用户列表，只返回前100个
-    auto allOnlineUsers = session_.getAllOnlineUserInfos();
-    std::vector<decltype(allOnlineUsers)::value_type> onlineUsers;
-    for (size_t i = 0; i < allOnlineUsers.size() && i < 100; ++i) {
-        onlineUsers.push_back(allOnlineUsers[i]);
-    }
+    int onlineCount = session_.getOnlineCount();
 
     rapidjson::Document loginResp;
     loginResp.SetObject();
-    auto& alloc = loginResp.GetAllocator();
+    auto &alloc = loginResp.GetAllocator();
     loginResp.AddMember("type", "login", alloc);
     loginResp.AddMember("status", "success", alloc);
     loginResp.AddMember("username", rapidjson::StringRef(username.c_str()), alloc);
     loginResp.AddMember("userId", userId, alloc);
     loginResp.AddMember("avatar_url", rapidjson::StringRef(avatarUrl.c_str()), alloc);
+    loginResp.AddMember("online_count", onlineCount, alloc);
 
-    rapidjson::Value onlineArray(rapidjson::kArrayType);
-    for (const auto& [acc, uname, avatar] : onlineUsers) {
-        rapidjson::Value obj(rapidjson::kObjectType);
-        obj.AddMember("account", rapidjson::StringRef(acc.c_str()), alloc);
-        obj.AddMember("username", rapidjson::StringRef(uname.c_str()), alloc);
-        obj.AddMember("avatar_url", rapidjson::StringRef(avatar.c_str()), alloc);
-        onlineArray.PushBack(obj, alloc);
+    rapidjson::Value joinedArray(rapidjson::kArrayType);
+    for (int gid : userGroups) {
+        joinedArray.PushBack(gid, alloc);
     }
-    loginResp.AddMember("online_users", onlineArray, alloc);
+    loginResp.AddMember("joinedGroups", joinedArray, alloc);
 
     rapidjson::StringBuffer loginBuffer;
     rapidjson::Writer<rapidjson::StringBuffer> loginWriter(loginBuffer);
     loginResp.Accept(loginWriter);
-    std::string loginMsg = loginBuffer.GetString() + std::string("\n");
+    std::string loginMsg = std::string(loginBuffer.GetString()) + "\n";
     ConnectionManager::instance().sendToUser(fd, loginMsg);
 }
 
-void MessageRouter::doGroupMessage(int fd, std::shared_ptr<User> user, int groupId, const std::string& content) {
+// 群聊消息
+void MessageRouter::doGroupMessage(int fd, std::shared_ptr<User> user,
+                                   int groupId, const std::string &content) {
     if (!user->isLoggedIn()) {
         sendErrorResponse(fd, "Not logged in");
         return;
@@ -291,7 +295,8 @@ void MessageRouter::doGroupMessage(int fd, std::shared_ptr<User> user, int group
     std::string senderUsername = session_.getUsernameByAccount(senderAccount);
     std::string senderAvatar = session_.getAvatar(senderAccount, "");
 
-    int msgId = store_.saveMessage(userId, senderUsername, senderAvatar, groupId, true, content);
+    int msgId = store_.saveMessage(userId, senderUsername, senderAvatar, groupId,
+                                   true, content);
     if (msgId <= 0) {
         sendErrorResponse(fd, "Failed to save message");
         return;
@@ -302,9 +307,7 @@ void MessageRouter::doGroupMessage(int fd, std::shared_ptr<User> user, int group
     std::vector<int> offlineMembers;
     for (int uid : members) {
         std::string account = session_.getAccountByUserId(uid);
-        if (account.empty()) {
-            account = "test" + std::to_string(uid);
-        }
+        if (account.empty()) account = "test" + std::to_string(uid);
         if (session_.isOnline(account)) {
             onlineMembers.push_back(uid);
         } else {
@@ -312,13 +315,18 @@ void MessageRouter::doGroupMessage(int fd, std::shared_ptr<User> user, int group
         }
     }
 
+    LOG_INFO("[doGroupMessage] groupId=" + std::to_string(groupId) +
+             " total=" + std::to_string(members.size()) +
+             " online=" + std::to_string(onlineMembers.size()) +
+             " offline=" + std::to_string(offlineMembers.size()));
+
     if (!offlineMembers.empty()) {
         store_.pushToInbox(msgId, offlineMembers);
     }
 
     rapidjson::Document msgDoc;
     msgDoc.SetObject();
-    auto& alloc = msgDoc.GetAllocator();
+    auto &alloc = msgDoc.GetAllocator();
     msgDoc.AddMember("type", "group_message", alloc);
     msgDoc.AddMember("from", userId, alloc);
     msgDoc.AddMember("from_username", rapidjson::StringRef(senderUsername.c_str()), alloc);
@@ -329,7 +337,7 @@ void MessageRouter::doGroupMessage(int fd, std::shared_ptr<User> user, int group
     rapidjson::StringBuffer buffer;
     rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
     msgDoc.Accept(writer);
-    std::string msg = buffer.GetString() + std::string("\n");
+    std::string msg = std::string(buffer.GetString()) + "\n";
 
     if (onlineMembers.empty()) return;
 
@@ -337,32 +345,33 @@ void MessageRouter::doGroupMessage(int fd, std::shared_ptr<User> user, int group
     onlineAccounts.reserve(onlineMembers.size());
     for (int uid : onlineMembers) {
         std::string account = session_.getAccountByUserId(uid);
-        if (account.empty()) {
-            account = "test" + std::to_string(uid);
-        }
+        if (account.empty()) account = "test" + std::to_string(uid);
         onlineAccounts.push_back(account);
     }
 
     std::vector<int> fds = session_.getFdsByAccounts(onlineAccounts);
     auto users = ConnectionManager::instance().getUsers(fds);
 
-    std::unordered_map<EventLoop*, std::vector<std::shared_ptr<User>>> threadUsers;
+    std::unordered_map<EventLoop *, std::vector<std::shared_ptr<User>>> threadUsers;
     for (size_t i = 0; i < fds.size(); ++i) {
         if (users[i] && fds[i] != -1) {
             threadUsers[users[i]->getLoop()].push_back(users[i]);
         }
     }
 
-    for (auto& [loop, userList] : threadUsers) {
+    for (auto &[loop, userList] : threadUsers) {
         loop->runInLoop([userList, msg]() {
-            for (auto& targetUser : userList) {
+            for (auto &targetUser : userList) {
                 targetUser->send(msg.data(), msg.size());
             }
         });
     }
 }
 
-void MessageRouter::doSingleMessage(int fd, std::shared_ptr<User> user, const std::string& targetUsername, const std::string& content) {
+// 私聊消息（优化版：使用账号）
+void MessageRouter::doSingleMessage(int fd, std::shared_ptr<User> user,
+                                    const std::string &target,
+                                    const std::string &content) {
     if (!user->isLoggedIn()) {
         sendErrorResponse(fd, "Not logged in");
         return;
@@ -373,43 +382,41 @@ void MessageRouter::doSingleMessage(int fd, std::shared_ptr<User> user, const st
     std::string senderUsername = session_.getUsernameByAccount(senderAccount);
     std::string senderAvatar = session_.getAvatar(senderAccount, "");
 
-    std::string targetAccount = session_.getAccountByUsername(targetUsername);
+    std::string targetAccount = session_.getAccountByAccountOrUsername(target);
     if (targetAccount.empty()) {
         sendErrorResponse(fd, "Target user not found");
         return;
     }
-    int toUserId = session_.getUserIdByAccount(targetAccount);
-    if (toUserId <= 0) {
-        sendErrorResponse(fd, "Invalid target user");
-        return;
-    }
-    int targetFd = session_.getFdByAccount(targetAccount);
 
-    int msgId = store_.saveMessage(fromUserId, senderUsername, senderAvatar, toUserId, false, content);
+    int msgId = store_.saveMessage(fromUserId, senderUsername, senderAvatar,
+                                   targetAccount, content);
     if (msgId <= 0) {
         sendErrorResponse(fd, "Failed to save message");
         return;
     }
 
+    int toUserId = session_.getUserIdByAccount(targetAccount);
+    bool isOnline = session_.isOnline(targetAccount);
+    int targetFd = session_.getFdByAccount(targetAccount);
+
     rapidjson::Document msgDoc;
     msgDoc.SetObject();
-    auto& alloc = msgDoc.GetAllocator();
+    auto &alloc = msgDoc.GetAllocator();
     msgDoc.AddMember("type", "single_message", alloc);
     msgDoc.AddMember("from", fromUserId, alloc);
     msgDoc.AddMember("from_username", rapidjson::StringRef(senderUsername.c_str()), alloc);
     msgDoc.AddMember("from_avatar", rapidjson::StringRef(senderAvatar.c_str()), alloc);
     msgDoc.AddMember("content", rapidjson::StringRef(content.c_str()), alloc);
     msgDoc.AddMember("msgId", msgId, alloc);
-    msgDoc.AddMember("to", rapidjson::StringRef(targetUsername.c_str()), alloc);
-
+    msgDoc.AddMember("to", rapidjson::StringRef(target.c_str()), alloc);
     rapidjson::StringBuffer buffer;
     rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
     msgDoc.Accept(writer);
-    std::string msg = buffer.GetString() + std::string("\n");
+    std::string msg = std::string(buffer.GetString()) + "\n";
 
-    if (session_.isOnline(targetAccount)) {
+    if (isOnline && targetFd != -1) {
         ConnectionManager::instance().sendToUser(targetFd, msg);
-    } else {
+    } else if (toUserId > 0) {
         store_.pushToInbox(msgId, {toUserId});
     }
 
@@ -420,37 +427,32 @@ void MessageRouter::doSingleMessage(int fd, std::shared_ptr<User> user, const st
     rapidjson::StringBuffer receiptBuf;
     rapidjson::Writer<rapidjson::StringBuffer> writer2(receiptBuf);
     receipt.Accept(writer2);
-    std::string receiptMsg = receiptBuf.GetString() + std::string("\n");
+    std::string receiptMsg = std::string(receiptBuf.GetString()) + "\n";
     ConnectionManager::instance().sendToUser(fd, receiptMsg);
 }
 
+// 离线消息 
 void MessageRouter::doPullOffline(int fd, std::shared_ptr<User> user) {
     if (!user->isLoggedIn()) return;
     int userId = user->getUserId();
     auto ids = store_.pullOfflineMsgIds(userId);
     auto msgs = store_.getMessages(ids);
 
-    for (auto& msg : msgs) {
+    for (auto &msg : msgs) {
         std::string account = session_.getAccountByUserId(msg.fromUserId);
-        if (account.empty()) {
-            account = "test" + std::to_string(msg.fromUserId);
-        }
+        if (account.empty()) account = "test" + std::to_string(msg.fromUserId);
         std::string currentAvatar = session_.getAvatar(account, msg.fromAvatar);
-        if (!currentAvatar.empty()) {
-            msg.fromAvatar = currentAvatar;
-        }
+        if (!currentAvatar.empty()) msg.fromAvatar = currentAvatar;
         std::string currentUsername = session_.getUsernameByAccount(account);
-        if (!currentUsername.empty()) {
-            msg.fromUsername = currentUsername;
-        }
+        if (!currentUsername.empty()) msg.fromUsername = currentUsername;
     }
 
     rapidjson::Document resp;
     resp.SetObject();
-    auto& alloc = resp.GetAllocator();
+    auto &alloc = resp.GetAllocator();
     resp.AddMember("type", "offline_messages", alloc);
     rapidjson::Value arr(rapidjson::kArrayType);
-    for (const auto& m : msgs) {
+    for (const auto &m : msgs) {
         rapidjson::Value obj(rapidjson::kObjectType);
         obj.AddMember("from", m.fromUserId, alloc);
         obj.AddMember("from_username", rapidjson::StringRef(m.fromUsername.c_str()), alloc);
@@ -458,9 +460,7 @@ void MessageRouter::doPullOffline(int fd, std::shared_ptr<User> user) {
         obj.AddMember("type", m.type, alloc);
         obj.AddMember("content", rapidjson::StringRef(m.content.c_str()), alloc);
         obj.AddMember("msgId", m.msgId, alloc);
-        if (m.type == 0) {
-            obj.AddMember("groupId", m.toId, alloc);
-        }
+        if (m.type == 0) obj.AddMember("groupId", m.toId, alloc);
         arr.PushBack(obj, alloc);
     }
     resp.AddMember("messages", arr, alloc);
@@ -468,101 +468,118 @@ void MessageRouter::doPullOffline(int fd, std::shared_ptr<User> user) {
     rapidjson::StringBuffer buffer;
     rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
     resp.Accept(writer);
-    std::string msg = buffer.GetString() + std::string("\n");
+    std::string msg = std::string(buffer.GetString()) + "\n";
     ConnectionManager::instance().sendToUser(fd, msg);
 }
 
+//心跳
 void MessageRouter::doHeartbeat(int fd, std::shared_ptr<User> user) {
-     (void)user; 
+    (void)user;
     ConnectionManager::instance().sendToUser(fd, "{\"type\":\"pong\"}\n");
 }
 
-void MessageRouter::doGetOnlineUsers(int fd, std::shared_ptr<User> user) {
-    if (!user->isLoggedIn()) {
-        sendErrorResponse(fd, "Not logged in");
-        return;
-    }
+// 分页获取在线用户
+void MessageRouter::doGetOnlineUsersPaginated(int fd, int page, int size) {
+    auto allOnline = session_.getAllOnlineUserInfos();
+    int total = (int)allOnline.size();
+    int start = (page - 1) * size;
+    int end = std::min(start + size, total);
+    if (start >= total) end = start;
+
     rapidjson::Document resp;
     resp.SetObject();
-    auto& alloc = resp.GetAllocator();
+    auto &alloc = resp.GetAllocator();
     resp.AddMember("type", "online_users", alloc);
-    resp.AddMember("users", rapidjson::Value(rapidjson::kArrayType), alloc);
+    resp.AddMember("page", page, alloc);
+    resp.AddMember("size", size, alloc);
+    resp.AddMember("total", total, alloc);
+
+    rapidjson::Value arr(rapidjson::kArrayType);
+    for (int i = start; i < end; ++i) {
+        const auto &[acc, uname, avatar] = allOnline[i];
+        rapidjson::Value obj(rapidjson::kObjectType);
+        obj.AddMember("account", rapidjson::StringRef(acc.c_str()), alloc);
+        obj.AddMember("username", rapidjson::StringRef(uname.c_str()), alloc);
+        obj.AddMember("avatar_url", rapidjson::StringRef(avatar.c_str()), alloc);
+        arr.PushBack(obj, alloc);
+    }
+    resp.AddMember("users", arr, alloc);
+
     rapidjson::StringBuffer buffer;
     rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
     resp.Accept(writer);
-    std::string msg = buffer.GetString() + std::string("\n");
+    std::string msg = std::string(buffer.GetString()) + "\n";
     ConnectionManager::instance().sendToUser(fd, msg);
 }
 
-void MessageRouter::doLoadHistory(int fd, std::shared_ptr<User> user,
-                                   const std::string& targetType,
-                                   const std::string& targetId,
-                                   int limit) {
+// 加载历史消息（分页）
+void MessageRouter::doLoadHistoryPaginated(int fd, std::shared_ptr<User> user,
+                                           const std::string &targetType,
+                                           const std::string &targetId,
+                                           int limit, int offset) {
     if (!user->isLoggedIn()) {
         sendErrorResponse(fd, "Not logged in");
         return;
     }
 
-    LOG_INFO("[doLoadHistory] fd=" + std::to_string(fd) + ", targetType=" + targetType + ", targetId=" + targetId + ", limit=" + std::to_string(limit));
+    LOG_INFO("[doLoadHistory] fd=" + std::to_string(fd) +
+             ", targetType=" + targetType + ", targetId=" + targetId +
+             ", limit=" + std::to_string(limit) + ", offset=" + std::to_string(offset));
 
     std::vector<StoredMessage> history;
     if (targetType == "group") {
         int groupId = 0;
         try {
             groupId = std::stoi(targetId);
-        } catch (const std::exception& e) {
+        } catch (const std::exception &e) {
             LOG_ERROR("[doLoadHistory] Invalid group id: " + targetId);
             sendErrorResponse(fd, "Invalid group id");
             return;
         }
-        history = store_.loadHistory(0, groupId, true, limit);
-        LOG_INFO("[doLoadHistory] group history count=" + std::to_string(history.size()) + " for groupId=" + std::to_string(groupId));
+        history = store_.loadHistoryPaginated(groupId, limit, offset);
+        LOG_INFO("[doLoadHistory] group history count=" + std::to_string(history.size()) +
+                 " for groupId=" + std::to_string(groupId));
     } else if (targetType == "private") {
-        std::string targetAccount = session_.getAccountByUsername(targetId);
+        std::string targetAccount = session_.getAccountByAccountOrUsername(targetId);
         if (targetAccount.empty()) {
-            LOG_ERROR("[doLoadHistory] Target user not found by username: " + targetId);
+            LOG_ERROR("[doLoadHistory] Target user not found: " + targetId);
             sendErrorResponse(fd, "Target user not found");
             return;
         }
-        int targetUserId = session_.getUserIdByAccount(targetAccount);
-        if (targetUserId <= 0) {
-            LOG_ERROR("[doLoadHistory] Failed to get user id for account: " + targetAccount);
-            sendErrorResponse(fd, "Invalid target user");
+        std::string myAccount = session_.getAccountByFd(fd);
+        if (myAccount.empty()) {
+            sendErrorResponse(fd, "Invalid user");
             return;
         }
-        int myUserId = user->getUserId();
-        history = store_.loadHistory(myUserId, targetUserId, false, limit);
-        LOG_INFO("[doLoadHistory] private history count=" + std::to_string(history.size()) + " between user " + std::to_string(myUserId) + " and " + std::to_string(targetUserId));
+        history = store_.loadHistoryPaginated(myAccount, targetAccount, limit, offset);
+        LOG_INFO("[doLoadHistory] private history count=" + std::to_string(history.size()) +
+                 " between " + myAccount + " and " + targetAccount);
     } else {
         LOG_ERROR("[doLoadHistory] Invalid targetType: " + targetType);
         sendErrorResponse(fd, "Invalid target type");
         return;
     }
 
-    for (auto& msg : history) {
+    for (auto &msg : history) {
         std::string account = session_.getAccountByUserId(msg.fromUserId);
-        if (account.empty()) {
-            account = "test" + std::to_string(msg.fromUserId);
-        }
+        if (account.empty()) account = "test" + std::to_string(msg.fromUserId);
         std::string currentAvatar = session_.getAvatar(account, msg.fromAvatar);
-        if (!currentAvatar.empty()) {
-            msg.fromAvatar = currentAvatar;
-        }
+        if (!currentAvatar.empty()) msg.fromAvatar = currentAvatar;
         std::string currentUsername = session_.getUsernameByAccount(account);
-        if (!currentUsername.empty()) {
-            msg.fromUsername = currentUsername;
-        }
+        if (!currentUsername.empty()) msg.fromUsername = currentUsername;
     }
 
     rapidjson::Document resp;
     resp.SetObject();
-    auto& alloc = resp.GetAllocator();
+    auto &alloc = resp.GetAllocator();
     resp.AddMember("type", "load_history", alloc);
     resp.AddMember("targetType", rapidjson::StringRef(targetType.c_str()), alloc);
     resp.AddMember("targetId", rapidjson::StringRef(targetId.c_str()), alloc);
+    resp.AddMember("offset", offset, alloc);
+    resp.AddMember("limit", limit, alloc);
 
     rapidjson::Value msgArray(rapidjson::kArrayType);
-    for (const auto& msg : history) {
+    for (const auto &msg : history) {
         rapidjson::Value obj(rapidjson::kObjectType);
         obj.AddMember("msgId", msg.msgId, alloc);
         obj.AddMember("from", msg.fromUserId, alloc);
@@ -570,9 +587,7 @@ void MessageRouter::doLoadHistory(int fd, std::shared_ptr<User> user,
         obj.AddMember("from_avatar", rapidjson::StringRef(msg.fromAvatar.c_str()), alloc);
         obj.AddMember("content", rapidjson::StringRef(msg.content.c_str()), alloc);
         obj.AddMember("sendTime", static_cast<int64_t>(msg.sendTime), alloc);
-        if (msg.type == 0) {
-            obj.AddMember("groupId", msg.toId, alloc);
-        }
+        if (msg.type == 0) obj.AddMember("groupId", msg.toId, alloc);
         msgArray.PushBack(obj, alloc);
     }
     resp.AddMember("messages", msgArray, alloc);
@@ -580,11 +595,13 @@ void MessageRouter::doLoadHistory(int fd, std::shared_ptr<User> user,
     rapidjson::StringBuffer buffer;
     rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
     resp.Accept(writer);
-    std::string msg = buffer.GetString() + std::string("\n");
+    std::string msg = std::string(buffer.GetString()) + "\n";
     ConnectionManager::instance().sendToUser(fd, msg);
 }
 
-void MessageRouter::doUpdateAvatar(int fd, std::shared_ptr<User> user, const std::string& avatarUrl) {
+// 更新头像
+void MessageRouter::doUpdateAvatar(int fd, std::shared_ptr<User> user,
+                                   const std::string &avatarUrl) {
     if (!user->isLoggedIn()) {
         sendErrorResponse(fd, "Not logged in");
         return;
@@ -606,18 +623,20 @@ void MessageRouter::doUpdateAvatar(int fd, std::shared_ptr<User> user, const std
 
     rapidjson::Document resp;
     resp.SetObject();
-    auto& alloc = resp.GetAllocator();
+    auto &alloc = resp.GetAllocator();
     resp.AddMember("type", "update_avatar", alloc);
     resp.AddMember("status", "success", alloc);
     resp.AddMember("avatar_url", rapidjson::StringRef(avatarUrl.c_str()), alloc);
     rapidjson::StringBuffer buffer;
     rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
     resp.Accept(writer);
-    std::string msg = buffer.GetString() + std::string("\n");
+    std::string msg = std::string(buffer.GetString()) + "\n";
     ConnectionManager::instance().sendToUser(fd, msg);
 }
 
-void MessageRouter::doUpdateUsername(int fd, std::shared_ptr<User> user, const std::string& newUsername) {
+// 更新用户名 
+void MessageRouter::doUpdateUsername(int fd, std::shared_ptr<User> user,
+                                     const std::string &newUsername) {
     if (!user->isLoggedIn()) {
         sendErrorResponse(fd, "Not logged in");
         return;
@@ -630,22 +649,28 @@ void MessageRouter::doUpdateUsername(int fd, std::shared_ptr<User> user, const s
 
     rapidjson::Document resp;
     resp.SetObject();
-    auto& alloc = resp.GetAllocator();
+    auto &alloc = resp.GetAllocator();
     resp.AddMember("type", "update_username", alloc);
     resp.AddMember("status", "success", alloc);
     resp.AddMember("username", rapidjson::StringRef(newUsername.c_str()), alloc);
     rapidjson::StringBuffer buffer;
     rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
     resp.Accept(writer);
-    std::string msg = buffer.GetString() + std::string("\n");
+    std::string msg = std::string(buffer.GetString()) + "\n";
     ConnectionManager::instance().sendToUser(fd, msg);
 }
 
-void MessageRouter::doRegister(int fd, const std::string& account,
-                               const std::string& password,
-                               const std::string& username) {
-    std::string existingUsername;
+//注册
+void MessageRouter::doRegister(int fd, const std::string &account,
+                               const std::string &password,
+                               const std::string &username) {
+   /* std::string existingUsername;
     if (DBManager::getInstance().queryUsernameByAccount(account, existingUsername)) {
+        sendErrorResponse(fd, "Account already exists");
+        return;
+    }
+    */
+    if (DBManager::getInstance().isAccountExist(account)) {
         sendErrorResponse(fd, "Account already exists");
         return;
     }
@@ -659,14 +684,9 @@ void MessageRouter::doRegister(int fd, const std::string& account,
         return;
     }
 
-    GroupManager& gm = GroupManager::instance();
-    for (int groupId = 1; groupId <= 3; ++groupId) {
-        gm.addUserToGroup(groupId, userId);
-    }
-
     rapidjson::Document resp;
     resp.SetObject();
-    auto& alloc = resp.GetAllocator();
+    auto &alloc = resp.GetAllocator();
     resp.AddMember("type", "register", alloc);
     resp.AddMember("status", "success", alloc);
     resp.AddMember("account", rapidjson::StringRef(account.c_str()), alloc);
@@ -676,10 +696,184 @@ void MessageRouter::doRegister(int fd, const std::string& account,
     rapidjson::StringBuffer buffer;
     rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
     resp.Accept(writer);
-    std::string msg = buffer.GetString() + std::string("\n");
+    std::string msg = std::string(buffer.GetString()) + "\n";
     ConnectionManager::instance().sendToUser(fd, msg);
 }
 
+//搜索用户
+void MessageRouter::doSearchUsers(int fd, std::shared_ptr<User> user,
+                                  const std::string &keyword, int limit) {
+    if (!user->isLoggedIn()) {
+        sendErrorResponse(fd, "Not logged in");
+        return;
+    }
+    auto results = session_.searchAllUsers(keyword, limit);
+    rapidjson::Document resp;
+    resp.SetObject();
+    auto &alloc = resp.GetAllocator();
+    resp.AddMember("type", "search_users", alloc);
+    rapidjson::Value arr(rapidjson::kArrayType);
+    for (const auto &[acc, uname, avatar] : results) {
+        rapidjson::Value obj(rapidjson::kObjectType);
+        obj.AddMember("account", rapidjson::StringRef(acc.c_str()), alloc);
+        obj.AddMember("username", rapidjson::StringRef(uname.c_str()), alloc);
+        obj.AddMember("avatar_url", rapidjson::StringRef(avatar.c_str()), alloc);
+        arr.PushBack(obj, alloc);
+    }
+    resp.AddMember("users", arr, alloc);
+    rapidjson::StringBuffer buffer;
+    rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+    resp.Accept(writer);
+    std::string msg = std::string(buffer.GetString()) + "\n";
+    ConnectionManager::instance().sendToUser(fd, msg);
+}
+
+// 获取用户主页
+void MessageRouter::doGetUserProfile(int fd, std::shared_ptr<User> user,
+                                     const std::string &targetAccount) {
+    if (!user->isLoggedIn()) {
+        sendErrorResponse(fd, "Not logged in");
+        return;
+    }
+    std::string realAccount = session_.getAccountByAccountOrUsername(targetAccount);
+    if (realAccount.empty()) {
+        sendErrorResponse(fd, "User not found");
+        return;
+    }
+    auto profile = session_.getUserProfile(realAccount);
+    if (profile.account.empty()) {
+        sendErrorResponse(fd, "User not found");
+        return;
+    }
+    rapidjson::Document resp;
+    resp.SetObject();
+    auto &alloc = resp.GetAllocator();
+    resp.AddMember("type", "user_profile", alloc);
+    resp.AddMember("account", rapidjson::StringRef(profile.account.c_str()), alloc);
+    resp.AddMember("username", rapidjson::StringRef(profile.username.c_str()), alloc);
+    resp.AddMember("avatar_url", rapidjson::StringRef(profile.avatarUrl.c_str()), alloc);
+    resp.AddMember("bio", rapidjson::StringRef(profile.bio.c_str()), alloc);
+    rapidjson::StringBuffer buffer;
+    rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+    resp.Accept(writer);
+    std::string msg = std::string(buffer.GetString()) + "\n";
+    ConnectionManager::instance().sendToUser(fd, msg);
+}
+
+// 群组操作
+void MessageRouter::doJoinGroup(int fd, std::shared_ptr<User> user, int groupId) {
+    if (!user->isLoggedIn()) {
+        sendErrorResponse(fd, "Not logged in");
+        return;
+    }
+    int userId = user->getUserId();
+    bool ok = group_.addUserToGroup(groupId, userId, 3);
+    if (!ok) {
+        sendErrorResponse(fd, "Join group failed: group full, already joined, or limit reached");
+        return;
+    }
+    rapidjson::Document resp;
+    resp.SetObject();
+    auto &alloc = resp.GetAllocator();
+    resp.AddMember("type", "join_group", alloc);
+    resp.AddMember("status", "success", alloc);
+    resp.AddMember("groupId", groupId, alloc);
+    rapidjson::StringBuffer buf;
+    rapidjson::Writer<rapidjson::StringBuffer> writer(buf);
+    resp.Accept(writer);
+    std::string msg = std::string(buf.GetString()) + "\n";
+    ConnectionManager::instance().sendToUser(fd, msg);
+}
+
+void MessageRouter::doLeaveGroup(int fd, std::shared_ptr<User> user, int groupId) {
+    if (!user->isLoggedIn()) {
+        sendErrorResponse(fd, "Not logged in");
+        return;
+    }
+    int userId = user->getUserId();
+    bool ok = group_.removeUserFromGroup(groupId, userId);
+    if (!ok) {
+        sendErrorResponse(fd, "Leave group failed");
+        return;
+    }
+    rapidjson::Document resp;
+    resp.SetObject();
+    auto &alloc = resp.GetAllocator();
+    resp.AddMember("type", "leave_group", alloc);
+    resp.AddMember("status", "success", alloc);
+    resp.AddMember("groupId", groupId, alloc);
+    rapidjson::StringBuffer buf;
+    rapidjson::Writer<rapidjson::StringBuffer> writer(buf);
+    resp.Accept(writer);
+    std::string msg = std::string(buf.GetString()) + "\n";
+    ConnectionManager::instance().sendToUser(fd, msg);
+}
+
+void MessageRouter::doGetGroups(int fd) {
+    auto allGroups = group_.getAllGroups();
+    rapidjson::Document resp;
+    resp.SetObject();
+    auto &alloc = resp.GetAllocator();
+    resp.AddMember("type", "group_list", alloc);
+    rapidjson::Value arr(rapidjson::kArrayType);
+    for (const auto &g : allGroups) {
+        rapidjson::Value obj(rapidjson::kObjectType);
+        obj.AddMember("id", g.id, alloc);
+        obj.AddMember("name", rapidjson::StringRef(g.name.c_str()), alloc);
+        obj.AddMember("description", rapidjson::StringRef(g.description.c_str()), alloc);
+        obj.AddMember("avatar", rapidjson::StringRef(g.avatar.c_str()), alloc);
+        obj.AddMember("memberCount", g.memberCount, alloc);
+        obj.AddMember("maxMembers", g.maxMembers, alloc);
+
+        MYSQL* conn = DBManager::getInstance().getConnection();
+        if (conn) {
+            const char* sql = "SELECT content, UNIX_TIMESTAMP(create_time) as ts FROM chat_group_messages WHERE group_id = ? ORDER BY create_time DESC LIMIT 1";
+            MYSQL_STMT* stmt = mysql_stmt_init(conn);
+            if (stmt && mysql_stmt_prepare(stmt, sql, strlen(sql)) == 0) {
+                int groupId = g.id;
+                MYSQL_BIND param;
+                memset(&param, 0, sizeof(param));
+                param.buffer_type = MYSQL_TYPE_LONG;
+                param.buffer = &groupId;
+                mysql_stmt_bind_param(stmt, &param);
+                if (mysql_stmt_execute(stmt) == 0) {
+                    MYSQL_BIND result[2];
+                    memset(result, 0, sizeof(result));
+                    char content[1024] = {0};
+                    long sendTime = 0;
+                    result[0].buffer_type = MYSQL_TYPE_STRING;
+                    result[0].buffer = content;
+                    result[0].buffer_length = sizeof(content);
+                    result[1].buffer_type = MYSQL_TYPE_LONG;
+                    result[1].buffer = &sendTime;
+                    mysql_stmt_bind_result(stmt, result);
+                    if (mysql_stmt_fetch(stmt) == 0) {
+                        obj.AddMember("lastMsg", rapidjson::StringRef(content), alloc);
+                        obj.AddMember("lastTime", sendTime, alloc);
+                    } else {
+                        obj.AddMember("lastMsg", "", alloc);
+                        obj.AddMember("lastTime", 0, alloc);
+                    }
+                }
+                mysql_stmt_close(stmt);
+            }
+            DBManager::getInstance().releaseConnection(conn);
+        } else {
+            obj.AddMember("lastMsg", "", alloc);
+            obj.AddMember("lastTime", 0, alloc);
+        }
+
+        arr.PushBack(obj, alloc);
+    }
+    resp.AddMember("groups", arr, alloc);
+    rapidjson::StringBuffer buf;
+    rapidjson::Writer<rapidjson::StringBuffer> writer(buf);
+    resp.Accept(writer);
+    std::string msg = std::string(buf.GetString()) + "\n";
+    ConnectionManager::instance().sendToUser(fd, msg);
+}
+
+// 获取私聊会话列表 
 void MessageRouter::doGetConversations(int fd, std::shared_ptr<User> user) {
     if (!user->isLoggedIn()) {
         sendErrorResponse(fd, "Not logged in");
@@ -691,7 +885,7 @@ void MessageRouter::doGetConversations(int fd, std::shared_ptr<User> user) {
     auto allFields = RedisClient::instance().hgetall(convKey);
     std::unordered_map<std::string, std::tuple<std::string, std::string, int>> convData;
 
-    for (const auto& [field, value] : allFields) {
+    for (const auto &[field, value] : allFields) {
         size_t colon = field.find(':');
         if (colon == std::string::npos) continue;
         std::string prefix = field.substr(0, colon);
@@ -699,10 +893,10 @@ void MessageRouter::doGetConversations(int fd, std::shared_ptr<User> user) {
         if (suffix == "lastMsg") {
             convData[prefix] = std::make_tuple(value, "", 0);
         } else if (suffix == "lastTime") {
-            auto& data = convData[prefix];
+            auto &data = convData[prefix];
             std::get<1>(data) = value;
         } else if (suffix == "unread") {
-            auto& data = convData[prefix];
+            auto &data = convData[prefix];
             try {
                 std::get<2>(data) = std::stoi(value);
             } catch (...) {}
@@ -711,59 +905,27 @@ void MessageRouter::doGetConversations(int fd, std::shared_ptr<User> user) {
 
     rapidjson::Document resp;
     resp.SetObject();
-    auto& alloc = resp.GetAllocator();
+    auto &alloc = resp.GetAllocator();
     resp.AddMember("type", "conversations", alloc);
     rapidjson::Value convsArray(rapidjson::kArrayType);
 
-    for (const auto& group : PRESET_GROUPS) {
-        rapidjson::Value obj(rapidjson::kObjectType);
-        obj.AddMember("type", "group", alloc);
-        obj.AddMember("id", rapidjson::StringRef(std::to_string(group.id).c_str()), alloc);
-        obj.AddMember("name", rapidjson::StringRef(group.name.c_str()), alloc);
-        obj.AddMember("avatar", rapidjson::StringRef(group.avatar.c_str()), alloc);
-        obj.AddMember("lastMsg", "", alloc);
-        obj.AddMember("lastTime", 0, alloc);
-        obj.AddMember("unread", 0, alloc);
-
-        std::string prefix = "group:" + std::to_string(group.id);
-        auto it = convData.find(prefix);
-        if (it != convData.end()) {
-            obj["lastMsg"] = rapidjson::StringRef(std::get<0>(it->second).c_str());
-            if (!std::get<1>(it->second).empty()) {
-                int64_t lastTime = std::stoll(std::get<1>(it->second));
-                obj["lastTime"] = lastTime;
-            }
-            obj["unread"] = std::get<2>(it->second);
-        }
-        convsArray.PushBack(obj, alloc);
-    }
-
-    for (const auto& [prefix, data] : convData) {
+    for (const auto &[prefix, data] : convData) {
         if (prefix.find("single:") != 0) continue;
-        std::string peerId = prefix.substr(7);
+        std::string peerAccount = prefix.substr(7);
+        std::string username = session_.getUsernameByAccount(peerAccount);
+        std::string avatar = session_.getAvatar(peerAccount, "");
+        if (username.empty()) username = peerAccount;
+
         rapidjson::Value obj(rapidjson::kObjectType);
         obj.AddMember("type", "single", alloc);
-        obj.AddMember("id", rapidjson::StringRef(peerId.c_str()), alloc);
+        obj.AddMember("id", rapidjson::StringRef(peerAccount.c_str()), alloc);
         obj.AddMember("lastMsg", rapidjson::StringRef(std::get<0>(data).c_str()), alloc);
         int64_t lastTime = 0;
-        if (!std::get<1>(data).empty()) {
-            lastTime = std::stoll(std::get<1>(data));
-        }
+        if (!std::get<1>(data).empty()) lastTime = std::stoll(std::get<1>(data));
         obj.AddMember("lastTime", lastTime, alloc);
         obj.AddMember("unread", std::get<2>(data), alloc);
-
-        int targetUserId = std::stoi(peerId);
-        std::string account = session_.getAccountByUserId(targetUserId);
-        if (account.empty()) {
-            obj.AddMember("name", rapidjson::StringRef(peerId.c_str()), alloc);
-            obj.AddMember("avatar", "", alloc);
-        } else {
-            std::string username = session_.getUsernameByAccount(account);
-            std::string avatar = session_.getAvatar(account, "");
-            if (username.empty()) username = account;
-            obj.AddMember("name", rapidjson::StringRef(username.c_str()), alloc);
-            obj.AddMember("avatar", rapidjson::StringRef(avatar.c_str()), alloc);
-        }
+        obj.AddMember("name", rapidjson::StringRef(username.c_str()), alloc);
+        obj.AddMember("avatar", rapidjson::StringRef(avatar.c_str()), alloc);
         convsArray.PushBack(obj, alloc);
     }
 
@@ -775,54 +937,33 @@ void MessageRouter::doGetConversations(int fd, std::shared_ptr<User> user) {
     ConnectionManager::instance().sendToUser(fd, msg);
 }
 
-// 新增函数实现
-void MessageRouter::doSearchUsers(int fd, std::shared_ptr<User> user, const std::string& keyword, int limit) {
-    if (!user->isLoggedIn()) {
-        sendErrorResponse(fd, "Not logged in");
-        return;
-    }
-    auto results = session_.searchOnlineUsers(keyword, limit);
+//分页获取群组成员 
+void MessageRouter::doGetGroupMembersPaginated(int fd, int groupId, int offset, int limit) {
+    auto members = group_.getGroupMembersPaginated(groupId, offset, limit);
     rapidjson::Document resp;
     resp.SetObject();
-    auto& alloc = resp.GetAllocator();
-    resp.AddMember("type", "search_users", alloc);
+    auto &alloc = resp.GetAllocator();
+    resp.AddMember("type", "group_members", alloc);
+    resp.AddMember("groupId", groupId, alloc);
+    resp.AddMember("offset", offset, alloc);
+    resp.AddMember("limit", limit, alloc);
     rapidjson::Value arr(rapidjson::kArrayType);
-    for (const auto& [acc, uname, avatar] : results) {
+    for (int uid : members) {
+        std::string account = session_.getAccountByUserId(uid);
+        if (account.empty()) account = "test" + std::to_string(uid);
+        std::string username = session_.getUsernameByAccount(account);
+        std::string avatar = session_.getAvatar(account, "");
         rapidjson::Value obj(rapidjson::kObjectType);
-        obj.AddMember("account", rapidjson::StringRef(acc.c_str()), alloc);
-        obj.AddMember("username", rapidjson::StringRef(uname.c_str()), alloc);
+        obj.AddMember("userId", uid, alloc);
+        obj.AddMember("account", rapidjson::StringRef(account.c_str()), alloc);
+        obj.AddMember("username", rapidjson::StringRef(username.c_str()), alloc);
         obj.AddMember("avatar_url", rapidjson::StringRef(avatar.c_str()), alloc);
         arr.PushBack(obj, alloc);
     }
-    resp.AddMember("users", arr, alloc);
-    rapidjson::StringBuffer buffer;
-    rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+    resp.AddMember("members", arr, alloc);
+    rapidjson::StringBuffer buf;
+    rapidjson::Writer<rapidjson::StringBuffer> writer(buf);
     resp.Accept(writer);
-    std::string msg = buffer.GetString() + std::string("\n");
-    ConnectionManager::instance().sendToUser(fd, msg);
-}
-
-void MessageRouter::doGetUserProfile(int fd, std::shared_ptr<User> user, const std::string& targetAccount) {
-    if (!user->isLoggedIn()) {
-        sendErrorResponse(fd, "Not logged in");
-        return;
-    }
-    auto profile = session_.getUserProfile(targetAccount);
-    if (profile.account.empty()) {
-        sendErrorResponse(fd, "User not found");
-        return;
-    }
-    rapidjson::Document resp;
-    resp.SetObject();
-    auto& alloc = resp.GetAllocator();
-    resp.AddMember("type", "user_profile", alloc);
-    resp.AddMember("account", rapidjson::StringRef(profile.account.c_str()), alloc);
-    resp.AddMember("username", rapidjson::StringRef(profile.username.c_str()), alloc);
-    resp.AddMember("avatar_url", rapidjson::StringRef(profile.avatarUrl.c_str()), alloc);
-    resp.AddMember("bio", rapidjson::StringRef(profile.bio.c_str()), alloc);
-    rapidjson::StringBuffer buffer;
-    rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
-    resp.Accept(writer);
-    std::string msg = buffer.GetString() + std::string("\n");
+    std::string msg = std::string(buf.GetString()) + "\n";
     ConnectionManager::instance().sendToUser(fd, msg);
 }

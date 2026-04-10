@@ -1,584 +1,424 @@
-Tue Mar 31 08:19:08 2026
- [INFO] Server starting...
-Tue Mar 31 08:19:08 2026
- [INFO] [AeroQueue] 已启动 16 个工作线程
-Tue Mar 31 08:19:08 2026
- [INFO] [Redis] 连接池初始化完成，创建 128 个连接
-Tue Mar 31 08:19:08 2026
- [INFO] EventLoop created with wakeupFd=133
-Tue Mar 31 08:19:09 2026
- [INFO] [ConnectionPool] 连接池初始化完成，创建100个连接
-Tue Mar 31 08:19:09 2026
- [ERROR] [GroupManager] 数据库添加群组成员失败 group=1 user=10006
-Tue Mar 31 08:19:09 2026
- [INFO] [GroupManager] 用户 10007 加入群组 1
-Tue Mar 31 08:19:09 2026
- [INFO] [GroupManager] 用户 10008 加入群组 1
-Tue Mar 31 08:19:09 2026
- [ERROR] [GroupManager] 数据库添加群组成员失败 group=1 user=10009
-Tue Mar 31 08:19:09 2026
- [ERROR] [GroupManager] 数据库添加群组成员失败 group=1 user=10010
-Tue Mar 31 08:19:09 2026
- [ERROR] [GroupManager] 数据库添加群组成员失败 group=1 user=10011
-Tue Mar 31 08:19:09 2026
- [INFO] [GroupManager] 初始化群组 1，添加了 6 个用户
-Tue Mar 31 08:19:09 2026
- [ERROR] [GroupManager] 数据库添加群组成员失败 group=2 user=10006
-Tue Mar 31 08:19:09 2026
- [INFO] [GroupManager] 用户 10007 加入群组 2
-Tue Mar 31 08:19:09 2026
- [INFO] [GroupManager] 用户 10008 加入群组 2
-Tue Mar 31 08:19:09 2026
- [ERROR] [GroupManager] 数据库添加群组成员失败 group=2 user=10009
-Tue Mar 31 08:19:09 2026
- [ERROR] [GroupManager] 数据库添加群组成员失败 group=2 user=10010
-Tue Mar 31 08:19:09 2026
- [ERROR] [GroupManager] 数据库添加群组成员失败 group=2 user=10011
-Tue Mar 31 08:19:09 2026
- [INFO] [GroupManager] 初始化群组 2，添加了 6 个用户
-Tue Mar 31 08:19:09 2026
- [ERROR] [GroupManager] 数据库添加群组成员失败 group=3 user=10006
-Tue Mar 31 08:19:09 2026
- [INFO] [GroupManager] 用户 10007 加入群组 3
-Tue Mar 31 08:19:09 2026
- [INFO] [GroupManager] 用户 10008 加入群组 3
-Tue Mar 31 08:19:09 2026
- [ERROR] [GroupManager] 数据库添加群组成员失败 group=3 user=10009
-Tue Mar 31 08:19:09 2026
- [ERROR] [GroupManager] 数据库添加群组成员失败 group=3 user=10010
-Tue Mar 31 08:19:09 2026
- [ERROR] [GroupManager] 数据库添加群组成员失败 group=3 user=10011
-Tue Mar 31 08:19:09 2026
- [INFO] [GroupManager] 初始化群组 3，添加了 6 个用户
-Tue Mar 31 08:19:09 2026
- [INFO] ChatServer初始化完成
-Tue Mar 31 08:19:09 2026
- [INFO] EventLoop created with wakeupFd=235
-Tue Mar 31 08:19:09 2026
- [INFO] [SUCCESS] Sub Reactor "SubReactor-0" (线程ID: 4207201354654591228) 已启动
-Tue Mar 31 08:19:09 2026
- [INFO] EventLoop created with wakeupFd=237
-Tue Mar 31 08:19:09 2026
- [INFO] [SUCCESS] Sub Reactor "SubReactor-1" (线程ID: 14574160162035067326) 已启动
-Tue Mar 31 08:19:09 2026
- [INFO] EventLoop created with wakeupFd=239
-Tue Mar 31 08:19:09 2026
- [INFO] [SUCCESS] Sub Reactor "SubReactor-2" (线程ID: 5090654357373484458) 已启动
-Tue Mar 31 08:19:09 2026
- [INFO] EventLoop created with wakeupFd=241
-Tue Mar 31 08:19:09 2026
- [INFO] [SUCCESS] Sub Reactor "SubReactor-3" (线程ID: 11133977215928419759) 已启动
-Tue Mar 31 08:19:09 2026
- [INFO] EventLoop created with wakeupFd=243
-Tue Mar 31 08:19:09 2026
- [INFO] [SUCCESS] Sub Reactor "SubReactor-4" (线程ID: 12160391108888187308) 已启动
-Tue Mar 31 08:19:09 2026
- [INFO] EventLoop created with wakeupFd=245
-Tue Mar 31 08:19:09 2026
- [INFO] [SUCCESS] Sub Reactor "SubReactor-5" (线程ID: 8746886656198935714) 已启动
-Tue Mar 31 08:19:09 2026
- [INFO] EventLoop created with wakeupFd=247
-Tue Mar 31 08:19:09 2026
- [INFO] [SUCCESS] Sub Reactor "SubReactor-6" (线程ID: 3344841578597494719) 已启动
-Tue Mar 31 08:19:09 2026
- [INFO] EventLoop created with wakeupFd=249
-Tue Mar 31 08:19:09 2026
- [INFO] [SUCCESS] Sub Reactor "SubReactor-7" (线程ID: 9000639939078632191) 已启动
-Tue Mar 31 08:19:09 2026
- [INFO] Redis subscription thread started
-Tue Mar 31 08:19:09 2026
- [INFO] Server started on port 8888
-Tue Mar 31 08:19:12 2026
- [WARN] [User] peer closed connection fd=253
-Tue Mar 31 08:19:12 2026
- [ERROR] [User] handleError fd=253 errno=0 (Success)
-Tue Mar 31 08:19:19 2026
- [INFO] [queryAccount] hashed password: 8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92
-Tue Mar 31 08:19:19 2026
- [INFO] [queryAccount] login success for account: 123123123 id=10006
-Tue Mar 31 08:19:19 2026
- [INFO] [SessionManager] login success: account=123123123, userId=10006, fd=253
-Tue Mar 31 08:19:19 2026
- [ERROR] [GroupManager] 数据库添加群组成员失败 group=1 user=10006
-Tue Mar 31 08:19:19 2026
- [ERROR] [GroupManager] 数据库添加群组成员失败 group=2 user=10006
-Tue Mar 31 08:19:19 2026
- [ERROR] [GroupManager] 数据库添加群组成员失败 group=3 user=10006
-Tue Mar 31 08:19:19 2026
- [INFO] [MessageStore] rebuildConversations: user=10006 updated private=3 group=3
-Tue Mar 31 08:19:19 2026
- [INFO] [MessageStore] pullOfflineMsgIds user=10006 count=0
-Tue Mar 31 08:19:21 2026
- [INFO] [doLoadHistory] fd=253, targetType=group, targetId=1, limit=30
-Tue Mar 31 08:19:21 2026
- [INFO] [MessageStore] loadHistory group: groupIdStr=1, limit=30
-Tue Mar 31 08:19:21 2026
- [INFO] [MessageStore] loadHistory group id=1 count=30 rows_fetched=30
-Tue Mar 31 08:19:21 2026
- [INFO] [doLoadHistory] group history count=30 for groupId=1
-Tue Mar 31 08:19:21 2026
- [INFO] [doLoadHistory] fd=253, targetType=group, targetId=2, limit=30
-Tue Mar 31 08:19:21 2026
- [INFO] [MessageStore] loadHistory group: groupIdStr=2, limit=30
-Tue Mar 31 08:19:21 2026
- [INFO] [MessageStore] loadHistory group id=2 count=17 rows_fetched=17
-Tue Mar 31 08:19:21 2026
- [INFO] [doLoadHistory] group history count=17 for groupId=2
-Tue Mar 31 08:19:22 2026
- [INFO] [doLoadHistory] fd=253, targetType=group, targetId=3, limit=30
-Tue Mar 31 08:19:22 2026
- [INFO] [MessageStore] loadHistory group: groupIdStr=3, limit=30
-Tue Mar 31 08:19:22 2026
- [INFO] [MessageStore] loadHistory group id=3 count=7 rows_fetched=7
-Tue Mar 31 08:19:22 2026
- [INFO] [doLoadHistory] group history count=7 for groupId=3
-Tue Mar 31 08:19:57 2026
- [WARN] [User] peer closed connection fd=253
-Tue Mar 31 08:19:57 2026
- [ERROR] [User] handleError fd=253 errno=11 (Resource temporarily unavailable)
-Tue Mar 31 08:19:57 2026
- [INFO] [SessionManager] logout: account=123123123, fd=253
-Tue Mar 31 08:20:11 2026
- [INFO] [queryAccount] hashed password: 8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92
-Tue Mar 31 08:20:11 2026
- [INFO] [queryAccount] login success for account: 123123123 id=10006
-Tue Mar 31 08:20:11 2026
- [INFO] [SessionManager] login success: account=123123123, userId=10006, fd=253
-Tue Mar 31 08:20:11 2026
- [ERROR] [GroupManager] 数据库添加群组成员失败 group=1 user=10006
-Tue Mar 31 08:20:11 2026
- [ERROR] [GroupManager] 数据库添加群组成员失败 group=2 user=10006
-Tue Mar 31 08:20:11 2026
- [ERROR] [GroupManager] 数据库添加群组成员失败 group=3 user=10006
-Tue Mar 31 08:20:11 2026
- [INFO] [MessageStore] rebuildConversations: cache exists for user 10006, skip
-Tue Mar 31 08:20:11 2026
- [INFO] [MessageStore] pullOfflineMsgIds user=10006 count=0
-Tue Mar 31 08:20:22 2026
- [INFO] [queryAccount] hashed password: 8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92
-Tue Mar 31 08:20:22 2026
- [INFO] [queryAccount] login success for account: 25802580 id=10009
-Tue Mar 31 08:20:22 2026
- [INFO] [SessionManager] login success: account=25802580, userId=10009, fd=254
-Tue Mar 31 08:20:22 2026
- [ERROR] [GroupManager] 数据库添加群组成员失败 group=1 user=10009
-Tue Mar 31 08:20:22 2026
- [ERROR] [GroupManager] 数据库添加群组成员失败 group=2 user=10009
-Tue Mar 31 08:20:22 2026
- [ERROR] [GroupManager] 数据库添加群组成员失败 group=3 user=10009
-Tue Mar 31 08:20:22 2026
- [INFO] [MessageStore] rebuildConversations: user=10009 updated private=2 group=3
-Tue Mar 31 08:20:22 2026
- [INFO] [MessageStore] pullOfflineMsgIds user=10009 count=0
-Tue Mar 31 08:20:24 2026
- [INFO] [doLoadHistory] fd=254, targetType=group, targetId=1, limit=30
-Tue Mar 31 08:20:24 2026
- [INFO] [MessageStore] loadHistory group: groupIdStr=1, limit=30
-Tue Mar 31 08:20:24 2026
- [INFO] [MessageStore] loadHistory group id=1 count=30 rows_fetched=30
-Tue Mar 31 08:20:24 2026
- [INFO] [doLoadHistory] group history count=30 for groupId=1
-Tue Mar 31 08:20:25 2026
- [INFO] [doLoadHistory] fd=254, targetType=private, targetId=李莹, limit=30
-Tue Mar 31 08:20:25 2026
- [INFO] [MessageStore] loadHistory private: user1=10009, user2=10006, limit=30
-Tue Mar 31 08:20:25 2026
- [INFO] [MessageStore] loadHistory private id=10006 count=30 rows_fetched=30
-Tue Mar 31 08:20:25 2026
- [INFO] [doLoadHistory] private history count=30 between user 10009 and 10006
-Tue Mar 31 08:20:35 2026
- [INFO] [doLoadHistory] fd=254, targetType=private, targetId=李莹, limit=30
-Tue Mar 31 08:20:35 2026
- [INFO] [MessageStore] loadHistory private: user1=10009, user2=10006, limit=30
-Tue Mar 31 08:20:35 2026
- [INFO] [MessageStore] loadHistory private id=10006 count=30 rows_fetched=30
-Tue Mar 31 08:20:35 2026
- [INFO] [doLoadHistory] private history count=30 between user 10009 and 10006
-Tue Mar 31 08:20:35 2026
- [INFO] [doLoadHistory] fd=254, targetType=private, targetId=李莹, limit=30
-Tue Mar 31 08:20:35 2026
- [INFO] [MessageStore] loadHistory private: user1=10009, user2=10006, limit=30
-Tue Mar 31 08:20:35 2026
- [INFO] [MessageStore] loadHistory private id=10006 count=30 rows_fetched=30
-Tue Mar 31 08:20:35 2026
- [INFO] [doLoadHistory] private history count=30 between user 10009 and 10006
-Tue Mar 31 08:22:04 2026
- [INFO] [doLoadHistory] fd=253, targetType=group, targetId=2, limit=30
-Tue Mar 31 08:22:04 2026
- [INFO] [MessageStore] loadHistory group: groupIdStr=2, limit=30
-Tue Mar 31 08:22:04 2026
- [INFO] [MessageStore] loadHistory group id=2 count=17 rows_fetched=17
-Tue Mar 31 08:22:04 2026
- [INFO] [doLoadHistory] group history count=17 for groupId=2
-Tue Mar 31 08:22:05 2026
- [INFO] [doLoadHistory] fd=253, targetType=group, targetId=1, limit=30
-Tue Mar 31 08:22:05 2026
- [INFO] [MessageStore] loadHistory group: groupIdStr=1, limit=30
-Tue Mar 31 08:22:05 2026
- [INFO] [MessageStore] loadHistory group id=1 count=30 rows_fetched=30
-Tue Mar 31 08:22:05 2026
- [INFO] [doLoadHistory] group history count=30 for groupId=1
-Tue Mar 31 08:22:06 2026
- [INFO] [doLoadHistory] fd=253, targetType=group, targetId=3, limit=30
-Tue Mar 31 08:22:06 2026
- [INFO] [MessageStore] loadHistory group: groupIdStr=3, limit=30
-Tue Mar 31 08:22:06 2026
- [INFO] [MessageStore] loadHistory group id=3 count=7 rows_fetched=7
-Tue Mar 31 08:22:06 2026
- [INFO] [doLoadHistory] group history count=7 for groupId=3
-Tue Mar 31 08:25:49 2026
- [INFO] [doLoadHistory] fd=254, targetType=group, targetId=2, limit=30
-Tue Mar 31 08:25:49 2026
- [INFO] [MessageStore] loadHistory group: groupIdStr=2, limit=30
-Tue Mar 31 08:25:49 2026
- [INFO] [MessageStore] loadHistory group id=2 count=17 rows_fetched=17
-Tue Mar 31 08:25:49 2026
- [INFO] [doLoadHistory] group history count=17 for groupId=2
-Tue Mar 31 08:29:37 2026
- [WARN] [User] peer closed connection fd=253
-Tue Mar 31 08:29:37 2026
- [ERROR] [User] handleError fd=253 errno=11 (Resource temporarily unavailable)
-Tue Mar 31 08:29:37 2026
- [INFO] [SessionManager] logout: account=123123123, fd=253
-Tue Mar 31 08:29:46 2026
- [INFO] [queryAccount] hashed password: 8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92
-Tue Mar 31 08:29:46 2026
- [INFO] [queryAccount] login success for account: 123123123 id=10006
-Tue Mar 31 08:29:46 2026
- [INFO] [SessionManager] login success: account=123123123, userId=10006, fd=253
-Tue Mar 31 08:29:46 2026
- [ERROR] [GroupManager] 数据库添加群组成员失败 group=1 user=10006
-Tue Mar 31 08:29:46 2026
- [ERROR] [GroupManager] 数据库添加群组成员失败 group=2 user=10006
-Tue Mar 31 08:29:46 2026
- [ERROR] [GroupManager] 数据库添加群组成员失败 group=3 user=10006
-Tue Mar 31 08:29:46 2026
- [INFO] [MessageStore] rebuildConversations: cache exists for user 10006, skip
-Tue Mar 31 08:29:46 2026
- [INFO] [MessageStore] pullOfflineMsgIds user=10006 count=0
-Tue Mar 31 08:29:51 2026
- [INFO] [doLoadHistory] fd=253, targetType=group, targetId=1, limit=30
-Tue Mar 31 08:29:51 2026
- [INFO] [MessageStore] loadHistory group: groupIdStr=1, limit=30
-Tue Mar 31 08:29:51 2026
- [INFO] [MessageStore] loadHistory group id=1 count=30 rows_fetched=30
-Tue Mar 31 08:29:51 2026
- [INFO] [doLoadHistory] group history count=30 for groupId=1
-Tue Mar 31 08:29:53 2026
- [INFO] [doLoadHistory] fd=253, targetType=private, targetId=莹莹, limit=30
-Tue Mar 31 08:29:53 2026
- [INFO] [MessageStore] loadHistory private: user1=10006, user2=10009, limit=30
-Tue Mar 31 08:29:53 2026
- [INFO] [MessageStore] loadHistory private id=10009 count=30 rows_fetched=30
-Tue Mar 31 08:29:53 2026
- [INFO] [doLoadHistory] private history count=30 between user 10006 and 10009
-Tue Mar 31 08:29:54 2026
- [INFO] [doLoadHistory] fd=253, targetType=private, targetId=莹莹, limit=30
-Tue Mar 31 08:29:54 2026
- [INFO] [MessageStore] loadHistory private: user1=10006, user2=10009, limit=30
-Tue Mar 31 08:29:54 2026
- [INFO] [MessageStore] loadHistory private id=10009 count=30 rows_fetched=30
-Tue Mar 31 08:29:54 2026
- [INFO] [doLoadHistory] private history count=30 between user 10006 and 10009
-Tue Mar 31 08:30:00 2026
- [INFO] [doLoadHistory] fd=253, targetType=group, targetId=2, limit=30
-Tue Mar 31 08:30:00 2026
- [INFO] [MessageStore] loadHistory group: groupIdStr=2, limit=30
-Tue Mar 31 08:30:00 2026
- [INFO] [MessageStore] loadHistory group id=2 count=17 rows_fetched=17
-Tue Mar 31 08:30:00 2026
- [INFO] [doLoadHistory] group history count=17 for groupId=2
-Tue Mar 31 08:30:00 2026
- [INFO] [doLoadHistory] fd=253, targetType=group, targetId=3, limit=30
-Tue Mar 31 08:30:00 2026
- [INFO] [MessageStore] loadHistory group: groupIdStr=3, limit=30
-Tue Mar 31 08:30:00 2026
- [INFO] [MessageStore] loadHistory group id=3 count=7 rows_fetched=7
-Tue Mar 31 08:30:00 2026
- [INFO] [doLoadHistory] group history count=7 for groupId=3
-Tue Mar 31 08:30:02 2026
- [INFO] [doLoadHistory] fd=253, targetType=group, targetId=3, limit=30
-Tue Mar 31 08:30:02 2026
- [INFO] [MessageStore] loadHistory group: groupIdStr=3, limit=30
-Tue Mar 31 08:30:02 2026
- [INFO] [MessageStore] loadHistory group id=3 count=7 rows_fetched=7
-Tue Mar 31 08:30:02 2026
- [INFO] [doLoadHistory] group history count=7 for groupId=3
-Tue Mar 31 08:30:03 2026
- [INFO] [doLoadHistory] fd=253, targetType=group, targetId=3, limit=30
-Tue Mar 31 08:30:03 2026
- [INFO] [MessageStore] loadHistory group: groupIdStr=3, limit=30
-Tue Mar 31 08:30:03 2026
- [INFO] [MessageStore] loadHistory group id=3 count=7 rows_fetched=7
-Tue Mar 31 08:30:03 2026
- [INFO] [doLoadHistory] group history count=7 for groupId=3
-Tue Mar 31 08:30:04 2026
- [INFO] [doLoadHistory] fd=253, targetType=group, targetId=3, limit=30
-Tue Mar 31 08:30:04 2026
- [INFO] [MessageStore] loadHistory group: groupIdStr=3, limit=30
-Tue Mar 31 08:30:04 2026
- [INFO] [MessageStore] loadHistory group id=3 count=7 rows_fetched=7
-Tue Mar 31 08:30:04 2026
- [INFO] [doLoadHistory] group history count=7 for groupId=3
-Tue Mar 31 08:30:07 2026
- [INFO] [doLoadHistory] fd=253, targetType=group, targetId=3, limit=30
-Tue Mar 31 08:30:07 2026
- [INFO] [MessageStore] loadHistory group: groupIdStr=3, limit=30
-Tue Mar 31 08:30:07 2026
- [INFO] [MessageStore] loadHistory group id=3 count=7 rows_fetched=7
-Tue Mar 31 08:30:07 2026
- [INFO] [doLoadHistory] group history count=7 for groupId=3
-Tue Mar 31 08:30:08 2026
- [INFO] [doLoadHistory] fd=253, targetType=group, targetId=3, limit=30
-Tue Mar 31 08:30:08 2026
- [INFO] [MessageStore] loadHistory group: groupIdStr=3, limit=30
-Tue Mar 31 08:30:08 2026
- [INFO] [MessageStore] loadHistory group id=3 count=7 rows_fetched=7
-Tue Mar 31 08:30:08 2026
- [INFO] [doLoadHistory] group history count=7 for groupId=3
-Tue Mar 31 08:30:09 2026
- [INFO] [doLoadHistory] fd=253, targetType=group, targetId=3, limit=30
-Tue Mar 31 08:30:09 2026
- [INFO] [MessageStore] loadHistory group: groupIdStr=3, limit=30
-Tue Mar 31 08:30:09 2026
- [INFO] [MessageStore] loadHistory group id=3 count=7 rows_fetched=7
-Tue Mar 31 08:30:09 2026
- [INFO] [doLoadHistory] group history count=7 for groupId=3
-Tue Mar 31 08:30:11 2026
- [INFO] [doLoadHistory] fd=253, targetType=group, targetId=3, limit=30
-Tue Mar 31 08:30:11 2026
- [INFO] [MessageStore] loadHistory group: groupIdStr=3, limit=30
-Tue Mar 31 08:30:11 2026
- [INFO] [MessageStore] loadHistory group id=3 count=7 rows_fetched=7
-Tue Mar 31 08:30:11 2026
- [INFO] [doLoadHistory] group history count=7 for groupId=3
-Tue Mar 31 08:31:05 2026
- [WARN] [User] peer closed connection fd=253
-Tue Mar 31 08:31:05 2026
- [ERROR] [User] handleError fd=253 errno=11 (Resource temporarily unavailable)
-Tue Mar 31 08:31:05 2026
- [INFO] [SessionManager] logout: account=123123123, fd=253
-Tue Mar 31 08:31:09 2026
- [WARN] [User] peer closed connection fd=254
-Tue Mar 31 08:31:09 2026
- [ERROR] [User] handleError fd=254 errno=11 (Resource temporarily unavailable)
-Tue Mar 31 08:31:09 2026
- [INFO] [SessionManager] logout: account=25802580, fd=254
-Tue Mar 31 08:31:20 2026
- [INFO] [queryAccount] hashed password: 8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92
-Tue Mar 31 08:31:20 2026
- [INFO] [queryAccount] login success for account: 123123123 id=10006
-Tue Mar 31 08:31:20 2026
- [INFO] [SessionManager] login success: account=123123123, userId=10006, fd=253
-Tue Mar 31 08:31:20 2026
- [ERROR] [GroupManager] 数据库添加群组成员失败 group=1 user=10006
-Tue Mar 31 08:31:20 2026
- [ERROR] [GroupManager] 数据库添加群组成员失败 group=2 user=10006
-Tue Mar 31 08:31:20 2026
- [ERROR] [GroupManager] 数据库添加群组成员失败 group=3 user=10006
-Tue Mar 31 08:31:20 2026
- [INFO] [MessageStore] rebuildConversations: cache exists for user 10006, skip
-Tue Mar 31 08:31:20 2026
- [INFO] [MessageStore] pullOfflineMsgIds user=10006 count=0
-Tue Mar 31 08:31:37 2026
- [INFO] [queryAccount] hashed password: 8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92
-Tue Mar 31 08:31:37 2026
- [INFO] [queryAccount] login success for account: 25802580 id=10009
-Tue Mar 31 08:31:37 2026
- [INFO] [SessionManager] login success: account=25802580, userId=10009, fd=254
-Tue Mar 31 08:31:37 2026
- [ERROR] [GroupManager] 数据库添加群组成员失败 group=1 user=10009
-Tue Mar 31 08:31:37 2026
- [ERROR] [GroupManager] 数据库添加群组成员失败 group=2 user=10009
-Tue Mar 31 08:31:37 2026
- [ERROR] [GroupManager] 数据库添加群组成员失败 group=3 user=10009
-Tue Mar 31 08:31:37 2026
- [INFO] [MessageStore] rebuildConversations: cache exists for user 10009, skip
-Tue Mar 31 08:31:37 2026
- [INFO] [MessageStore] pullOfflineMsgIds user=10009 count=0
-Tue Mar 31 08:31:45 2026
- [INFO] [doLoadHistory] fd=254, targetType=private, targetId=李莹, limit=30
-Tue Mar 31 08:31:45 2026
- [INFO] [MessageStore] loadHistory private: user1=10009, user2=10006, limit=30
-Tue Mar 31 08:31:45 2026
- [INFO] [MessageStore] loadHistory private id=10006 count=30 rows_fetched=30
-Tue Mar 31 08:31:45 2026
- [INFO] [doLoadHistory] private history count=30 between user 10009 and 10006
-Tue Mar 31 08:31:46 2026
- [INFO] [doLoadHistory] fd=254, targetType=private, targetId=李莹, limit=30
-Tue Mar 31 08:31:46 2026
- [INFO] [MessageStore] loadHistory private: user1=10009, user2=10006, limit=30
-Tue Mar 31 08:31:46 2026
- [INFO] [MessageStore] loadHistory private id=10006 count=30 rows_fetched=30
-Tue Mar 31 08:31:46 2026
- [INFO] [doLoadHistory] private history count=30 between user 10009 and 10006
-Tue Mar 31 08:31:46 2026
- [INFO] [doLoadHistory] fd=254, targetType=private, targetId=李莹, limit=30
-Tue Mar 31 08:31:46 2026
- [INFO] [MessageStore] loadHistory private: user1=10009, user2=10006, limit=30
-Tue Mar 31 08:31:46 2026
- [INFO] [MessageStore] loadHistory private id=10006 count=30 rows_fetched=30
-Tue Mar 31 08:31:46 2026
- [INFO] [doLoadHistory] private history count=30 between user 10009 and 10006
-Tue Mar 31 08:32:09 2026
- [INFO] [insertUser] affected_rows = 1
-Tue Mar 31 08:32:09 2026
- [INFO] [insertUser] new user id = 10012
-Tue Mar 31 08:32:09 2026
- [INFO] [GroupManager] 用户 10012 加入群组 1
-Tue Mar 31 08:32:09 2026
- [INFO] [GroupManager] 用户 10012 加入群组 2
-Tue Mar 31 08:32:09 2026
- [INFO] [GroupManager] 用户 10012 加入群组 3
-Tue Mar 31 08:32:13 2026
- [INFO] [queryAccount] hashed password: 8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92
-Tue Mar 31 08:32:13 2026
- [INFO] [queryAccount] login success for account: 654654 id=10012
-Tue Mar 31 08:32:13 2026
- [INFO] [SessionManager] login success: account=654654, userId=10012, fd=255
-Tue Mar 31 08:32:13 2026
- [ERROR] [GroupManager] 数据库添加群组成员失败 group=1 user=10012
-Tue Mar 31 08:32:13 2026
- [ERROR] [GroupManager] 数据库添加群组成员失败 group=2 user=10012
-Tue Mar 31 08:32:13 2026
- [ERROR] [GroupManager] 数据库添加群组成员失败 group=3 user=10012
-Tue Mar 31 08:32:13 2026
- [INFO] [MessageStore] rebuildConversations: user=10012 updated private=0 group=3
-Tue Mar 31 08:32:13 2026
- [INFO] [MessageStore] pullOfflineMsgIds user=10012 count=0
-Tue Mar 31 08:32:22 2026
- [INFO] [doLoadHistory] fd=255, targetType=private, targetId=莹莹, limit=30
-Tue Mar 31 08:32:22 2026
- [INFO] [MessageStore] loadHistory private: user1=10012, user2=10009, limit=30
-Tue Mar 31 08:32:22 2026
- [INFO] [MessageStore] loadHistory private id=10009 count=0 rows_fetched=0
-Tue Mar 31 08:32:22 2026
- [INFO] [doLoadHistory] private history count=0 between user 10012 and 10009
-Tue Mar 31 08:32:26 2026
- [INFO] [MessageStore] saveMessage success, msgId=165 from=10012 to=10009 isGroup=false
-Tue Mar 31 08:32:26 2026
- [INFO] [MessageStore] updateConversationSummary user=10012 conv=single:10009 incr=0
-Tue Mar 31 08:32:26 2026
- [INFO] [MessageStore] updateConversationSummary user=10009 conv=single:10009 incr=1
-Tue Mar 31 08:37:57 2026
- [INFO] [doLoadHistory] fd=254, targetType=private, targetId=韩信, limit=30
-Tue Mar 31 08:37:57 2026
- [INFO] [MessageStore] loadHistory private: user1=10009, user2=10012, limit=30
-Tue Mar 31 08:37:57 2026
- [INFO] [MessageStore] loadHistory private id=10012 count=1 rows_fetched=1
-Tue Mar 31 08:37:57 2026
- [INFO] [doLoadHistory] private history count=1 between user 10009 and 10012
-Tue Mar 31 08:38:02 2026
- [INFO] [MessageStore] saveMessage success, msgId=166 from=10009 to=10012 isGroup=false
-Tue Mar 31 08:38:02 2026
- [INFO] [MessageStore] updateConversationSummary user=10009 conv=single:10012 incr=0
-Tue Mar 31 08:38:02 2026
- [INFO] [MessageStore] updateConversationSummary user=10012 conv=single:10012 incr=1
-Tue Mar 31 08:38:14 2026
- [INFO] [doLoadHistory] fd=255, targetType=group, targetId=1, limit=30
-Tue Mar 31 08:38:14 2026
- [INFO] [MessageStore] loadHistory group: groupIdStr=1, limit=30
-Tue Mar 31 08:38:14 2026
- [INFO] [MessageStore] loadHistory group id=1 count=30 rows_fetched=30
-Tue Mar 31 08:38:14 2026
- [INFO] [doLoadHistory] group history count=30 for groupId=1
-Tue Mar 31 08:38:22 2026
- [INFO] [MessageStore] saveMessage success, msgId=167 from=10009 to=10012 isGroup=false
-Tue Mar 31 08:38:22 2026
- [INFO] [MessageStore] updateConversationSummary user=10009 conv=single:10012 incr=0
-Tue Mar 31 08:38:22 2026
- [INFO] [MessageStore] updateConversationSummary user=10012 conv=single:10012 incr=1
-Tue Mar 31 08:39:49 2026
- [INFO] [doLoadHistory] fd=255, targetType=group, targetId=2, limit=30
-Tue Mar 31 08:39:49 2026
- [INFO] [MessageStore] loadHistory group: groupIdStr=2, limit=30
-Tue Mar 31 08:39:49 2026
- [INFO] [MessageStore] loadHistory group id=2 count=17 rows_fetched=17
-Tue Mar 31 08:39:49 2026
- [INFO] [doLoadHistory] group history count=17 for groupId=2
-Tue Mar 31 08:39:49 2026
- [INFO] [doLoadHistory] fd=255, targetType=group, targetId=3, limit=30
-Tue Mar 31 08:39:49 2026
- [INFO] [MessageStore] loadHistory group: groupIdStr=3, limit=30
-Tue Mar 31 08:39:49 2026
- [INFO] [MessageStore] loadHistory group id=3 count=7 rows_fetched=7
-Tue Mar 31 08:39:49 2026
- [INFO] [doLoadHistory] group history count=7 for groupId=3
-Tue Mar 31 08:39:53 2026
- [INFO] [doLoadHistory] fd=255, targetType=private, targetId=李莹, limit=30
-Tue Mar 31 08:39:53 2026
- [INFO] [MessageStore] loadHistory private: user1=10012, user2=10006, limit=30
-Tue Mar 31 08:39:53 2026
- [INFO] [MessageStore] loadHistory private id=10006 count=0 rows_fetched=0
-Tue Mar 31 08:39:53 2026
- [INFO] [doLoadHistory] private history count=0 between user 10012 and 10006
-Tue Mar 31 08:39:59 2026
- [INFO] [doLoadHistory] fd=255, targetType=group, targetId=1, limit=30
-Tue Mar 31 08:39:59 2026
- [INFO] [MessageStore] loadHistory group: groupIdStr=1, limit=30
-Tue Mar 31 08:39:59 2026
- [INFO] [MessageStore] loadHistory group id=1 count=30 rows_fetched=30
-Tue Mar 31 08:39:59 2026
- [INFO] [doLoadHistory] group history count=30 for groupId=1
-Tue Mar 31 08:40:01 2026
- [INFO] [doLoadHistory] fd=255, targetType=group, targetId=1, limit=30
-Tue Mar 31 08:40:01 2026
- [INFO] [MessageStore] loadHistory group: groupIdStr=1, limit=30
-Tue Mar 31 08:40:01 2026
- [INFO] [MessageStore] loadHistory group id=1 count=30 rows_fetched=30
-Tue Mar 31 08:40:01 2026
- [INFO] [doLoadHistory] group history count=30 for groupId=1
-Tue Mar 31 08:40:01 2026
- [INFO] [doLoadHistory] fd=255, targetType=group, targetId=1, limit=30
-Tue Mar 31 08:40:01 2026
- [INFO] [MessageStore] loadHistory group: groupIdStr=1, limit=30
-Tue Mar 31 08:40:01 2026
- [INFO] [MessageStore] loadHistory group id=1 count=30 rows_fetched=30
-Tue Mar 31 08:40:01 2026
- [INFO] [doLoadHistory] group history count=30 for groupId=1
-Tue Mar 31 08:40:02 2026
- [INFO] [doLoadHistory] fd=255, targetType=group, targetId=1, limit=30
-Tue Mar 31 08:40:02 2026
- [INFO] [MessageStore] loadHistory group: groupIdStr=1, limit=30
-Tue Mar 31 08:40:02 2026
- [INFO] [MessageStore] loadHistory group id=1 count=30 rows_fetched=30
-Tue Mar 31 08:40:02 2026
- [INFO] [doLoadHistory] group history count=30 for groupId=1
-Tue Mar 31 08:40:03 2026
- [INFO] [doLoadHistory] fd=255, targetType=group, targetId=1, limit=30
-Tue Mar 31 08:40:03 2026
- [INFO] [MessageStore] loadHistory group: groupIdStr=1, limit=30
-Tue Mar 31 08:40:03 2026
- [INFO] [MessageStore] loadHistory group id=1 count=30 rows_fetched=30
-Tue Mar 31 08:40:03 2026
- [INFO] [doLoadHistory] group history count=30 for groupId=1
-Tue Mar 31 08:47:49 2026
- [WARN] [User] peer closed connection fd=253
-Tue Mar 31 08:47:49 2026
- [ERROR] [User] handleError fd=253 errno=11 (Resource temporarily unavailable)
-Tue Mar 31 08:47:49 2026
- [INFO] [SessionManager] logout: account=123123123, fd=253
-Tue Mar 31 08:47:51 2026
- [WARN] [User] peer closed connection fd=254
-Tue Mar 31 08:47:51 2026
- [ERROR] [User] handleError fd=254 errno=11 (Resource temporarily unavailable)
-Tue Mar 31 08:47:51 2026
- [INFO] [SessionManager] logout: account=25802580, fd=254
-Tue Mar 31 08:47:53 2026
- [INFO] [doLoadHistory] fd=255, targetType=group, targetId=3, limit=30
-Tue Mar 31 08:47:53 2026
- [INFO] [MessageStore] loadHistory group: groupIdStr=3, limit=30
-Tue Mar 31 08:47:53 2026
- [INFO] [MessageStore] loadHistory group id=3 count=7 rows_fetched=7
-Tue Mar 31 08:47:53 2026
- [INFO] [doLoadHistory] group history count=7 for groupId=3
-Tue Mar 31 08:48:01 2026
- [INFO] [doLoadHistory] fd=255, targetType=private, targetId=李莹, limit=30
-Tue Mar 31 08:48:01 2026
- [ERROR] [doLoadHistory] Target user not found by username: 李莹
-Tue Mar 31 08:48:30 2026
- [WARN] [User] peer closed connection fd=255
-Tue Mar 31 08:48:30 2026
- [ERROR] [User] handleError fd=255 errno=11 (Resource temporarily unavailable)
-Tue Mar 31 08:48:30 2026
- [INFO] [SessionManager] logout: account=654654, fd=255
+Wed Apr 08 07:35:58 2026 [INFO] Server starting...
+Wed Apr 08 07:35:59 2026 [INFO] [AeroQueue] 已启动 500 个工作线程
+Wed Apr 08 07:35:59 2026 [INFO] [Redis] 连接池初始化完成，创建 500 个连接
+Wed Apr 08 07:35:59 2026 [INFO] EventLoop created with wakeupFd=505
+Wed Apr 08 07:36:01 2026 [INFO] [ConnectionPool] 连接池初始化完成，创建500个连接
+Wed Apr 08 07:36:01 2026 [INFO] [GroupManager] 初始化8个预设群组
+Wed Apr 08 07:36:01 2026 [INFO] ChatServer初始化完成
+Wed Apr 08 07:36:01 2026 [INFO] EventLoop created with wakeupFd=1007
+Wed Apr 08 07:36:01 2026 [INFO] [SUCCESS] Sub Reactor "SubReactor-0" (线程ID: 3676558361224218092) 已启动
+Wed Apr 08 07:36:01 2026 [INFO] EventLoop created with wakeupFd=1009
+Wed Apr 08 07:36:01 2026 [INFO] [SUCCESS] Sub Reactor "SubReactor-1" (线程ID: 17905509928249263868) 已启动
+Wed Apr 08 07:36:01 2026 [INFO] EventLoop created with wakeupFd=1011
+Wed Apr 08 07:36:01 2026 [INFO] [SUCCESS] Sub Reactor "SubReactor-2" (线程ID: 6910622981418437448) 已启动
+Wed Apr 08 07:36:01 2026 [INFO] EventLoop created with wakeupFd=1013
+Wed Apr 08 07:36:01 2026 [INFO] [SUCCESS] Sub Reactor "SubReactor-3" (线程ID: 6177100669037224132) 已启动
+Wed Apr 08 07:36:01 2026 [INFO] EventLoop created with wakeupFd=1015
+Wed Apr 08 07:36:01 2026 [INFO] [SUCCESS] Sub Reactor "SubReactor-4" (线程ID: 4423558906870283447) 已启动
+Wed Apr 08 07:36:01 2026 [INFO] EventLoop created with wakeupFd=1017
+Wed Apr 08 07:36:01 2026 [INFO] [SUCCESS] Sub Reactor "SubReactor-5" (线程ID: 7761188571304614921) 已启动
+Wed Apr 08 07:36:01 2026 [INFO] EventLoop created with wakeupFd=1019
+Wed Apr 08 07:36:01 2026 [INFO] [SUCCESS] Sub Reactor "SubReactor-6" (线程ID: 15270153295277867576) 已启动
+Wed Apr 08 07:36:01 2026 [INFO] EventLoop created with wakeupFd=1021
+Wed Apr 08 07:36:01 2026 [INFO] [SUCCESS] Sub Reactor "SubReactor-7" (线程ID: 11281594989448266994) 已启动
+Wed Apr 08 07:36:01 2026 [INFO] Redis subscription thread started
+Wed Apr 08 07:36:01 2026 [INFO] Server started on port 8888
+Wed Apr 08 08:38:05 2026 [INFO] Server starting...
+Wed Apr 08 08:38:05 2026 [INFO] [AeroQueue] 已启动 500 个工作线程
+Wed Apr 08 08:38:05 2026 [INFO] [Redis] 连接池初始化完成，创建 500 个连接
+Wed Apr 08 08:38:05 2026 [INFO] EventLoop created with wakeupFd=505
+Wed Apr 08 08:38:07 2026 [INFO] [ConnectionPool] 连接池初始化完成，创建500个连接
+Wed Apr 08 08:38:07 2026 [INFO] [GroupManager] 初始化8个预设群组
+Wed Apr 08 08:38:07 2026 [INFO] ChatServer初始化完成
+Wed Apr 08 08:38:07 2026 [INFO] EventLoop created with wakeupFd=1007
+Wed Apr 08 08:38:07 2026 [INFO] [SUCCESS] Sub Reactor "SubReactor-0" (线程ID: 6820947699708477612) 已启动
+Wed Apr 08 08:38:07 2026 [INFO] EventLoop created with wakeupFd=1009
+Wed Apr 08 08:38:07 2026 [INFO] [SUCCESS] Sub Reactor "SubReactor-1" (线程ID: 12823260472080720353) 已启动
+Wed Apr 08 08:38:07 2026 [INFO] EventLoop created with wakeupFd=1011
+Wed Apr 08 08:38:07 2026 [INFO] [SUCCESS] Sub Reactor "SubReactor-2" (线程ID: 5610313680101353600) 已启动
+Wed Apr 08 08:38:07 2026 [INFO] EventLoop created with wakeupFd=1013
+Wed Apr 08 08:38:07 2026 [INFO] [SUCCESS] Sub Reactor "SubReactor-3" (线程ID: 4212740708602637923) 已启动
+Wed Apr 08 08:38:07 2026 [INFO] EventLoop created with wakeupFd=1015
+Wed Apr 08 08:38:07 2026 [INFO] [SUCCESS] Sub Reactor "SubReactor-4" (线程ID: 14471422267977551379) 已启动
+Wed Apr 08 08:38:07 2026 [INFO] EventLoop created with wakeupFd=1017
+Wed Apr 08 08:38:07 2026 [INFO] [SUCCESS] Sub Reactor "SubReactor-5" (线程ID: 16997618592011877391) 已启动
+Wed Apr 08 08:38:07 2026 [INFO] EventLoop created with wakeupFd=1019
+Wed Apr 08 08:38:07 2026 [INFO] [SUCCESS] Sub Reactor "SubReactor-6" (线程ID: 8074186148498137050) 已启动
+Wed Apr 08 08:38:07 2026 [INFO] EventLoop created with wakeupFd=1021
+Wed Apr 08 08:38:07 2026 [INFO] [SUCCESS] Sub Reactor "SubReactor-7" (线程ID: 12274930815514578338) 已启动
+Wed Apr 08 08:38:07 2026 [INFO] Redis subscription thread started
+Wed Apr 08 08:38:07 2026 [INFO] Server started on port 8888
+Wed Apr 08 08:42:46 2026 [INFO] [queryAccount] hashed password: 8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92
+Wed Apr 08 08:42:46 2026 [INFO] [queryAccount] login success for account: 123123123 id=1
+Wed Apr 08 08:42:46 2026 [INFO] [SessionManager] login success: account=123123123, userId=1, fd=1025
+Wed Apr 08 08:42:46 2026 [INFO] [MessageStore] rebuildConversations: cache exists for user 1, skip
+Wed Apr 08 08:42:47 2026 [INFO] [MessageStore] pullOfflineMsgIds user=1 count=0
+Wed Apr 08 08:42:49 2026 [INFO] [doLoadHistory] fd=1025, targetType=group, targetId=6, limit=30, offset=0
+Wed Apr 08 08:42:49 2026 [INFO] [MessageStore] loadHistoryPaginated(group) count=1
+Wed Apr 08 08:42:49 2026 [INFO] [doLoadHistory] group history count=1 for groupId=6
+Wed Apr 08 08:42:52 2026 [INFO] [GroupManager] 用户 1 退出群组 3
+Wed Apr 08 08:42:54 2026 [INFO] [GroupManager] 用户 1 退出群组 4
+Wed Apr 08 08:43:05 2026 [INFO] [doLoadHistory] fd=1025, targetType=private, targetId=25802580, limit=30, offset=0
+Wed Apr 08 08:43:05 2026 [INFO] [MessageStore] loadHistoryPaginated(single) count=13
+Wed Apr 08 08:43:05 2026 [INFO] [doLoadHistory] private history count=13 between 123123123 and 25802580
+Wed Apr 08 08:43:08 2026 [INFO] [MessageStore] saveMessage(single) success, msgId=14 from=123123123 to=25802580
+Wed Apr 08 08:43:08 2026 [INFO] [MessageStore] updateConversationSummary user=1 conv=single:25802580 incr=0
+Wed Apr 08 08:43:08 2026 [INFO] [MessageStore] updateConversationSummary user=2 conv=single:123123123 incr=1
+Wed Apr 08 08:43:08 2026 [INFO] [MessageStore] pushToInbox: msg=14 to user=2
+Wed Apr 08 08:43:16 2026 [INFO] [MessageStore] saveMessage(single) success, msgId=15 from=123123123 to=25802580
+Wed Apr 08 08:43:16 2026 [INFO] [MessageStore] updateConversationSummary user=1 conv=single:25802580 incr=0
+Wed Apr 08 08:43:16 2026 [INFO] [MessageStore] updateConversationSummary user=2 conv=single:123123123 incr=1
+Wed Apr 08 08:43:16 2026 [INFO] [MessageStore] pushToInbox: msg=15 to user=2
+Wed Apr 08 08:43:32 2026 [INFO] [queryAccount] hashed password: 8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92
+Wed Apr 08 08:43:32 2026 [INFO] [queryAccount] login success for account: 25802580 id=2
+Wed Apr 08 08:43:32 2026 [INFO] [SessionManager] login success: account=25802580, userId=2, fd=1026
+Wed Apr 08 08:43:32 2026 [INFO] [MessageStore] rebuildConversations: cache exists for user 2, skip
+Wed Apr 08 08:43:33 2026 [INFO] [MessageStore] pullOfflineMsgIds user=2 count=2
+Wed Apr 08 08:43:38 2026 [INFO] [doLoadHistory] fd=1026, targetType=private, targetId=1, limit=30, offset=0
+Wed Apr 08 08:43:38 2026 [ERROR] [doLoadHistory] Target user not found: 1
+Wed Apr 08 08:43:44 2026 [INFO] [doLoadHistory] fd=1026, targetType=group, targetId=6, limit=30, offset=0
+Wed Apr 08 08:43:44 2026 [INFO] [MessageStore] loadHistoryPaginated(group) count=1
+Wed Apr 08 08:43:44 2026 [INFO] [doLoadHistory] group history count=1 for groupId=6
+Wed Apr 08 08:43:44 2026 [INFO] [doLoadHistory] fd=1026, targetType=private, targetId=1, limit=30, offset=0
+Wed Apr 08 08:43:44 2026 [ERROR] [doLoadHistory] Target user not found: 1
+Wed Apr 08 08:43:48 2026 [INFO] [doLoadHistory] fd=1026, targetType=group, targetId=6, limit=30, offset=0
+Wed Apr 08 08:43:48 2026 [INFO] [MessageStore] loadHistoryPaginated(group) count=1
+Wed Apr 08 08:43:48 2026 [INFO] [doLoadHistory] group history count=1 for groupId=6
+Wed Apr 08 08:43:49 2026 [INFO] [doLoadHistory] fd=1026, targetType=private, targetId=1, limit=30, offset=0
+Wed Apr 08 08:43:49 2026 [ERROR] [doLoadHistory] Target user not found: 1
+Wed Apr 08 08:44:33 2026 [INFO] [doLoadHistory] fd=1026, targetType=group, targetId=6, limit=30, offset=0
+Wed Apr 08 08:44:33 2026 [INFO] [MessageStore] loadHistoryPaginated(group) count=1
+Wed Apr 08 08:44:33 2026 [INFO] [doLoadHistory] group history count=1 for groupId=6
+Wed Apr 08 08:44:34 2026 [INFO] [doLoadHistory] fd=1026, targetType=private, targetId=1, limit=30, offset=0
+Wed Apr 08 08:44:34 2026 [ERROR] [doLoadHistory] Target user not found: 1
+Wed Apr 08 08:54:38 2026 [WARN] [User] peer closed connection fd=1025
+Wed Apr 08 08:54:38 2026 [ERROR] [User] handleError fd=1025 errno=11 (Resource temporarily unavailable)
+Wed Apr 08 08:54:38 2026 [INFO] [SessionManager] logout: account=123123123, fd=1025
+Wed Apr 08 08:54:39 2026 [WARN] [User] peer closed connection fd=1026
+Wed Apr 08 08:54:39 2026 [ERROR] [User] handleError fd=1026 errno=11 (Resource temporarily unavailable)
+Wed Apr 08 08:54:39 2026 [INFO] [SessionManager] logout: account=25802580, fd=1026
+Wed Apr 08 08:55:10 2026 [INFO] [queryAccount] hashed password: 8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92
+Wed Apr 08 08:55:10 2026 [INFO] [queryAccount] login success for account: 123123123 id=1
+Wed Apr 08 08:55:10 2026 [INFO] [SessionManager] login success: account=123123123, userId=1, fd=1025
+Wed Apr 08 08:55:10 2026 [INFO] [MessageStore] rebuildConversations: cache exists for user 1, skip
+Wed Apr 08 08:55:10 2026 [INFO] [MessageStore] pullOfflineMsgIds user=1 count=0
+Wed Apr 08 08:55:12 2026 [INFO] [doLoadHistory] fd=1025, targetType=group, targetId=6, limit=30, offset=0
+Wed Apr 08 08:55:12 2026 [INFO] [MessageStore] loadHistoryPaginated(group) count=1
+Wed Apr 08 08:55:12 2026 [INFO] [doLoadHistory] group history count=1 for groupId=6
+Wed Apr 08 08:55:18 2026 [INFO] [doLoadHistory] fd=1025, targetType=private, targetId=25802580, limit=30, offset=0
+Wed Apr 08 08:55:18 2026 [INFO] [MessageStore] loadHistoryPaginated(single) count=15
+Wed Apr 08 08:55:18 2026 [INFO] [doLoadHistory] private history count=15 between 123123123 and 25802580
+Wed Apr 08 08:55:19 2026 [INFO] [doLoadHistory] fd=1025, targetType=private, targetId=25802580, limit=30, offset=15
+Wed Apr 08 08:55:19 2026 [INFO] [MessageStore] loadHistoryPaginated(single) count=0
+Wed Apr 08 08:55:19 2026 [INFO] [doLoadHistory] private history count=0 between 123123123 and 25802580
+Wed Apr 08 08:55:30 2026 [INFO] [MessageStore] saveMessage(single) success, msgId=16 from=123123123 to=25802580
+Wed Apr 08 08:55:30 2026 [INFO] [MessageStore] updateConversationSummary user=1 conv=single:25802580 incr=0
+Wed Apr 08 08:55:30 2026 [INFO] [MessageStore] updateConversationSummary user=2 conv=single:123123123 incr=1
+Wed Apr 08 08:55:30 2026 [INFO] [MessageStore] pushToInbox: msg=16 to user=2
+Wed Apr 08 08:55:39 2026 [INFO] [queryAccount] hashed password: 8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92
+Wed Apr 08 08:55:39 2026 [INFO] [queryAccount] login success for account: 25802580 id=2
+Wed Apr 08 08:55:39 2026 [INFO] [SessionManager] login success: account=25802580, userId=2, fd=1026
+Wed Apr 08 08:55:39 2026 [INFO] [MessageStore] rebuildConversations: cache exists for user 2, skip
+Wed Apr 08 08:55:39 2026 [INFO] [MessageStore] pullOfflineMsgIds user=2 count=1
+Wed Apr 08 08:55:41 2026 [INFO] [doLoadHistory] fd=1026, targetType=private, targetId=刘宇航, limit=30, offset=0
+Wed Apr 08 08:55:41 2026 [INFO] [MessageStore] loadHistoryPaginated(single) count=16
+Wed Apr 08 08:55:41 2026 [INFO] [doLoadHistory] private history count=16 between 25802580 and 123123123
+Wed Apr 08 08:55:42 2026 [INFO] [doLoadHistory] fd=1026, targetType=private, targetId=刘宇航, limit=30, offset=16
+Wed Apr 08 08:55:42 2026 [INFO] [MessageStore] loadHistoryPaginated(single) count=0
+Wed Apr 08 08:55:42 2026 [INFO] [doLoadHistory] private history count=0 between 25802580 and 123123123
+Wed Apr 08 08:55:49 2026 [INFO] [doLoadHistory] fd=1026, targetType=private, targetId=123123123, limit=30, offset=0
+Wed Apr 08 08:55:49 2026 [INFO] [MessageStore] loadHistoryPaginated(single) count=16
+Wed Apr 08 08:55:49 2026 [INFO] [doLoadHistory] private history count=16 between 25802580 and 123123123
+Wed Apr 08 08:55:50 2026 [INFO] [doLoadHistory] fd=1026, targetType=private, targetId=刘宇航, limit=30, offset=0
+Wed Apr 08 08:55:50 2026 [INFO] [MessageStore] loadHistoryPaginated(single) count=16
+Wed Apr 08 08:55:50 2026 [INFO] [doLoadHistory] private history count=16 between 25802580 and 123123123
+Wed Apr 08 08:55:51 2026 [INFO] [doLoadHistory] fd=1026, targetType=private, targetId=123123123, limit=30, offset=0
+Wed Apr 08 08:55:51 2026 [INFO] [MessageStore] loadHistoryPaginated(single) count=16
+Wed Apr 08 08:55:51 2026 [INFO] [doLoadHistory] private history count=16 between 25802580 and 123123123
+Wed Apr 08 08:55:51 2026 [INFO] [doLoadHistory] fd=1026, targetType=private, targetId=刘宇航, limit=30, offset=0
+Wed Apr 08 08:55:51 2026 [INFO] [MessageStore] loadHistoryPaginated(single) count=16
+Wed Apr 08 08:55:51 2026 [INFO] [doLoadHistory] private history count=16 between 25802580 and 123123123
+Wed Apr 08 08:55:52 2026 [INFO] [doLoadHistory] fd=1026, targetType=private, targetId=123123123, limit=30, offset=0
+Wed Apr 08 08:55:52 2026 [INFO] [MessageStore] loadHistoryPaginated(single) count=16
+Wed Apr 08 08:55:52 2026 [INFO] [doLoadHistory] private history count=16 between 25802580 and 123123123
+Wed Apr 08 08:55:52 2026 [INFO] [doLoadHistory] fd=1026, targetType=private, targetId=刘宇航, limit=30, offset=0
+Wed Apr 08 08:55:52 2026 [INFO] [MessageStore] loadHistoryPaginated(single) count=16
+Wed Apr 08 08:55:52 2026 [INFO] [doLoadHistory] private history count=16 between 25802580 and 123123123
+Wed Apr 08 08:55:52 2026 [INFO] [doLoadHistory] fd=1026, targetType=private, targetId=123123123, limit=30, offset=0
+Wed Apr 08 08:55:52 2026 [INFO] [MessageStore] loadHistoryPaginated(single) count=16
+Wed Apr 08 08:55:52 2026 [INFO] [doLoadHistory] private history count=16 between 25802580 and 123123123
+Wed Apr 08 08:55:53 2026 [INFO] [doLoadHistory] fd=1026, targetType=private, targetId=刘宇航, limit=30, offset=0
+Wed Apr 08 08:55:53 2026 [INFO] [MessageStore] loadHistoryPaginated(single) count=16
+Wed Apr 08 08:55:53 2026 [INFO] [doLoadHistory] private history count=16 between 25802580 and 123123123
+Wed Apr 08 08:55:53 2026 [INFO] [doLoadHistory] fd=1026, targetType=private, targetId=123123123, limit=30, offset=0
+Wed Apr 08 08:55:53 2026 [INFO] [MessageStore] loadHistoryPaginated(single) count=16
+Wed Apr 08 08:55:53 2026 [INFO] [doLoadHistory] private history count=16 between 25802580 and 123123123
+Wed Apr 08 08:55:54 2026 [INFO] [doLoadHistory] fd=1026, targetType=private, targetId=刘宇航, limit=30, offset=0
+Wed Apr 08 08:55:54 2026 [INFO] [MessageStore] loadHistoryPaginated(single) count=16
+Wed Apr 08 08:55:54 2026 [INFO] [doLoadHistory] private history count=16 between 25802580 and 123123123
+Wed Apr 08 09:11:59 2026 [INFO] [doLoadHistory] fd=1025, targetType=group, targetId=6, limit=30, offset=0
+Wed Apr 08 09:11:59 2026 [INFO] [MessageStore] loadHistoryPaginated(group) count=1
+Wed Apr 08 09:11:59 2026 [INFO] [doLoadHistory] group history count=1 for groupId=6
+Wed Apr 08 09:12:05 2026 [INFO] [doLoadHistory] fd=1026, targetType=private, targetId=123123123, limit=30, offset=0
+Wed Apr 08 09:12:05 2026 [INFO] [MessageStore] loadHistoryPaginated(single) count=16
+Wed Apr 08 09:12:05 2026 [INFO] [doLoadHistory] private history count=16 between 25802580 and 123123123
+Wed Apr 08 09:20:12 2026 [WARN] [User] peer closed connection fd=1025
+Wed Apr 08 09:20:12 2026 [ERROR] [User] handleError fd=1025 errno=11 (Resource temporarily unavailable)
+Wed Apr 08 09:20:12 2026 [INFO] [SessionManager] logout: account=123123123, fd=1025
+Wed Apr 08 09:20:13 2026 [WARN] [User] peer closed connection fd=1026
+Wed Apr 08 09:20:13 2026 [ERROR] [User] handleError fd=1026 errno=11 (Resource temporarily unavailable)
+Wed Apr 08 09:20:13 2026 [INFO] [SessionManager] logout: account=25802580, fd=1026
+Wed Apr 08 09:20:41 2026 [INFO] [queryAccount] hashed password: 8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92
+Wed Apr 08 09:20:41 2026 [INFO] [queryAccount] login success for account: 123123123 id=1
+Wed Apr 08 09:20:41 2026 [INFO] [SessionManager] login success: account=123123123, userId=1, fd=1026
+Wed Apr 08 09:20:41 2026 [INFO] [MessageStore] rebuildConversations: cache exists for user 1, skip
+Wed Apr 08 09:20:41 2026 [INFO] [MessageStore] pullOfflineMsgIds user=1 count=0
+Wed Apr 08 09:20:50 2026 [INFO] [queryAccount] hashed password: 8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92
+Wed Apr 08 09:20:50 2026 [INFO] [queryAccount] login success for account: 25802580 id=2
+Wed Apr 08 09:20:50 2026 [INFO] [SessionManager] login success: account=25802580, userId=2, fd=1025
+Wed Apr 08 09:20:50 2026 [INFO] [MessageStore] rebuildConversations: cache exists for user 2, skip
+Wed Apr 08 09:20:50 2026 [INFO] [MessageStore] pullOfflineMsgIds user=2 count=0
+Wed Apr 08 09:20:54 2026 [WARN] [User] peer closed connection fd=1025
+Wed Apr 08 09:20:54 2026 [ERROR] [User] handleError fd=1025 errno=11 (Resource temporarily unavailable)
+Wed Apr 08 09:20:54 2026 [INFO] [SessionManager] logout: account=25802580, fd=1025
+Wed Apr 08 09:21:01 2026 [INFO] [doLoadHistory] fd=1026, targetType=private, targetId=李莹, limit=30, offset=0
+Wed Apr 08 09:21:01 2026 [INFO] [MessageStore] loadHistoryPaginated(single) count=16
+Wed Apr 08 09:21:01 2026 [INFO] [doLoadHistory] private history count=16 between 123123123 and 25802580
+Wed Apr 08 09:21:07 2026 [INFO] [MessageStore] saveMessage(single) success, msgId=17 from=123123123 to=25802580
+Wed Apr 08 09:21:07 2026 [INFO] [MessageStore] updateConversationSummary user=1 conv=single:25802580 incr=0
+Wed Apr 08 09:21:07 2026 [INFO] [MessageStore] updateConversationSummary user=2 conv=single:123123123 incr=1
+Wed Apr 08 09:21:07 2026 [INFO] [MessageStore] pushToInbox: msg=17 to user=2
+Wed Apr 08 09:21:14 2026 [INFO] [MessageStore] saveMessage(single) success, msgId=18 from=123123123 to=25802580
+Wed Apr 08 09:21:14 2026 [INFO] [MessageStore] updateConversationSummary user=1 conv=single:25802580 incr=0
+Wed Apr 08 09:21:14 2026 [INFO] [MessageStore] updateConversationSummary user=2 conv=single:123123123 incr=1
+Wed Apr 08 09:21:14 2026 [INFO] [MessageStore] pushToInbox: msg=18 to user=2
+Wed Apr 08 09:21:28 2026 [INFO] [queryAccount] hashed password: 8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92
+Wed Apr 08 09:21:28 2026 [INFO] [queryAccount] login success for account: 25802580 id=2
+Wed Apr 08 09:21:28 2026 [INFO] [SessionManager] login success: account=25802580, userId=2, fd=1025
+Wed Apr 08 09:21:28 2026 [INFO] [MessageStore] rebuildConversations: cache exists for user 2, skip
+Wed Apr 08 09:21:28 2026 [INFO] [MessageStore] pullOfflineMsgIds user=2 count=2
+Wed Apr 08 09:21:29 2026 [INFO] [doLoadHistory] fd=1025, targetType=private, targetId=刘宇航, limit=30, offset=0
+Wed Apr 08 09:21:29 2026 [INFO] [MessageStore] loadHistoryPaginated(single) count=18
+Wed Apr 08 09:21:29 2026 [INFO] [doLoadHistory] private history count=18 between 25802580 and 123123123
+Wed Apr 08 09:21:30 2026 [INFO] [doLoadHistory] fd=1025, targetType=private, targetId=刘宇航, limit=30, offset=18
+Wed Apr 08 09:21:30 2026 [INFO] [MessageStore] loadHistoryPaginated(single) count=0
+Wed Apr 08 09:21:30 2026 [INFO] [doLoadHistory] private history count=0 between 25802580 and 123123123
+Wed Apr 08 09:21:38 2026 [INFO] [doLoadHistory] fd=1025, targetType=group, targetId=6, limit=30, offset=0
+Wed Apr 08 09:21:38 2026 [INFO] [MessageStore] loadHistoryPaginated(group) count=1
+Wed Apr 08 09:21:38 2026 [INFO] [doLoadHistory] group history count=1 for groupId=6
+Wed Apr 08 09:21:39 2026 [INFO] [doLoadHistory] fd=1025, targetType=group, targetId=5, limit=30, offset=0
+Wed Apr 08 09:21:39 2026 [INFO] [MessageStore] loadHistoryPaginated(group) count=0
+Wed Apr 08 09:21:39 2026 [INFO] [doLoadHistory] group history count=0 for groupId=5
+Wed Apr 08 09:21:39 2026 [INFO] [doLoadHistory] fd=1025, targetType=group, targetId=6, limit=30, offset=0
+Wed Apr 08 09:21:39 2026 [INFO] [MessageStore] loadHistoryPaginated(group) count=1
+Wed Apr 08 09:21:39 2026 [INFO] [doLoadHistory] group history count=1 for groupId=6
+Wed Apr 08 09:21:42 2026 [INFO] [MessageStore] saveMessage(group) success, msgId=3 groupId=6
+Wed Apr 08 09:21:42 2026 [INFO] [MessageStore] updateConversationSummary user=2 conv=group:6 incr=0
+Wed Apr 08 09:21:42 2026 [INFO] [MessageStore] updateConversationSummary user=1 conv=group:6 incr=1
+Wed Apr 08 09:21:42 2026 [INFO] [MessageStore] updateConversationSummary user=3 conv=group:6 incr=1
+Wed Apr 08 09:21:42 2026 [INFO] [doGroupMessage] groupId=6 total=3 online=2 offline=1
+Wed Apr 08 09:21:42 2026 [INFO] [MessageStore] pushToInbox: msg=3 to user=3
+Wed Apr 08 09:21:44 2026 [INFO] [doLoadHistory] fd=1025, targetType=group, targetId=5, limit=30, offset=0
+Wed Apr 08 09:21:44 2026 [INFO] [MessageStore] loadHistoryPaginated(group) count=0
+Wed Apr 08 09:21:44 2026 [INFO] [doLoadHistory] group history count=0 for groupId=5
+Wed Apr 08 09:21:45 2026 [INFO] [doLoadHistory] fd=1025, targetType=group, targetId=6, limit=30, offset=0
+Wed Apr 08 09:21:45 2026 [INFO] [MessageStore] loadHistoryPaginated(group) count=2
+Wed Apr 08 09:21:45 2026 [INFO] [doLoadHistory] group history count=2 for groupId=6
+Wed Apr 08 09:21:46 2026 [WARN] [User] peer closed connection fd=1025
+Wed Apr 08 09:21:46 2026 [ERROR] [User] handleError fd=1025 errno=11 (Resource temporarily unavailable)
+Wed Apr 08 09:21:46 2026 [INFO] [SessionManager] logout: account=25802580, fd=1025
+Wed Apr 08 09:21:59 2026 [INFO] [queryAccount] hashed password: 8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92
+Wed Apr 08 09:21:59 2026 [INFO] [queryAccount] login success for account: 25802580 id=2
+Wed Apr 08 09:21:59 2026 [INFO] [SessionManager] login success: account=25802580, userId=2, fd=1025
+Wed Apr 08 09:21:59 2026 [INFO] [MessageStore] rebuildConversations: cache exists for user 2, skip
+Wed Apr 08 09:21:59 2026 [INFO] [MessageStore] pullOfflineMsgIds user=2 count=0
+Wed Apr 08 09:22:01 2026 [INFO] [doLoadHistory] fd=1025, targetType=group, targetId=6, limit=30, offset=0
+Wed Apr 08 09:22:01 2026 [INFO] [MessageStore] loadHistoryPaginated(group) count=2
+Wed Apr 08 09:22:01 2026 [INFO] [doLoadHistory] group history count=2 for groupId=6
+Wed Apr 08 09:33:41 2026 [INFO] [queryAccount] hashed password: 8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92
+Wed Apr 08 09:33:41 2026 [INFO] [queryAccount] login success for account: 123123123 id=1
+Wed Apr 08 09:33:41 2026 [INFO] [SessionManager] login success: account=123123123, userId=1, fd=1027
+Wed Apr 08 09:33:41 2026 [INFO] [MessageStore] rebuildConversations: cache exists for user 1, skip
+Wed Apr 08 09:33:41 2026 [INFO] [MessageStore] pullOfflineMsgIds user=1 count=0
+Wed Apr 08 09:33:46 2026 [INFO] [doLoadHistory] fd=1027, targetType=private, targetId=李莹, limit=30, offset=0
+Wed Apr 08 09:33:46 2026 [INFO] [MessageStore] loadHistoryPaginated(single) count=18
+Wed Apr 08 09:33:46 2026 [INFO] [doLoadHistory] private history count=18 between 123123123 and 25802580
+Wed Apr 08 09:33:51 2026 [WARN] [User] peer closed connection fd=1027
+Wed Apr 08 09:33:51 2026 [ERROR] [User] handleError fd=1027 errno=11 (Resource temporarily unavailable)
+Wed Apr 08 09:33:51 2026 [INFO] [SessionManager] logout: account=123123123, fd=1027
+Wed Apr 08 09:33:52 2026 [WARN] [User] peer closed connection fd=1028
+Wed Apr 08 09:33:52 2026 [ERROR] [User] handleError fd=1028 errno=11 (Resource temporarily unavailable)
+Wed Apr 08 09:34:15 2026 [INFO] [queryAccount] hashed password: 8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92
+Wed Apr 08 09:34:15 2026 [INFO] [queryAccount] login success for account: 123123123 id=1
+Wed Apr 08 09:34:15 2026 [INFO] [SessionManager] login success: account=123123123, userId=1, fd=1027
+Wed Apr 08 09:34:15 2026 [INFO] [MessageStore] rebuildConversations: cache exists for user 1, skip
+Wed Apr 08 09:34:15 2026 [INFO] [MessageStore] pullOfflineMsgIds user=1 count=0
+Wed Apr 08 09:34:34 2026 [WARN] [User] peer closed connection fd=1028
+Wed Apr 08 09:34:34 2026 [ERROR] [User] handleError fd=1028 errno=11 (Resource temporarily unavailable)
+Wed Apr 08 09:34:44 2026 [WARN] [User] peer closed connection fd=1027
+Wed Apr 08 09:34:44 2026 [ERROR] [User] handleError fd=1027 errno=11 (Resource temporarily unavailable)
+Wed Apr 08 09:34:44 2026 [INFO] [SessionManager] logout: account=123123123, fd=1027
+Wed Apr 08 09:35:41 2026 [INFO] [queryAccount] hashed password: 8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92
+Wed Apr 08 09:35:41 2026 [INFO] [queryAccount] login success for account: 123123123 id=1
+Wed Apr 08 09:35:41 2026 [INFO] [SessionManager] login success: account=123123123, userId=1, fd=1027
+Wed Apr 08 09:35:41 2026 [INFO] [MessageStore] rebuildConversations: user=1 private=1 group=1
+Wed Apr 08 09:35:41 2026 [INFO] [MessageStore] pullOfflineMsgIds user=1 count=0
+Wed Apr 08 09:35:43 2026 [INFO] [doLoadHistory] fd=1027, targetType=group, targetId=6, limit=30, offset=0
+Wed Apr 08 09:35:43 2026 [INFO] [MessageStore] loadHistoryPaginated(group) count=2
+Wed Apr 08 09:35:43 2026 [INFO] [doLoadHistory] group history count=2 for groupId=6
+Wed Apr 08 09:35:52 2026 [INFO] [MessageStore] saveMessage(group) success, msgId=4 groupId=6
+Wed Apr 08 09:35:52 2026 [INFO] [MessageStore] updateConversationSummary user=1 conv=group:6 incr=0
+Wed Apr 08 09:35:52 2026 [INFO] [doGroupMessage] groupId=6 total=0 online=0 offline=0
+Wed Apr 08 09:35:59 2026 [WARN] [User] peer closed connection fd=1027
+Wed Apr 08 09:35:59 2026 [ERROR] [User] handleError fd=1027 errno=11 (Resource temporarily unavailable)
+Wed Apr 08 09:35:59 2026 [INFO] [SessionManager] logout: account=123123123, fd=1027
+Wed Apr 08 09:36:05 2026 [INFO] [queryAccount] hashed password: 8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92
+Wed Apr 08 09:36:05 2026 [INFO] [queryAccount] login success for account: 123123123 id=1
+Wed Apr 08 09:36:05 2026 [INFO] [SessionManager] login success: account=123123123, userId=1, fd=1027
+Wed Apr 08 09:36:05 2026 [INFO] [MessageStore] rebuildConversations: cache exists for user 1, skip
+Wed Apr 08 09:36:05 2026 [INFO] [MessageStore] pullOfflineMsgIds user=1 count=0
+Wed Apr 08 09:36:07 2026 [INFO] [doLoadHistory] fd=1027, targetType=group, targetId=6, limit=30, offset=0
+Wed Apr 08 09:36:07 2026 [INFO] [MessageStore] loadHistoryPaginated(group) count=3
+Wed Apr 08 09:36:07 2026 [INFO] [doLoadHistory] group history count=3 for groupId=6
+Wed Apr 08 09:39:07 2026 [ERROR] [User] handleError fd=1026 errno=11 (Resource temporarily unavailable)
+Wed Apr 08 09:39:07 2026 [ERROR] [User] handleError fd=1025 errno=11 (Resource temporarily unavailable)
+Wed Apr 08 09:44:08 2026 [WARN] [User] peer closed connection fd=1027
+Wed Apr 08 09:44:08 2026 [ERROR] [User] handleError fd=1027 errno=11 (Resource temporarily unavailable)
+Wed Apr 08 09:44:08 2026 [INFO] [SessionManager] logout: account=123123123, fd=1027
+Wed Apr 08 09:44:16 2026 [INFO] [queryAccount] hashed password: 8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92
+Wed Apr 08 09:44:16 2026 [INFO] [queryAccount] login success for account: 123123123 id=1
+Wed Apr 08 09:44:16 2026 [INFO] [SessionManager] login success: account=123123123, userId=1, fd=1025
+Wed Apr 08 09:44:16 2026 [INFO] [MessageStore] rebuildConversations: cache exists for user 1, skip
+Wed Apr 08 09:44:16 2026 [INFO] [MessageStore] pullOfflineMsgIds user=1 count=0
+Wed Apr 08 09:44:18 2026 [INFO] [doLoadHistory] fd=1025, targetType=group, targetId=6, limit=30, offset=0
+Wed Apr 08 09:44:18 2026 [INFO] [MessageStore] loadHistoryPaginated(group) count=3
+Wed Apr 08 09:44:18 2026 [INFO] [doLoadHistory] group history count=3 for groupId=6
+Wed Apr 08 09:44:31 2026 [INFO] [MessageStore] saveMessage(group) success, msgId=5 groupId=6
+Wed Apr 08 09:44:31 2026 [INFO] [MessageStore] updateConversationSummary user=1 conv=group:6 incr=0
+Wed Apr 08 09:44:31 2026 [INFO] [doGroupMessage] groupId=6 total=0 online=0 offline=0
+Wed Apr 08 09:44:34 2026 [WARN] [User] peer closed connection fd=1025
+Wed Apr 08 09:44:34 2026 [ERROR] [User] handleError fd=1025 errno=11 (Resource temporarily unavailable)
+Wed Apr 08 09:44:34 2026 [INFO] [SessionManager] logout: account=123123123, fd=1025
+Wed Apr 08 09:44:42 2026 [INFO] [queryAccount] hashed password: 8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92
+Wed Apr 08 09:44:42 2026 [INFO] [queryAccount] login success for account: 123123123 id=1
+Wed Apr 08 09:44:42 2026 [INFO] [SessionManager] login success: account=123123123, userId=1, fd=1025
+Wed Apr 08 09:44:42 2026 [INFO] [MessageStore] rebuildConversations: cache exists for user 1, skip
+Wed Apr 08 09:44:42 2026 [INFO] [MessageStore] pullOfflineMsgIds user=1 count=0
+Wed Apr 08 09:44:43 2026 [INFO] [doLoadHistory] fd=1025, targetType=group, targetId=6, limit=30, offset=0
+Wed Apr 08 09:44:43 2026 [INFO] [MessageStore] loadHistoryPaginated(group) count=4
+Wed Apr 08 09:44:43 2026 [INFO] [doLoadHistory] group history count=4 for groupId=6
+Wed Apr 08 09:56:12 2026 [INFO] Server starting...
+Wed Apr 08 09:56:12 2026 [INFO] [AeroQueue] 已启动 500 个工作线程
+Wed Apr 08 09:56:12 2026 [INFO] [Redis] 连接池初始化完成，创建 500 个连接
+Wed Apr 08 09:56:12 2026 [INFO] EventLoop created with wakeupFd=505
+Wed Apr 08 09:56:13 2026 [INFO] [ConnectionPool] 连接池初始化完成，创建500个连接
+Wed Apr 08 09:56:13 2026 [INFO] [GroupManager] 初始化8个预设群组
+Wed Apr 08 09:56:13 2026 [INFO] [GroupManager] 从数据库恢复群组 2 成员 1
+Wed Apr 08 09:56:13 2026 [INFO] [GroupManager] 从数据库恢复群组 5 成员 1
+Wed Apr 08 09:56:13 2026 [INFO] [GroupManager] 从数据库恢复群组 6 成员 3
+Wed Apr 08 09:56:13 2026 [INFO] ChatServer初始化完成
+Wed Apr 08 09:56:13 2026 [INFO] EventLoop created with wakeupFd=1007
+Wed Apr 08 09:56:13 2026 [INFO] [SUCCESS] Sub Reactor "SubReactor-0" (线程ID: 5287250901822111141) 已启动
+Wed Apr 08 09:56:13 2026 [INFO] EventLoop created with wakeupFd=1009
+Wed Apr 08 09:56:13 2026 [INFO] [SUCCESS] Sub Reactor "SubReactor-1" (线程ID: 14391912865053244175) 已启动
+Wed Apr 08 09:56:13 2026 [INFO] EventLoop created with wakeupFd=1011
+Wed Apr 08 09:56:13 2026 [INFO] [SUCCESS] Sub Reactor "SubReactor-2" (线程ID: 6762918113462962036) 已启动
+Wed Apr 08 09:56:13 2026 [INFO] EventLoop created with wakeupFd=1013
+Wed Apr 08 09:56:13 2026 [INFO] [SUCCESS] Sub Reactor "SubReactor-3" (线程ID: 11075170748631723470) 已启动
+Wed Apr 08 09:56:13 2026 [INFO] EventLoop created with wakeupFd=1015
+Wed Apr 08 09:56:13 2026 [INFO] [SUCCESS] Sub Reactor "SubReactor-4" (线程ID: 3436861414037175958) 已启动
+Wed Apr 08 09:56:13 2026 [INFO] EventLoop created with wakeupFd=1017
+Wed Apr 08 09:56:13 2026 [INFO] [SUCCESS] Sub Reactor "SubReactor-5" (线程ID: 10315139199774503072) 已启动
+Wed Apr 08 09:56:13 2026 [INFO] EventLoop created with wakeupFd=1019
+Wed Apr 08 09:56:13 2026 [INFO] [SUCCESS] Sub Reactor "SubReactor-6" (线程ID: 12806371823033590565) 已启动
+Wed Apr 08 09:56:13 2026 [INFO] EventLoop created with wakeupFd=1021
+Wed Apr 08 09:56:13 2026 [INFO] [SUCCESS] Sub Reactor "SubReactor-7" (线程ID: 6183100636227856702) 已启动
+Wed Apr 08 09:56:13 2026 [INFO] Redis subscription thread started
+Wed Apr 08 09:56:13 2026 [INFO] Server started on port 8888
+Wed Apr 08 09:56:32 2026 [INFO] [queryAccount] hashed password: 8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92
+Wed Apr 08 09:56:32 2026 [INFO] [queryAccount] login success for account: 123123123 id=1
+Wed Apr 08 09:56:32 2026 [INFO] [SessionManager] logout: account=123123123, fd=1025
+Wed Apr 08 09:56:32 2026 [INFO] [SessionManager] login success: account=123123123, userId=1, fd=1025
+Wed Apr 08 09:56:32 2026 [INFO] [MessageStore] rebuildConversations: cache exists for user 1, skip
+Wed Apr 08 09:56:32 2026 [INFO] [MessageStore] pullOfflineMsgIds user=1 count=0
+Wed Apr 08 09:56:34 2026 [INFO] [doLoadHistory] fd=1025, targetType=group, targetId=6, limit=30, offset=0
+Wed Apr 08 09:56:34 2026 [INFO] [MessageStore] loadHistoryPaginated(group) count=4
+Wed Apr 08 09:56:34 2026 [INFO] [doLoadHistory] group history count=4 for groupId=6
+Wed Apr 08 10:05:25 2026 [INFO] Server starting...
+Wed Apr 08 10:05:25 2026 [INFO] [AeroQueue] 已启动 500 个工作线程
+Wed Apr 08 10:05:25 2026 [INFO] [Redis] 连接池初始化完成，创建 500 个连接
+Wed Apr 08 10:05:25 2026 [INFO] EventLoop created with wakeupFd=505
+Wed Apr 08 10:05:26 2026 [INFO] [ConnectionPool] 连接池初始化完成，创建500个连接
+Wed Apr 08 10:05:26 2026 [INFO] [GroupManager] 初始化8个预设群组
+Wed Apr 08 10:05:26 2026 [INFO] ChatServer初始化完成
+Wed Apr 08 10:05:26 2026 [INFO] EventLoop created with wakeupFd=1007
+Wed Apr 08 10:05:26 2026 [INFO] [SUCCESS] Sub Reactor "SubReactor-0" (线程ID: 4344427252430845497) 已启动
+Wed Apr 08 10:05:26 2026 [INFO] EventLoop created with wakeupFd=1009
+Wed Apr 08 10:05:26 2026 [INFO] [SUCCESS] Sub Reactor "SubReactor-1" (线程ID: 10121039381955866855) 已启动
+Wed Apr 08 10:05:26 2026 [INFO] EventLoop created with wakeupFd=1011
+Wed Apr 08 10:05:26 2026 [INFO] [SUCCESS] Sub Reactor "SubReactor-2" (线程ID: 14668621647388831600) 已启动
+Wed Apr 08 10:05:26 2026 [INFO] EventLoop created with wakeupFd=1013
+Wed Apr 08 10:05:26 2026 [INFO] [SUCCESS] Sub Reactor "SubReactor-3" (线程ID: 10068021402317404492) 已启动
+Wed Apr 08 10:05:26 2026 [INFO] EventLoop created with wakeupFd=1015
+Wed Apr 08 10:05:26 2026 [INFO] [SUCCESS] Sub Reactor "SubReactor-4" (线程ID: 8705031780814313536) 已启动
+Wed Apr 08 10:05:26 2026 [INFO] EventLoop created with wakeupFd=1017
+Wed Apr 08 10:05:26 2026 [INFO] [SUCCESS] Sub Reactor "SubReactor-5" (线程ID: 14371133723329838323) 已启动
+Wed Apr 08 10:05:26 2026 [INFO] EventLoop created with wakeupFd=1019
+Wed Apr 08 10:05:26 2026 [INFO] [SUCCESS] Sub Reactor "SubReactor-6" (线程ID: 4333213308949805816) 已启动
+Wed Apr 08 10:05:26 2026 [INFO] EventLoop created with wakeupFd=1021
+Wed Apr 08 10:05:26 2026 [INFO] [SUCCESS] Sub Reactor "SubReactor-7" (线程ID: 6512580393239507972) 已启动
+Wed Apr 08 10:05:26 2026 [INFO] Redis subscription thread started
+Wed Apr 08 10:05:26 2026 [INFO] Server started on port 8888
+Wed Apr 08 10:05:26 2026 [INFO] [queryAccount] hashed password: 8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92
+Wed Apr 08 10:05:26 2026 [INFO] [queryAccount] login success for account: 123123123 id=1
+Wed Apr 08 10:05:26 2026 [INFO] [SessionManager] logout: account=123123123, fd=1025
+Wed Apr 08 10:05:26 2026 [INFO] [SessionManager] login success: account=123123123, userId=1, fd=1025
+Wed Apr 08 10:05:26 2026 [INFO] [MessageStore] rebuildConversations: cache exists for user 1, skip
+Wed Apr 08 10:05:27 2026 [INFO] [MessageStore] pullOfflineMsgIds user=1 count=0
+Wed Apr 08 10:05:38 2026 [WARN] [User] peer closed connection fd=1025
+Wed Apr 08 10:05:38 2026 [ERROR] [User] handleError fd=1025 errno=11 (Resource temporarily unavailable)
+Wed Apr 08 10:05:38 2026 [INFO] [SessionManager] logout: account=123123123, fd=1025
+Wed Apr 08 10:05:46 2026 [INFO] [queryAccount] hashed password: 8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92
+Wed Apr 08 10:05:46 2026 [INFO] [queryAccount] login success for account: 123123123 id=1
+Wed Apr 08 10:05:46 2026 [INFO] [SessionManager] login success: account=123123123, userId=1, fd=1025
+Wed Apr 08 10:05:46 2026 [INFO] [MessageStore] rebuildConversations: cache exists for user 1, skip
+Wed Apr 08 10:05:46 2026 [INFO] [MessageStore] pullOfflineMsgIds user=1 count=0
+Wed Apr 08 10:05:48 2026 [INFO] [doLoadHistory] fd=1025, targetType=group, targetId=6, limit=30, offset=0
+Wed Apr 08 10:05:48 2026 [INFO] [MessageStore] loadHistoryPaginated(group) count=4
+Wed Apr 08 10:05:48 2026 [INFO] [doLoadHistory] group history count=4 for groupId=6
+Wed Apr 08 10:06:05 2026 [INFO] [doLoadHistory] fd=1025, targetType=private, targetId=李莹, limit=30, offset=0
+Wed Apr 08 10:06:05 2026 [INFO] [MessageStore] loadHistoryPaginated(single) count=18
+Wed Apr 08 10:06:05 2026 [INFO] [doLoadHistory] private history count=18 between 123123123 and 25802580
+Wed Apr 08 10:06:11 2026 [INFO] [MessageStore] saveMessage(single) success, msgId=19 from=123123123 to=25802580
+Wed Apr 08 10:06:11 2026 [INFO] [MessageStore] updateConversationSummary user=1 conv=single:25802580 incr=0
+Wed Apr 08 10:06:11 2026 [INFO] [MessageStore] updateConversationSummary user=2 conv=single:123123123 incr=1
+Wed Apr 08 10:06:11 2026 [INFO] [MessageStore] pushToInbox: msg=19 to user=2
+Wed Apr 08 10:06:25 2026 [INFO] [queryAccount] hashed password: 8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92
+Wed Apr 08 10:06:25 2026 [INFO] [queryAccount] login success for account: 25802580 id=2
+Wed Apr 08 10:06:25 2026 [INFO] [SessionManager] login success: account=25802580, userId=2, fd=1026
+Wed Apr 08 10:06:25 2026 [INFO] [MessageStore] rebuildConversations: cache exists for user 2, skip
+Wed Apr 08 10:06:25 2026 [INFO] [MessageStore] pullOfflineMsgIds user=2 count=1
+Wed Apr 08 10:06:27 2026 [INFO] [doLoadHistory] fd=1026, targetType=private, targetId=刘宇航, limit=30, offset=0
+Wed Apr 08 10:06:27 2026 [INFO] [MessageStore] loadHistoryPaginated(single) count=19
+Wed Apr 08 10:06:27 2026 [INFO] [doLoadHistory] private history count=19 between 25802580 and 123123123
+Wed Apr 08 10:06:28 2026 [INFO] [doLoadHistory] fd=1026, targetType=private, targetId=刘宇航, limit=30, offset=19
+Wed Apr 08 10:06:28 2026 [INFO] [MessageStore] loadHistoryPaginated(single) count=0
+Wed Apr 08 10:06:28 2026 [INFO] [doLoadHistory] private history count=0 between 25802580 and 123123123
+Wed Apr 08 10:06:28 2026 [INFO] [doLoadHistory] fd=1026, targetType=private, targetId=刘宇航, limit=30, offset=19
+Wed Apr 08 10:06:28 2026 [INFO] [MessageStore] loadHistoryPaginated(single) count=0
+Wed Apr 08 10:06:28 2026 [INFO] [doLoadHistory] private history count=0 between 25802580 and 123123123
+Wed Apr 08 10:06:29 2026 [INFO] [doLoadHistory] fd=1026, targetType=private, targetId=刘宇航, limit=30, offset=19
+Wed Apr 08 10:06:29 2026 [INFO] [MessageStore] loadHistoryPaginated(single) count=0
+Wed Apr 08 10:06:29 2026 [INFO] [doLoadHistory] private history count=0 between 25802580 and 123123123
+Wed Apr 08 10:06:34 2026 [INFO] [MessageStore] saveMessage(single) success, msgId=20 from=25802580 to=123123123
+Wed Apr 08 10:06:34 2026 [INFO] [MessageStore] updateConversationSummary user=2 conv=single:123123123 incr=0
+Wed Apr 08 10:06:34 2026 [INFO] [MessageStore] updateConversationSummary user=1 conv=single:25802580 incr=1
+Wed Apr 08 10:06:38 2026 [INFO] [doLoadHistory] fd=1025, targetType=group, targetId=6, limit=30, offset=0
+Wed Apr 08 10:06:38 2026 [INFO] [MessageStore] loadHistoryPaginated(group) count=4
+Wed Apr 08 10:06:38 2026 [INFO] [doLoadHistory] group history count=4 for groupId=6
+Wed Apr 08 10:06:39 2026 [WARN] [User] peer closed connection fd=1025
+Wed Apr 08 10:06:39 2026 [ERROR] [User] handleError fd=1025 errno=11 (Resource temporarily unavailable)
+Wed Apr 08 10:06:39 2026 [INFO] [SessionManager] logout: account=123123123, fd=1025
+Wed Apr 08 10:06:40 2026 [WARN] [User] peer closed connection fd=1026
+Wed Apr 08 10:06:40 2026 [ERROR] [User] handleError fd=1026 errno=11 (Resource temporarily unavailable)
+Wed Apr 08 10:06:40 2026 [INFO] [SessionManager] logout: account=25802580, fd=1026

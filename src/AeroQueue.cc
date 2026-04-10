@@ -3,6 +3,7 @@
 #include "Log.hpp"
 #include <iostream>
 #include <chrono>
+#include <iterator>
 
 AeroQueue& AeroQueue::instance() {
     static AeroQueue queue;
@@ -23,6 +24,8 @@ void AeroQueue::start(size_t threadCount) {
 
 void AeroQueue::stop(bool wait) {
     stopped_ = true;
+    // 唤醒所有等待的线程，使它们能检查 stopped_ 标志并退出
+    cv_.notify_all();
     if (wait) {
         for (auto& t : threads_) {
             if (t.joinable()) t.join();
@@ -32,6 +35,8 @@ void AeroQueue::stop(bool wait) {
 
 void AeroQueue::post(Task task) {
     tasks_.enqueue(std::move(task));
+    // 通知一个工作线程有任务可用，避免所有线程都在等待
+    cv_.notify_one();
 }
 
 void AeroQueue::workerThread() {
@@ -48,7 +53,10 @@ void AeroQueue::workerThread() {
                 LOG_ERROR("[AeroQueue] 未知异常");
             }
         } else {
-            std::this_thread::sleep_for(std::chrono::microseconds(10));//主动让出CPU
+            // 没有任务时，使用条件变量阻塞，直到有新任务或停止信号
+            // 相比原来的 sleep_for(10us)，这种方式能立即响应新任务，避免固定延迟带来的性能下降
+            std::unique_lock<std::mutex> lock(cv_mutex_);
+            cv_.wait(lock, [this] { return tasks_.size_approx() != 0 || stopped_; });
         }
     }
 }

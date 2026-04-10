@@ -23,7 +23,7 @@ public:
     using ErrorCallback = std::function<void(int fd)>;
     //当连接发生错误或者关闭时调用
     User(int fd, EventLoop* loop);//接受fd和所属的EventLoop(即该用户的连接在哪个Reactor线程中处理)
-    ~User() = default;
+    ~User();
 
     // 禁止拷贝
     User(const User&) = delete;//用户对象不可复制！！！
@@ -67,15 +67,15 @@ private:
     void handleWrite();
     void processReadBuffer();
 
-    const int fd_;
-    EventLoop* const loop_;
-    std::unique_ptr<Channel> channel_;
+    const int fd_;//文件描述符
+    EventLoop* const loop_;//所属的EventLoop线程
+    std::unique_ptr<Channel> channel_;//事件通道     User和EventLoop之间的桥梁
 
     // 读缓冲区
-    std::vector<char> readBuf_;
+    std::vector<char> readBuf_;//读缓冲区:客户端发来的数据
 
     // 写缓冲区
-    std::vector<char> writeBuf_;
+    std::vector<char> writeBuf_;//写缓冲区:要发给客户端的数据
     size_t writePos_;   // 已发送位置
 
     int userId_;                      // 用户 ID（来自 account）
@@ -85,11 +85,12 @@ private:
 
     time_t lastActive_;               // 最后活动时间
 
-    MessageCallback messageCb_;
-    ErrorCallback errorCb_;
+    //回调函数
+    MessageCallback messageCb_;//收到完整消息时调用
+    ErrorCallback errorCb_;//连接出错/断开连接时调用
 
     static const size_t MAX_WRITE_PER_LOOP = 65536; // 每次最多写 64KB
-   static const size_t MAX_READ_BUFFER    = 256 * 1024; // 读缓冲区总大小上限 4MB
+   static const size_t MAX_READ_BUFFER    = 64 * 1024; // 读缓冲区总大小上限
 };
 
 #endif // USER_HPP

@@ -1,5 +1,6 @@
 #ifndef CHATSERVER_HPP
 #define CHATSERVER_HPP
+
 #include "EventLoop.hpp"
 #include "EventLoopThreadPool.hpp"
 #include "User.hpp"
@@ -14,6 +15,7 @@
 #include <functional>
 #include <shared_mutex>
 #include <sys/timerfd.h>
+
 /*
 AeroChat的主控类,主要负责:
 1、初始化网络环境以及数据库(Mysql/redis)以及线程池
@@ -35,7 +37,7 @@ public:
     void checkIdleConnections();
 
     static std::atomic<int> connCount_;//用来记录当前的连接数
-  
+
 private:
     EventLoop* loop_;//主Reactor的EventLoop(对应主线程)
     uint16_t port_;
@@ -56,13 +58,13 @@ private:
     // 空闲超时相关
     int timerFd_;
     std::unique_ptr<Channel> timerChannel_;
-    static const int kIdleTimeoutSeconds = 60;
+    static const int kIdleTimeoutSeconds = 180;   // 空闲超时 180 秒（原 60 秒，避免压测误踢）
+
     // Redis 订阅线程
     std::unique_ptr<std::thread> redisSubThread_;
     std::atomic<bool> redisSubRunning_{false};
     void redisSubLoop();
     void broadcastOnlineUpdate(const std::string& msg);
-
 };
 
-#endif
+#endif // CHATSERVER_HPP

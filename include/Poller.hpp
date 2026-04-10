@@ -7,6 +7,7 @@ Poller:每个EventLoop拥有一个Poller对象(一一对应),负责实际的epol
 #include <sys/epoll.h>
 #include <unordered_map>
 #include <vector>
+#include<unistd.h>
 // 前置声明
 class EventLoop;
 class Channel;
@@ -14,8 +15,7 @@ class Channel;
 class Poller : noncopyable {
 public:
   explicit Poller(EventLoop *loop);
-  ~Poller() = default;
-
+  ~Poller();
   void poll(int timeoutMs, std::vector<Channel *> *activeChannels);
   void updateChannel(Channel *channel);
   void removeChannel(Channel *channel);

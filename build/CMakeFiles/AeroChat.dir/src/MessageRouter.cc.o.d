@@ -215,6 +215,7 @@ CMakeFiles/AeroChat.dir/src/MessageRouter.cc.o: \
  /usr/include/c++/13/bits/charconv.h \
  /usr/include/c++/13/bits/basic_string.tcc \
  /home/ywx/shareproject/AeroChat/include/SessionManager.hpp \
+ /usr/include/c++/13/shared_mutex \
  /home/ywx/shareproject/AeroChat/include/RedisClient.hpp \
  /usr/include/hiredis/hiredis.h /usr/include/hiredis/read.h \
  /usr/include/x86_64-linux-gnu/sys/time.h /usr/include/hiredis/sds.h \
@@ -234,9 +235,11 @@ CMakeFiles/AeroChat.dir/src/MessageRouter.cc.o: \
  /usr/include/mysql/mysql_version.h /usr/include/mysql/mysql_time.h \
  /usr/include/mysql/errmsg.h \
  /home/ywx/shareproject/AeroChat/include/MessageStore.hpp \
+ /home/ywx/shareproject/AeroChat/include/AeroQueue.hpp \
+ /usr/include/c++/13/condition_variable \
  /home/ywx/shareproject/AeroChat/include/ConnectionManager.hpp \
- /usr/include/c++/13/shared_mutex \
  /home/ywx/shareproject/AeroChat/include/DBManager.hpp \
+ /home/ywx/shareproject/AeroChat/include/EventLoop.hpp \
  /home/ywx/shareproject/AeroChat/include/Log.hpp \
  /usr/include/c++/13/fstream /usr/include/c++/13/istream \
  /usr/include/c++/13/ios /usr/include/c++/13/bits/ios_base.h \
@@ -257,9 +260,6 @@ CMakeFiles/AeroChat.dir/src/MessageRouter.cc.o: \
  /usr/include/x86_64-linux-gnu/c++/13/bits/basic_file.h \
  /usr/include/x86_64-linux-gnu/c++/13/bits/c++io.h \
  /usr/include/c++/13/bits/fstream.tcc \
- /usr/include/c++/13/condition_variable \
- /home/ywx/shareproject/AeroChat/include/EventLoop.hpp \
- /home/ywx/shareproject/AeroChat/include/AeroQueue.hpp \
  /home/ywx/shareproject/AeroChat/include/rapidjson/document.h \
  /home/ywx/shareproject/AeroChat/include/rapidjson/reader.h \
  /home/ywx/shareproject/AeroChat/include/rapidjson/allocators.h \
@@ -290,10 +290,10 @@ CMakeFiles/AeroChat.dir/src/MessageRouter.cc.o: \
  /home/ywx/shareproject/AeroChat/include/rapidjson/internal/../stream.h \
  /home/ywx/shareproject/AeroChat/include/rapidjson/internal/../rapidjson.h \
  /usr/include/c++/13/iterator /usr/include/c++/13/bits/stream_iterator.h \
+ /home/ywx/shareproject/AeroChat/include/rapidjson/stringbuffer.h \
  /home/ywx/shareproject/AeroChat/include/rapidjson/writer.h \
  /home/ywx/shareproject/AeroChat/include/rapidjson/internal/dtoa.h \
  /home/ywx/shareproject/AeroChat/include/rapidjson/internal/itoa.h \
  /home/ywx/shareproject/AeroChat/include/rapidjson/internal/itoa.h \
- /home/ywx/shareproject/AeroChat/include/rapidjson/stringbuffer.h \
  /home/ywx/shareproject/AeroChat/include/rapidjson/stringbuffer.h \
  /usr/include/c++/13/iostream

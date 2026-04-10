@@ -3,7 +3,7 @@
 #include <iostream>
 /*
 EventLoop loop;
-loop对象创建在栈上,其生命周期与当前线程函数绑定.这是实现one loop per thread的核心,每个线程拥有自己独立的EventLoop对象,
+loop对象创建在栈上,其生命周期与当前线程函数绑定。这是实现one loop per thread的核心,每个线程拥有自己独立的EventLoop对象,
 且该对象的内存由线程栈所管理,无需手动分配/释放
 栈对象自动销毁,避免了内存泄漏等问题
 如何实现one loop per thread
@@ -30,7 +30,7 @@ EventLoopThread::~EventLoopThread() {
 EventLoop* EventLoopThread::startLoop() {
     thread_.start();//启动底层线程,线程入口函是threadFunc
     std::unique_lock<std::mutex> lock(mutex_);
-    cond_.wait(lock, [this]() { return loop_ != nullptr; });
+    cond_.wait(lock, [this]() { return loop_ != nullptr; });//带谓词的安全版本,第二个参数返回值为bool类型,是一个lambda表达式
     return loop_;//一旦子线程完成初始化并通知条件变量,startLoop()返回指向该EventLoop的指针
     //此后外部就可以通过这个指针进行跨线程调用(如runInLoop)
 }

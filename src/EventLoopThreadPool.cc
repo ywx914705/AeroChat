@@ -32,6 +32,8 @@ EventLoop* EventLoopThreadPool::getNextLoop() {
 }
 
 EventLoop* EventLoopThreadPool::getLoop(int idx) {
+    //增加一个有消息检查
+    if(loops_.empty())return baseLoop_;
     if (idx < 0 || static_cast<size_t>(idx) >= loops_.size()) {
         return baseLoop_;
     }

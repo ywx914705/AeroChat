@@ -4,25 +4,44 @@
 #include <sstream>
 #include <stdexcept>
 #include <iostream>
+#include <iomanip>
+#include <cstring>
+#include <sys/stat.h>
 
 AsyncLog::AsyncLog()
-    : running_(false), flushInterval_(3), buffer_(BUFFER_SIZE), nextBuffer_(BUFFER_SIZE) {
+    : running_(false),
+      flushInterval_(3),
+      maxFileSize_(100 * 1024 * 1024),   // 默认100MB
+      buffer_(BUFFER_SIZE),
+      nextBuffer_(BUFFER_SIZE),
+      minLevel_(LogLevel::INFO)          // 默认INFO及以上
+{
     buffer_.clear();   // size = 0, capacity = BUFFER_SIZE
     nextBuffer_.clear();
 }
 
-void AsyncLog::init(const std::string& filename, int flushInterval) {
+void AsyncLog::init(const std::string& filename, int flushInterval, size_t maxFileSizeMB) {
     filename_ = filename;
     flushInterval_ = flushInterval;
+    maxFileSize_ = maxFileSizeMB * 1024 * 1024;
+    
     file_.open(filename, std::ios::app | std::ios::out);
     if (!file_.is_open()) {
         throw std::runtime_error("Log file open failed: " + filename);
     }
+    
     running_ = true;
     thread_ = std::thread(&AsyncLog::threadFunc, this);
 }
 
+void AsyncLog::setLevel(LogLevel level) {
+    minLevel_ = level;
+}
+
 void AsyncLog::write(LogLevel level, const std::string& msg) {
+    // 级别过滤
+    if (level < minLevel_) return;
+    
     // 格式化日志行：时间 + 级别 + 消息
     auto now = std::chrono::system_clock::now();
     auto t = std::chrono::system_clock::to_time_t(now);
@@ -33,11 +52,12 @@ void AsyncLog::write(LogLevel level, const std::string& msg) {
         case LogLevel::WARN:  levelStr = "[WARN]";  break;
         case LogLevel::ERROR: levelStr = "[ERROR]"; break;
     }
-
-    std::stringstream ss;
-    ss << std::ctime(&t) << " " << levelStr << " " << msg << "\n";
-    std::string logLine = ss.str();
-
+    
+    // 使用局部缓冲区减少锁内操作
+    char timeBuf[32];
+    std::strftime(timeBuf, sizeof(timeBuf), "%a %b %d %H:%M:%S %Y", std::localtime(&t));
+    std::string logLine = std::string(timeBuf) + " " + levelStr + " " + msg + "\n";
+    
     std::unique_lock<std::mutex> lock(mutex_);
     // 如果当前缓冲区剩余空间不足，先交换
     if (buffer_.size() + logLine.size() > BUFFER_SIZE) {
@@ -58,6 +78,7 @@ void AsyncLog::write(LogLevel level, const std::string& msg) {
 }
 
 void AsyncLog::stop() {
+    if (!running_) return;
     running_ = false;
     cond_.notify_one();
     if (thread_.joinable()) {
@@ -100,7 +121,7 @@ void AsyncLog::threadFunc() {
             // 取出所有待写缓冲区
             buffersToWrite.swap(buffers_);
         }
-
+        
         // 写入文件（无锁）
         for (const auto& buf : buffersToWrite) {
             if (!buf.empty()) {
@@ -108,7 +129,10 @@ void AsyncLog::threadFunc() {
             }
         }
         file_.flush();
-
+        
+        // 检查文件大小并轮转
+        rotateFile();
+        
         // 回收缓冲区，用于备用
         {
             std::unique_lock<std::mutex> lock(mutex_);
@@ -119,6 +143,38 @@ void AsyncLog::threadFunc() {
                 }
                 // 否则丢弃（内存自动释放）
             }
+        }
+    }
+}
+
+void AsyncLog::rotateFile() {
+    // 获取当前文件大小
+    std::streampos pos = file_.tellp();
+    if (pos == std::streampos(-1)) {
+        // 获取失败，可能文件已关闭
+        return;
+    }
+    if (static_cast<size_t>(pos) >= maxFileSize_) {
+        // 关闭当前文件
+        file_.close();
+        // 生成备份文件名（原文件名 + 时间戳）
+        auto now = std::chrono::system_clock::now();
+        auto t = std::chrono::system_clock::to_time_t(now);
+        std::stringstream ss;
+        ss << filename_ << "." << t;
+        std::string backupName = ss.str();
+        if (rename(filename_.c_str(), backupName.c_str()) != 0) {
+            // 重命名失败，尝试恢复原文件继续写
+            file_.open(filename_, std::ios::app | std::ios::out);
+            return;
+        }
+        // 重新打开原文件
+        file_.open(filename_, std::ios::app | std::ios::out);
+        if (!file_.is_open()) {
+            // 严重错误：无法打开新日志文件
+            // 这里可设置标志或直接终止
+            std::cerr << "FATAL: Cannot open log file " << filename_ << std::endl;
+            running_ = false;
         }
     }
 }

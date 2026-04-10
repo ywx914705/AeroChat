@@ -46,6 +46,5 @@ private:
     bool started_;//bool类型,表示线程是否启动 ture:启动了 false:没有启动
     bool joined_;//是否调用join(是否调用linux中的pthrea_join()函数)
     static std::atomic_int numCreated_;//已经创建线程的数量,静态原子变量
-
     int coreId_ = -1;//期望绑定的 CPU 核心编号，-1 表示不绑定
 };

@@ -157,6 +157,7 @@ bool DBManager::queryAccount(const std::string& account,
     return found;
 }
 
+# if 0
 bool DBManager::queryUsernameByAccount(const std::string &account,
                                        std::string &username) {
     MYSQL *conn = getConnection();
@@ -220,6 +221,8 @@ bool DBManager::queryUsernameByAccount(const std::string &account,
     releaseConnection(conn);
     return found;
 }
+#endif 
+
 
 bool DBManager::updateUsername(const std::string &account,
                                const std::string &new_username) {
@@ -387,11 +390,6 @@ bool DBManager::updateUserAvatar(const std::string &account,
     return success;
 }
 
-std::string DBManager::getError() const {
-    return error_;
-}
-
-// 修改：插入用户并返回自增ID
 bool DBManager::insertUser(const std::string& account, const std::string& hashedPassword,
                            const std::string& username, int& userId) {
     MYSQL* conn = getConnection();
@@ -460,7 +458,6 @@ bool DBManager::insertUser(const std::string& account, const std::string& hashed
         return false;
     }
 
-    // 获取自增ID
     userId = mysql_stmt_insert_id(stmt);
     LOG_INFO("[insertUser] new user id = " + std::to_string(userId));
 
@@ -473,10 +470,13 @@ bool DBManager::insertUser(const std::string& account, const std::string& hashed
     return true;
 }
 
+//群组成员相关 
+
 bool DBManager::addGroupMember(int groupId, int userId) {
     MYSQL* conn = getConnection();
     if (!conn) {
         error_ = "No database connection";
+        LOG_ERROR("[addGroupMember] 无法获取数据库连接");
         return false;
     }
 
@@ -484,12 +484,14 @@ bool DBManager::addGroupMember(int groupId, int userId) {
     MYSQL_STMT* stmt = mysql_stmt_init(conn);
     if (!stmt) {
         error_ = mysql_error(conn);
+        LOG_ERROR("[addGroupMember] stmt init 失败: " + error_);
         releaseConnection(conn);
         return false;
     }
 
     if (mysql_stmt_prepare(stmt, sql, strlen(sql)) != 0) {
         error_ = mysql_stmt_error(stmt);
+        LOG_ERROR("[addGroupMember] prepare 失败: " + error_);
         mysql_stmt_close(stmt);
         releaseConnection(conn);
         return false;
@@ -504,6 +506,7 @@ bool DBManager::addGroupMember(int groupId, int userId) {
 
     if (mysql_stmt_bind_param(stmt, params) != 0) {
         error_ = mysql_stmt_error(stmt);
+        LOG_ERROR("[addGroupMember] bind param 失败: " + error_);
         mysql_stmt_close(stmt);
         releaseConnection(conn);
         return false;
@@ -511,15 +514,17 @@ bool DBManager::addGroupMember(int groupId, int userId) {
 
     if (mysql_stmt_execute(stmt) != 0) {
         error_ = mysql_stmt_error(stmt);
+        LOG_ERROR("[addGroupMember] execute 失败: " + error_);
         mysql_stmt_close(stmt);
         releaseConnection(conn);
         return false;
     }
 
-    bool success = (mysql_stmt_affected_rows(stmt) > 0);
+    int affected = mysql_stmt_affected_rows(stmt);
+    LOG_INFO("[addGroupMember] group=" + std::to_string(groupId) + " user=" + std::to_string(userId) + " affected=" + std::to_string(affected));
     mysql_stmt_close(stmt);
     releaseConnection(conn);
-    return success;
+    return true;
 }
 
 bool DBManager::removeGroupMember(int groupId, int userId) {
@@ -685,6 +690,71 @@ std::vector<int> DBManager::getGroupMembersFromDB(int groupId) {
     releaseConnection(conn);
     return members;
 }
+
+// 获取用户加入的所有群组ID
+std::vector<int> DBManager::getUserGroupsFromDB(int userId) {
+    std::vector<int> groups;
+    MYSQL* conn = getConnection();
+    if (!conn) {
+        error_ = "No database connection";
+        LOG_ERROR("[getUserGroupsFromDB] 无法获取数据库连接");
+        return groups;
+    }
+
+    const char* sql = "SELECT group_id FROM group_members WHERE user_id = ?";
+    MYSQL_STMT* stmt = mysql_stmt_init(conn);
+    if (!stmt) {
+        error_ = mysql_error(conn);
+        LOG_ERROR("[getUserGroupsFromDB] mysql_stmt_init 失败: " + error_);
+        releaseConnection(conn);
+        return groups;
+    }
+
+    if (mysql_stmt_prepare(stmt, sql, strlen(sql)) != 0) {
+        error_ = mysql_stmt_error(stmt);
+        LOG_ERROR("[getUserGroupsFromDB] prepare 失败: " + error_);
+        mysql_stmt_close(stmt);
+        releaseConnection(conn);
+        return groups;
+    }
+
+    MYSQL_BIND param;
+    memset(&param, 0, sizeof(param));
+    param.buffer_type = MYSQL_TYPE_LONG;
+    param.buffer = &userId;
+    if (mysql_stmt_bind_param(stmt, &param) != 0) {
+        error_ = mysql_stmt_error(stmt);
+        LOG_ERROR("[getUserGroupsFromDB] bind param 失败: " + error_);
+        mysql_stmt_close(stmt);
+        releaseConnection(conn);
+        return groups;
+    }
+
+    if (mysql_stmt_execute(stmt) != 0) {
+        error_ = mysql_stmt_error(stmt);
+        LOG_ERROR("[getUserGroupsFromDB] execute 失败: " + error_);
+        mysql_stmt_close(stmt);
+        releaseConnection(conn);
+        return groups;
+    }
+
+    MYSQL_BIND result;
+    int groupId = 0;
+    memset(&result, 0, sizeof(result));
+    result.buffer_type = MYSQL_TYPE_LONG;
+    result.buffer = &groupId;
+    mysql_stmt_bind_result(stmt, &result);
+    mysql_stmt_store_result(stmt);
+
+    while (mysql_stmt_fetch(stmt) == 0) {
+        groups.push_back(groupId);
+    }
+
+    mysql_stmt_close(stmt);
+    releaseConnection(conn);
+    return groups;
+}
+
 std::vector<int> DBManager::getAllUserIds(int limit) {
     std::vector<int> ids;
     MYSQL* conn = getConnection();
@@ -752,4 +822,59 @@ std::vector<int> DBManager::getAllUserIds(int limit) {
     mysql_stmt_close(stmt);
     releaseConnection(conn);
     return ids;
+}
+
+std::string DBManager::getError() const {
+    return error_;
+}
+
+//新增用户注册功能           判断账号是否存在
+bool DBManager::isAccountExist(const std::string& account){ 
+  MYSQL* conn = getConnection();
+    if (!conn) {
+        error_ = "No database connection";
+        return false;
+    }
+
+    const char* sql = "SELECT 1 FROM chat_users WHERE account = ? LIMIT 1";
+    MYSQL_STMT* stmt = mysql_stmt_init(conn);
+    if (!stmt) {
+        error_ = mysql_error(conn);
+        releaseConnection(conn);
+        return false;
+    }
+
+    if (mysql_stmt_prepare(stmt, sql, strlen(sql)) != 0) {
+        error_ = mysql_stmt_error(stmt);
+        mysql_stmt_close(stmt);
+        releaseConnection(conn);
+        return false;
+    }
+
+    MYSQL_BIND param;
+    memset(&param, 0, sizeof(param));
+    param.buffer_type = MYSQL_TYPE_STRING;
+    param.buffer = (char*)account.c_str();
+    param.buffer_length = account.length();
+    if (mysql_stmt_bind_param(stmt, &param) != 0) {
+        error_ = mysql_stmt_error(stmt);
+        mysql_stmt_close(stmt);
+        releaseConnection(conn);
+        return false;
+    }
+
+    if (mysql_stmt_execute(stmt) != 0) {
+        error_ = mysql_stmt_error(stmt);
+        mysql_stmt_close(stmt);
+        releaseConnection(conn);
+        return false;
+    }
+
+    // 不需要绑定结果，只需判断是否有行返回
+    mysql_stmt_store_result(stmt);
+    bool exists = (mysql_stmt_num_rows(stmt) > 0);
+
+    mysql_stmt_close(stmt);
+    releaseConnection(conn);
+    return exists;
 }

@@ -17,6 +17,10 @@ Poller::Poller(EventLoop *loop)
     abort();
   }
 }
+Poller::~Poller(){
+   if(epollfd_>=0)
+   close(epollfd_);
+}
 
 void Poller::updateChannel(Channel *channel) {
   if (!channel || channel->fd() < 0) {

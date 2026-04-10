@@ -1,23 +1,23 @@
 #pragma once
 #include <mysql/mysql.h>
 #include <string>
-#include <queue>
 #include <mutex>
 #include <condition_variable>
-#include <thread>
+#include <atomic>
+#include "concurrentqueue.hpp"
 
 class ConnectionPool {
 public:
-    static ConnectionPool& getInstance();//单例模式
+    static ConnectionPool& getInstance();//单例模式,全局唯一连接池
 
     bool init(const std::string& host, const std::string& user,
               const std::string& passwd, const std::string& db,
-              unsigned int port = 3306, int poolSize = 128);
+              unsigned int port = 3306, int poolSize = 128);//初始化连接池
 
-    MYSQL* getConnection();//获取一个连接
-    void releaseConnection(MYSQL* conn);//归还连接
-    void close();
-
+    MYSQL* getConnection();//从连接池中获取一个连接
+    void releaseConnection(MYSQL* conn);//归还一个连接
+    void close();//关闭
+    //禁止拷贝/赋值操作
     ConnectionPool(const ConnectionPool&) = delete;
     ConnectionPool& operator=(const ConnectionPool&) = delete;
 
@@ -25,18 +25,18 @@ private:
     ConnectionPool() = default;
     ~ConnectionPool() { close(); }
 
-    MYSQL* createConnection();//创建当连接
-    MYSQL* ensureValidConnection(MYSQL* conn);//验证并修复连接
+    MYSQL* createConnection();//创建一条mysql连接
+    MYSQL* ensureValidConnection(MYSQL* conn);//检验连接是否有效
 
-    std::string host_;//数据库IP
-    std::string user_;//用户名
-    std::string passwd_;//密码
-    std::string db_;//数据库名
-    unsigned int port_;//端口号(默认3306)
-    int poolSize_;//连接池大小
+    std::string host_;
+    std::string user_;
+    std::string passwd_;
+    std::string db_;
+    unsigned int port_;
+    int poolSize_;
 
-    std::queue<MYSQL*> connections_;//空闲连接队列
-    std::mutex mutex_;//保护队列的锁
-    std::condition_variable cv_;//条件变量,用于等待连接
-    bool stopped_ = false;//连接池是否关闭的标志
+    moodycamel::ConcurrentQueue<MYSQL*> connections_;//存储所有连接的一个无锁队列
+    std::atomic<bool> stopped_{false};//是否停止
+    std::mutex cv_mutex_;
+    std::condition_variable cv_;
 };

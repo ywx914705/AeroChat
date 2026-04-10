@@ -12,7 +12,7 @@ bindCurrentThreadToCore:
 
 std::atomic_int Thread::numCreated_(0);
 
-Thread::Thread(ThreadFunc func, const std::string& name)
+Thread::Thread(ThreadFunc func, const std::string& name)//第一个参数为一个回调函数,第二个为name,线程的名字
     : func_(std::move(func))//使用move(避免了拷贝)
     , name_(name)
     , tid_(0)

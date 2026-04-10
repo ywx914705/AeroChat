@@ -7,6 +7,10 @@
 #include <memory>
 #include <vector>
 #include <unordered_map>
+#include <functional>
+#include <thread>
+#include <atomic>
+
 /*
 RedisClient顾名思义就是AeroChat中负责与Redis服务器交互,RedisClient封装了hiredis c库,并维护了一个连接池来
 复用TCP连接
@@ -28,7 +32,6 @@ RedisClient顾名思义就是AeroChat中负责与Redis服务器交互,RedisClien
 class RedisClient {
 public:
     static RedisClient& instance();
-
     bool init(const std::string& host, int port, int poolSize = 128);
     redisContext* getContext();
     void releaseContext(redisContext* ctx);
@@ -46,6 +49,8 @@ public:
     bool sismember(const std::string& key, const std::string& member);
     std::vector<std::string> smembers(const std::string& key);
     long long scard(const std::string& key);
+    // SSCAN 迭代集合，返回下一次的 cursor，并填充结果列表
+    size_t sscan(const std::string& key, size_t cursor, std::vector<std::string>& result, int count = 10);
 
     // List 操作
     long long rpush(const std::string& key, const std::string& value);

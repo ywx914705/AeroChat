@@ -60,8 +60,9 @@ void ChatServer::handleAccept() {
             continue;
         }
         EventLoop* subLoop = threadPool_->getNextLoop();
-        subLoop->runInLoop([this, connFd, subLoop] {
-            handleNewConn(connFd, subLoop);
+		//投递任务
+        subLoop->runInLoop([this, connFd, subLoop] {  
+            handleNewConn(connFd, subLoop); 
         });
     }
 }

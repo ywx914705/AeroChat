@@ -1,7 +1,8 @@
 /*
 EventLoopThreadPool是AeroChat中管理多个子Reactor线程的核心类,它封装了多个EventLoopThead,对外提供
 统一的接口来获取子Reactor的EventLoop,负责新连接的负载均衡
-*/#ifndef EVENTLOOPTHREADPOOL_HPP
+*/
+#ifndef EVENTLOOPTHREADPOOL_HPP
 #define EVENTLOOPTHREADPOOL_HPP
 
 #include <vector>
@@ -16,7 +17,7 @@ public:
     EventLoopThreadPool(EventLoop* baseLoop, int numThreads);
     ~EventLoopThreadPool() = default;
 
-    void start();//开启所以线程,进行loop
+    void start();//开启所有线程,进行loop
     EventLoop* getNextLoop();          // 无参获取下一个loop
     EventLoop* getLoop(int idx);       // 根据索引获取指定loop
     int getThreadNum() const;          // 获取线程数（仅声明）

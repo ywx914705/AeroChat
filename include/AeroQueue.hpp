@@ -11,6 +11,8 @@ AeroQueue是AeroChat项目中一个轻量级的异步任务队列,
 #include <functional>
 #include <thread>
 #include <vector>
+#include <mutex>
+#include <condition_variable>
 #include "concurrentqueue.hpp"
 
 class AeroQueue {
@@ -34,4 +36,8 @@ private:
     //来存储待处理的任务，实现多生产者多消费者模式，无需加锁
     
     std::atomic<bool> stopped_{false};//停止标志
+
+    // 新增：用于唤醒工作线程的条件变量（避免固定休眠导致的延迟）
+    std::mutex cv_mutex_;
+    std::condition_variable cv_;
 };
