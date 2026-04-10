@@ -5,7 +5,7 @@
 ![C++](https://img.shields.io/badge/C%2B%2B-17-blue)
 ![Linux](https://img.shields.io/badge/Linux-Ready-green)
 
-AeroChat 是一个基于 **Reactor模式** 的 C++ 高性能聊天服务器，参考了 Muduo 与 Netty 的设计思想，采用 **主从 Reactor + 多线程** 架构，实现了高并发、低延迟的实时通信。项目集成了 MySQL 连接池、Redis 缓存与发布订阅、无锁队列、异步日志等组件，并提供基于 Vue3 + WebSocket 的现代化前端界面。
+AeroChat 是一个基于 **Reactor模式** 的 C++ 高性能聊天服务器，参考了 Muduo 与 Netty 的设计思想，基于One Loop Per Thread的设计理念，采用 **主从 Reactor + 多线程** 架构，实现了高并发、低延迟的实时通信。项目集成了 MySQL 连接池、Redis 缓存与发布订阅、无锁队列、异步日志等组件，并提供基于 Vue3 + WebSocket 的现代化前端界面。
 
 > 后端使用纯 TCP 协议，前端通过 WebSocket 进行中转通信。
 
@@ -27,8 +27,8 @@ AeroChat 是一个基于 **Reactor模式** 的 C++ 高性能聊天服务器，�
 
 | 类别       | 技术                                                         |
 | ---------- | ------------------------------------------------------------ |
-| 语言       | C++17                                                        |
-| 网络模型   | epoll（ET 模式）、非阻塞 I/O                                 |
+| 语言       | C++11以及部分c++14/c++11                                                  |
+| 网络模型   | 主从Reactor,epoll（ET 模式）、非阻塞 I/O                                 |
 | 并发       | std::thread、std::atomic、moodycamel::ConcurrentQueue |
 | 数据库     | MySQL 8.0 + MySQL Connector/C API、Redis 6.0 + hiredis       |
 | 日志       | 自研异步日志（双缓冲）                                       |
