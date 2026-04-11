@@ -967,7 +967,7 @@
             return;
         }
         const { createApp, ref, reactive, computed, onMounted, onUnmounted, nextTick } = Vue;
-        const WS_URL = "ws://26.tcp.cpolar.top:14145";
+        const WS_URL = "ws://9.tcp.vip.cpolar.cn:10161";
         const defaultAvatar = "https://cdn-icons-png.flaticon.com/512/3135/3135715.png";
 
         const toTimestamp = (ts) => {
@@ -1103,6 +1103,55 @@
 
                 const pendingJoinedGroups = ref(null);
 
+                // 修正私聊会话中的数字ID为真实账号，合并重复会话
+                const fixPrivateConvIds = () => {
+                    let changed = false;
+                    const mergedMap = new Map();
+                    for (let conv of privateConvs.value) {
+                        let id = conv.id;
+                        let realAccount = null;
+                        if (/^\d+$/.test(id)) {
+                            const uid = parseInt(id);
+                            if (userIdToAccount.has(uid)) {
+                                realAccount = userIdToAccount.get(uid);
+                            }
+                        } else {
+                            const found = onlineUsers.value.find(u => u.username === id);
+                            if (found) realAccount = found.account;
+                            else {
+                                for (let [uid, acc] of userIdToAccount.entries()) {
+                                    const username = onlineUsers.value.find(u => u.account === acc)?.username;
+                                    if (username === id) { realAccount = acc; break; }
+                                }
+                            }
+                        }
+                        if (realAccount && realAccount !== id) {
+                            conv.id = realAccount;
+                            conv.targetAccount = realAccount;
+                            changed = true;
+                        }
+                        const key = conv.id;
+                        if (mergedMap.has(key)) {
+                            const existing = mergedMap.get(key);
+                            if (conv.lastTime > existing.lastTime) {
+                                existing.lastMsg = conv.lastMsg;
+                                existing.lastTime = conv.lastTime;
+                            }
+                            existing.unread = Math.max(existing.unread, conv.unread);
+                            existing.messages = [...existing.messages, ...conv.messages];
+                            existing.messages.sort((a,b)=> (a.sendTime||0)-(b.sendTime||0));
+                            if (!existing.avatar && conv.avatar) existing.avatar = conv.avatar;
+                            if (!existing.targetUsername && conv.targetUsername) existing.targetUsername = conv.targetUsername;
+                        } else {
+                            mergedMap.set(key, conv);
+                        }
+                    }
+                    if (changed || mergedMap.size !== privateConvs.value.length) {
+                        privateConvs.value = Array.from(mergedMap.values());
+                        privateConvs.value.sort((a,b)=> (b.lastTime||0)-(a.lastTime||0));
+                    }
+                };
+
                 const initGroupStores = () => {
                     for (let i = 1; i <= 8; i++) {
                         if (!groupMessages[i]) groupMessages[i] = [];
@@ -1155,30 +1204,55 @@
                 };
 
                 const findOrCreatePrivateConv = (targetAccount, targetUsername, avatar) => {
-                    if (!targetAccount) return null;
+                    if (!targetAccount && !targetUsername) return null;
                     let conv = privateConvs.value.find(c => c.id === targetAccount);
-                    if (!conv) {
-                        const displayName = targetUsername || targetAccount;
-                        conv = {
-                            id: targetAccount,
-                            type: 'single',
-                            targetAccount: targetAccount,
-                            targetUsername: targetUsername || targetAccount,
-                            displayName: displayName,
-                            avatar: avatar || '',
-                            lastMsg: '',
-                            lastTime: 0,
-                            unread: 0,
-                            messages: []
-                        };
-                        privateConvs.value.unshift(conv);
-                    } else {
+                    if (conv) {
                         if (targetUsername && conv.displayName !== targetUsername) conv.displayName = targetUsername;
                         if (avatar && conv.avatar !== avatar) conv.avatar = avatar;
                         conv.targetUsername = targetUsername || conv.targetUsername;
-                        conv.targetAccount = targetAccount;
-                        if (conv.type !== 'single') conv.type = 'single';
+                        return conv;
                     }
+                    let realAccount = targetAccount;
+                    if (/^\d+$/.test(targetAccount)) {
+                        const uid = parseInt(targetAccount);
+                        if (userIdToAccount.has(uid)) realAccount = userIdToAccount.get(uid);
+                        else realAccount = null;
+                    }
+                    if (realAccount) {
+                        conv = privateConvs.value.find(c => c.id === realAccount);
+                        if (conv) {
+                            if (targetUsername && conv.displayName !== targetUsername) conv.displayName = targetUsername;
+                            if (avatar && conv.avatar !== avatar) conv.avatar = avatar;
+                            return conv;
+                        }
+                    }
+                    if (targetUsername) {
+                        conv = privateConvs.value.find(c => c.targetUsername === targetUsername || c.displayName === targetUsername);
+                        if (conv) {
+                            if (realAccount && conv.id !== realAccount) {
+                                conv.id = realAccount;
+                                conv.targetAccount = realAccount;
+                            }
+                            if (avatar && conv.avatar !== avatar) conv.avatar = avatar;
+                            return conv;
+                        }
+                    }
+                    const finalId = realAccount || targetUsername;
+                    if (!finalId) return null;
+                    const displayName = targetUsername || finalId;
+                    conv = {
+                        id: finalId,
+                        type: 'single',
+                        targetAccount: finalId,
+                        targetUsername: targetUsername || finalId,
+                        displayName: displayName,
+                        avatar: avatar || '',
+                        lastMsg: '',
+                        lastTime: 0,
+                        unread: 0,
+                        messages: []
+                    };
+                    privateConvs.value.unshift(conv);
                     return conv;
                 };
 
@@ -1239,7 +1313,9 @@
                         msgId: msgObj.msgId, fromUserId: msgObj.from,
                         fromUsername: msgObj.from_username || (msgObj.from === currentUser.userId ? currentUser.username : '用户'),
                         fromAvatar: msgObj.from_avatar || '', content: msgObj.content,
-                        sendTime: toTimestamp(msgObj.sendTime) || Math.floor(Date.now()/1000), isSelf: isSelf, pending: false
+                        sendTime: toTimestamp(msgObj.sendTime) || Math.floor(Date.now()/1000),
+                        isSelf: isSelf,
+                        pending: false
                     };
                     if (type === 'group') {
                         const gid = parseInt(id);
@@ -1283,7 +1359,11 @@
                     if (type === 'group') {
                         const gid = parseInt(id);
                         if (!groupMessages[gid]) groupMessages[gid] = [];
-                        groupMessages[gid].push({ msgId: tempId, fromUserId: currentUser.userId, fromUsername: currentUser.username, fromAvatar: currentUser.avatarUrl, content, sendTime: now, isSelf: true, pending: true });
+                        groupMessages[gid].push({ 
+                            msgId: tempId, fromUserId: currentUser.userId, 
+                            fromUsername: currentUser.username, fromAvatar: currentUser.avatarUrl, 
+                            content, sendTime: now, isSelf: true, pending: true 
+                        });
                         groupMessages[gid].sort((a,b)=> (a.sendTime||0)-(b.sendTime||0));
                         groupLastMsg[gid] = content;
                         groupLastTime[gid] = now;
@@ -1300,7 +1380,11 @@
                     } else {
                         const conv = privateConvs.value.find(c => c.id === id);
                         if (conv) {
-                            conv.messages.push({ msgId: tempId, fromUserId: currentUser.userId, fromUsername: currentUser.username, fromAvatar: currentUser.avatarUrl, content, sendTime: now, isSelf: true, pending: true });
+                            conv.messages.push({ 
+                                msgId: tempId, fromUserId: currentUser.userId, 
+                                fromUsername: currentUser.username, fromAvatar: currentUser.avatarUrl, 
+                                content, sendTime: now, isSelf: true, pending: true 
+                            });
                             conv.messages.sort((a,b)=> (a.sendTime||0)-(b.sendTime||0));
                             conv.lastMsg = content;
                             conv.lastTime = now;
@@ -1375,6 +1459,7 @@
                         }
                         privateConvs.value = Array.from(convMap.values());
                         privateConvs.value.sort((a,b)=> (b.lastTime||0)-(a.lastTime||0));
+                        fixPrivateConvIds();
                     } else if (type === 'join_group' && json.status === 'success') {
                         const channel = allChannels.value.find(c => c.id === json.groupId);
                         if (channel) {
@@ -1398,6 +1483,7 @@
                         for (const u of (users || [])) {
                             if (u.userId) userIdToAccount.set(u.userId, u.account);
                         }
+                        fixPrivateConvIds();
                     } else if (type === 'online_update') {
                         const { action, account, username, avatar_url } = json;
                         if (action === 'join') {
@@ -1408,8 +1494,13 @@
                         }
                     } else if (type === 'group_message') {
                         if (json.groupId >= 1 && json.groupId <= 8) {
-                            addOrUpdateMessage('group', json.groupId, { from: json.from, from_username: json.from_username, from_avatar: json.from_avatar, content: json.content, msgId: json.msgId, sendTime: json.sendTime }, json.from === currentUser.userId);
-                            if (currentConv.value && currentConv.value.type === 'group' && currentConv.value.id == json.groupId) nextTick(() => { const el = document.querySelector('.message-list'); if (el) el.scrollTop = el.scrollHeight; });
+                            const isSelf = (json.from === currentUser.userId);
+                            addOrUpdateMessage('group', json.groupId, { 
+                                from: json.from, from_username: json.from_username, from_avatar: json.from_avatar, 
+                                content: json.content, msgId: json.msgId, sendTime: json.sendTime 
+                            }, isSelf);
+                            if (currentConv.value && currentConv.value.type === 'group' && currentConv.value.id == json.groupId) 
+                                nextTick(() => { const el = document.querySelector('.message-list'); if (el) el.scrollTop = el.scrollHeight; });
                         }
                     } else if (type === 'single_message') {
                         let targetAccount = '', targetUsername = '';
@@ -1426,23 +1517,41 @@
                         const conv = findOrCreatePrivateConv(targetAccount, targetUsername, json.from_avatar);
                         if (conv) {
                             const isSelf = (json.from === currentUser.userId);
-                            addOrUpdateMessage('single', conv.id, { from: json.from, from_username: json.from_username, from_avatar: json.from_avatar, content: json.content, msgId: json.msgId, sendTime: json.sendTime }, isSelf);
+                            addOrUpdateMessage('single', conv.id, { 
+                                from: json.from, from_username: json.from_username, from_avatar: json.from_avatar, 
+                                content: json.content, msgId: json.msgId, sendTime: json.sendTime 
+                            }, isSelf);
                             if (!isSelf && (!currentConv.value || currentConv.value.id !== conv.id || currentConv.value.type !== 'single')) {
                                 showToast(`新消息来自 ${json.from_username}`);
                             }
-                            if (currentConv.value && currentConv.value.type === 'single' && currentConv.value.id === conv.id) nextTick(() => { const el = document.querySelector('.message-list'); if (el) el.scrollTop = el.scrollHeight; });
+                            if (currentConv.value && currentConv.value.type === 'single' && currentConv.value.id === conv.id) 
+                                nextTick(() => { const el = document.querySelector('.message-list'); if (el) el.scrollTop = el.scrollHeight; });
                         }
                     } else if (type === 'single_message_ack') {
-                        // 已发送确认，无需额外处理
+                        // 已发送确认
                     } else if (type === 'offline_messages') {
                         let offlineCount = 0;
                         for (let msg of (json.messages || [])) {
+                            // 关键修复：根据发送者ID判断是否为自己发送的消息
+                            const isSelf = (msg.from === currentUser.userId);
                             if (msg.type === 0 && msg.groupId >=1 && msg.groupId<=8) {
-                                addOrUpdateMessage('group', msg.groupId, { from: msg.from, from_username: msg.from_username, from_avatar: msg.from_avatar, content: msg.content, msgId: msg.msgId, sendTime: msg.sendTime }, false);
+                                addOrUpdateMessage('group', msg.groupId, { 
+                                    from: msg.from, from_username: msg.from_username, from_avatar: msg.from_avatar, 
+                                    content: msg.content, msgId: msg.msgId, sendTime: msg.sendTime 
+                                }, isSelf);
                             } else if (msg.type === 1) {
-                                const conv = findOrCreatePrivateConv(String(msg.from), msg.from_username, msg.from_avatar);
+                                let targetAccount = String(msg.from);
+                                if (/^\d+$/.test(targetAccount) && userIdToAccount.has(parseInt(targetAccount))) {
+                                    targetAccount = userIdToAccount.get(parseInt(targetAccount));
+                                } else if (/^\d+$/.test(targetAccount) && msg.from_username) {
+                                    targetAccount = msg.from_username;
+                                }
+                                const conv = findOrCreatePrivateConv(targetAccount, msg.from_username, msg.from_avatar);
                                 if (conv) {
-                                    addOrUpdateMessage('single', conv.id, { from: msg.from, from_username: msg.from_username, from_avatar: msg.from_avatar, content: msg.content, msgId: msg.msgId, sendTime: msg.sendTime }, false);
+                                    addOrUpdateMessage('single', conv.id, { 
+                                        from: msg.from, from_username: msg.from_username, from_avatar: msg.from_avatar, 
+                                        content: msg.content, msgId: msg.msgId, sendTime: msg.sendTime 
+                                    }, isSelf);
                                     offlineCount++;
                                 }
                             }
@@ -1451,7 +1560,11 @@
                     } else if (type === 'load_history') {
                         const history = json.messages || [], targetType = json.targetType, targetId = json.targetId;
                         if (targetType === 'private') {
-                            const conv = privateConvs.value.find(c => c.id === targetId);
+                            let conv = privateConvs.value.find(c => c.id === targetId);
+                            if (!conv && /^\d+$/.test(targetId) && userIdToAccount.has(parseInt(targetId))) {
+                                const realAccount = userIdToAccount.get(parseInt(targetId));
+                                conv = privateConvs.value.find(c => c.id === realAccount);
+                            }
                             if (conv) {
                                 const existingIds = new Set(conv.messages.map(m=>m.msgId));
                                 const newMsgs = history.filter(h=>!existingIds.has(h.msgId)).map(h=>({
@@ -1491,6 +1604,7 @@
                         for (const u of searchResults.value) {
                             if (u.userId) userIdToAccount.set(u.userId, u.account);
                         }
+                        fixPrivateConvIds();
                     } else if (type === 'user_profile') {
                         profileModal.username = json.username; profileModal.account = json.account; profileModal.avatarUrl = json.avatar_url; profileModal.online = onlineUsers.value.some(u => u.account === json.account); profileModal.visible = true;
                     } else if (type === 'update_avatar' && json.status === 'success') {
@@ -1509,6 +1623,15 @@
                         else conv.type = 'single';
                     }
                     if (currentConv.value && currentConv.value.id === conv.id && currentConv.value.type === conv.type) return;
+                    if (conv.type === 'single' && /^\d+$/.test(conv.id) && userIdToAccount.has(parseInt(conv.id))) {
+                        const realAccount = userIdToAccount.get(parseInt(conv.id));
+                        const existingConv = privateConvs.value.find(c => c.id === realAccount);
+                        if (existingConv) conv = existingConv;
+                        else {
+                            conv.id = realAccount;
+                            conv.targetAccount = realAccount;
+                        }
+                    }
                     currentConv.value = conv;
                     loadingHistory.value = true;
                     if (conv.type === 'group') {
