@@ -75,13 +75,73 @@ sudo apt-get install libssl-dev
 
 ### 安装 RapidJSON（头文件库）
 sudo apt-get install rapidjson-dev
-### 2. 克隆源码
+### 2. 数据库配置
+## 数据库表结构：确保 MySQL 中已创建数据库 chat_db,然后use chat_db;之后直接执行下面的sql,复制粘贴即可。
+-- 1. 用户表
+CREATE TABLE `chat_users` (
+  `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '用户ID',
+  `account` VARCHAR(50) NOT NULL COMMENT '登录账号',
+  `password` VARCHAR(255) NOT NULL COMMENT '密码（存储哈希）',
+  `username` VARCHAR(50) NOT NULL COMMENT '显示昵称',
+  `avatar_url` VARCHAR(255) DEFAULT '' COMMENT '头像URL',
+  `created_at` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `updated_at` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  `bio` VARCHAR(255) DEFAULT '' COMMENT '个人简介',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `account` (`account`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='用户表';
+
+-- 2. 单聊消息表
+CREATE TABLE `chat_single_messages` (
+  `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '消息ID',
+  `from_account` VARCHAR(50) NOT NULL COMMENT '发送者账号',
+  `to_account` VARCHAR(50) NOT NULL COMMENT '接收者账号',
+  `from_username` VARCHAR(50) DEFAULT '' COMMENT '发送者昵称（冗余，避免联表）',
+  `avatar_url` VARCHAR(255) DEFAULT '' COMMENT '发送者头像（冗余）',
+  `content` TEXT NOT NULL COMMENT '消息内容',
+  `create_time` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP COMMENT '发送时间',
+  PRIMARY KEY (`id`),
+  KEY `idx_from_account` (`from_account`),
+  KEY `idx_to_account` (`to_account`),
+  KEY `idx_create_time` (`create_time`),
+  KEY `idx_from_to_time` (`from_account`,`to_account`,`create_time`),
+  KEY `idx_to_from_time` (`to_account`,`from_account`,`create_time`),
+  KEY `idx_accounts` (`from_account`,`to_account`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='单聊消息表';
+
+-- 3. 群聊消息表
+CREATE TABLE `chat_group_messages` (
+  `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '消息ID',
+  `from_account` VARCHAR(50) NOT NULL COMMENT '发送者账号',
+  `group_id` BIGINT NOT NULL COMMENT '群组ID',
+  `from_username` VARCHAR(50) DEFAULT '' COMMENT '发送者昵称（冗余）',
+  `avatar_url` VARCHAR(255) DEFAULT '' COMMENT '发送者头像（冗余）',
+  `content` TEXT NOT NULL COMMENT '消息内容',
+  `create_time` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP COMMENT '发送时间',
+  PRIMARY KEY (`id`),
+  KEY `idx_from_account` (`from_account`),
+  KEY `idx_create_time` (`create_time`),
+  KEY `idx_group_id` (`group_id`),
+  KEY `idx_group_time` (`group_id`,`create_time`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='群聊消息表';
+
+-- 4. 群组成员关系表
+CREATE TABLE `group_members` (
+  `group_id` BIGINT NOT NULL COMMENT '群组ID',
+  `user_id` BIGINT NOT NULL COMMENT '用户ID',
+  `joined_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '加入时间',
+  PRIMARY KEY (`group_id`,`user_id`),
+  UNIQUE KEY `unique_user_group` (`user_id`,`group_id`),
+  KEY `idx_user_id` (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='群组成员关系表';
+
+### 3. 克隆源码
 git clone  https://github.com/ywx914705/AeroChat.git
 
 <img width="1163" height="215" alt="image" src="https://github.com/user-attachments/assets/7203b123-4aa5-4f25-ab87-607f891e3b03" />
 
 cd AeroChat
-### 3. 构建build目录并编译
+### 4. 构建build目录并编译
 输入命令:  mkdir build && cd build 
 <img width="1314" height="85" alt="image" src="https://github.com/user-attachments/assets/e0f9ca88-4e0e-405f-a466-6ceb28ccd2e3" />
 进入build目录后执行cmake .. 
@@ -96,14 +156,12 @@ build目录下的server.log就是该服务器的日志信息
 ### 最后执行
 ./AeroChat 端口号 即可
 
-### 4. 配置
+### 5. 配置
 数据库：编辑 ChatServer.cc 或 ConnectionPool.cc 中的 MySQL 连接信息（默认 localhost，root，123456，chat_db）。
 
 Redis：默认连接 127.0.0.1:6379，如需修改请编辑 main.cc 中的 RedisClient::init 调用。
 
-数据库表结构：确保 MySQL 中已创建数据库 chat_db，并导入 sql/schema.sql（请根据源码中的 SQL 语句自行创建表，如 chat_users、chat_group_messages、chat_single_messages、group_members 等）。
-
-前端配置：打开index.html，修改 WebSocket 连接地址为你的服务器地址（例如 ws://your-server-ip:8000）。
+### 前端配置：打开index.html，修改 WebSocket 连接地址为你的服务器地址（例如 ws://your-server-ip:8000）。
 
 ### 5. 运行
 在 build 目录下执行
