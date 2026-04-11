@@ -2,7 +2,7 @@
 
 ![GitHub repo size](https://img.shields.io/github/repo-size/your-username/aerochat)
 ![GitHub license](https://img.shields.io/github/license/your-username/aerochat)
-![C++](https://img.shields.io/badge/C%2B%2B-17-blue)
+![C++](https://img.shields.io/badge/C%2B%2B-11-blue)
 ![Linux](https://img.shields.io/badge/Linux-Ready-green)
 
 AeroChat 是一个基于 **Reactor模式** 的 C++ 高性能聊天服务器，参考了 Muduo 与 Netty 的设计思想，基于One Loop Per Thread的设计理念，采用 **主从 Reactor + 多线程** 架构，实现了高并发、低延迟的实时通信。项目集成了 MySQL 连接池、Redis 缓存与发布订阅、无锁队列、异步日志等组件，并提供基于 Vue3 + WebSocket 的现代化前端界面。
