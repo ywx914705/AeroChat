@@ -163,7 +163,7 @@ Redis：默认连接 127.0.0.1:6379，如需修改请编辑 main.cc 中的 Redis
 
 ### 前端配置：打开index.html，修改 WebSocket 连接地址为你的服务器地址（例如 ws://your-server-ip:8000）。
 
-### 5. 运行
+### 6. 运行
 在 build 目录下执行
 ./bin/Aerochat 8000
 服务器将监听 8000 端口。
