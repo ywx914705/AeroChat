@@ -142,6 +142,7 @@ git clone  https://github.com/ywx914705/AeroChat.git
 
 cd AeroChat
 ### 4. 构建build目录并编译
+先把build目录删了rm -rf build 因为我上传的代码是执行完cmake ..的代码
 输入命令:  mkdir build && cd build 
 <img width="1314" height="85" alt="image" src="https://github.com/user-attachments/assets/e0f9ca88-4e0e-405f-a466-6ceb28ccd2e3" />
 进入build目录后执行cmake .. 
