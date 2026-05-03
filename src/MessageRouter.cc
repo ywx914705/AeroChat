@@ -4,6 +4,7 @@
 #include "DBManager.hpp"
 #include "EventLoop.hpp"
 #include "Log.hpp"
+#include "RedisClient.hpp"
 #include "rapidjson/document.h"
 #include "rapidjson/stringbuffer.h"
 #include "rapidjson/writer.h"
@@ -302,6 +303,14 @@ void MessageRouter::doGroupMessage(int fd, std::shared_ptr<User> user,
         return;
     }
 
+    // 更新频道最后消息缓存到 Redis
+    {
+        std::string cacheKey = "group:last_msg:" + std::to_string(groupId);
+        time_t now = time(nullptr);
+        RedisClient::instance().hset(cacheKey, "content", content.size() > 200 ? content.substr(0, 200) : content);
+        RedisClient::instance().hset(cacheKey, "time", std::to_string(static_cast<long long>(now)));
+    }
+
     auto members = group_.getGroupMembers(groupId);
     std::vector<int> onlineMembers;
     std::vector<int> offlineMembers;
@@ -478,13 +487,13 @@ void MessageRouter::doHeartbeat(int fd, std::shared_ptr<User> user) {
     ConnectionManager::instance().sendToUser(fd, "{\"type\":\"pong\"}\n");
 }
 
-// 分页获取在线用户
+// 分页获取在线用户（使用 Sorted Set 服务端分页，不再全量加载）
 void MessageRouter::doGetOnlineUsersPaginated(int fd, int page, int size) {
-    auto allOnline = session_.getAllOnlineUserInfos();
-    int total = (int)allOnline.size();
+    int total = session_.getOnlineCount();
     int start = (page - 1) * size;
-    int end = std::min(start + size, total);
-    if (start >= total) end = start;
+
+    // 使用 Sorted Set 服务端分页，只获取当前页数据
+    auto pageUsers = session_.getOnlineUsersPaginated(start, size);
 
     rapidjson::Document resp;
     resp.SetObject();
@@ -495,12 +504,11 @@ void MessageRouter::doGetOnlineUsersPaginated(int fd, int page, int size) {
     resp.AddMember("total", total, alloc);
 
     rapidjson::Value arr(rapidjson::kArrayType);
-    for (int i = start; i < end; ++i) {
-        const auto &[acc, uname, avatar] = allOnline[i];
+    for (const auto &info : pageUsers) {
         rapidjson::Value obj(rapidjson::kObjectType);
-        obj.AddMember("account", rapidjson::StringRef(acc.c_str()), alloc);
-        obj.AddMember("username", rapidjson::StringRef(uname.c_str()), alloc);
-        obj.AddMember("avatar_url", rapidjson::StringRef(avatar.c_str()), alloc);
+        obj.AddMember("account", rapidjson::StringRef(info.account.c_str()), alloc);
+        obj.AddMember("username", rapidjson::StringRef(info.username.c_str()), alloc);
+        obj.AddMember("avatar_url", rapidjson::StringRef(info.avatarUrl.c_str()), alloc);
         arr.PushBack(obj, alloc);
     }
     resp.AddMember("users", arr, alloc);
@@ -586,7 +594,7 @@ void MessageRouter::doLoadHistoryPaginated(int fd, std::shared_ptr<User> user,
         obj.AddMember("from_username", rapidjson::StringRef(msg.fromUsername.c_str()), alloc);
         obj.AddMember("from_avatar", rapidjson::StringRef(msg.fromAvatar.c_str()), alloc);
         obj.AddMember("content", rapidjson::StringRef(msg.content.c_str()), alloc);
-        obj.AddMember("sendTime", static_cast<int64_t>(msg.sendTime), alloc);
+        obj.AddMember("sendTime", static_cast<int>(msg.sendTime), alloc);
         if (msg.type == 0) obj.AddMember("groupId", msg.toId, alloc);
         msgArray.PushBack(obj, alloc);
     }
@@ -825,43 +833,16 @@ void MessageRouter::doGetGroups(int fd) {
         obj.AddMember("memberCount", g.memberCount, alloc);
         obj.AddMember("maxMembers", g.maxMembers, alloc);
 
-        MYSQL* conn = DBManager::getInstance().getConnection();
-        if (conn) {
-            const char* sql = "SELECT content, UNIX_TIMESTAMP(create_time) as ts FROM chat_group_messages WHERE group_id = ? ORDER BY create_time DESC LIMIT 1";
-            MYSQL_STMT* stmt = mysql_stmt_init(conn);
-            if (stmt && mysql_stmt_prepare(stmt, sql, strlen(sql)) == 0) {
-                int groupId = g.id;
-                MYSQL_BIND param;
-                memset(&param, 0, sizeof(param));
-                param.buffer_type = MYSQL_TYPE_LONG;
-                param.buffer = &groupId;
-                mysql_stmt_bind_param(stmt, &param);
-                if (mysql_stmt_execute(stmt) == 0) {
-                    MYSQL_BIND result[2];
-                    memset(result, 0, sizeof(result));
-                    char content[1024] = {0};
-                    long sendTime = 0;
-                    result[0].buffer_type = MYSQL_TYPE_STRING;
-                    result[0].buffer = content;
-                    result[0].buffer_length = sizeof(content);
-                    result[1].buffer_type = MYSQL_TYPE_LONG;
-                    result[1].buffer = &sendTime;
-                    mysql_stmt_bind_result(stmt, result);
-                    if (mysql_stmt_fetch(stmt) == 0) {
-                        obj.AddMember("lastMsg", rapidjson::StringRef(content), alloc);
-                        obj.AddMember("lastTime", sendTime, alloc);
-                    } else {
-                        obj.AddMember("lastMsg", "", alloc);
-                        obj.AddMember("lastTime", 0, alloc);
-                    }
-                }
-                mysql_stmt_close(stmt);
-            }
-            DBManager::getInstance().releaseConnection(conn);
-        } else {
-            obj.AddMember("lastMsg", "", alloc);
-            obj.AddMember("lastTime", 0, alloc);
+        // 从 Redis 缓存读取频道最后消息（替代 MySQL 查询）
+        std::string cacheKey = "group:last_msg:" + std::to_string(g.id);
+        std::string lastMsg = RedisClient::instance().hget(cacheKey, "content");
+        std::string lastTimeStr = RedisClient::instance().hget(cacheKey, "time");
+        int lastTime = 0;
+        if (!lastTimeStr.empty()) {
+            try { lastTime = std::stoi(lastTimeStr); } catch (...) {}
         }
+        obj.AddMember("lastMsg", rapidjson::StringRef(lastMsg.c_str()), alloc);
+        obj.AddMember("lastTime", lastTime, alloc);
 
         arr.PushBack(obj, alloc);
     }
@@ -920,8 +901,8 @@ void MessageRouter::doGetConversations(int fd, std::shared_ptr<User> user) {
         obj.AddMember("type", "single", alloc);
         obj.AddMember("id", rapidjson::StringRef(peerAccount.c_str()), alloc);
         obj.AddMember("lastMsg", rapidjson::StringRef(std::get<0>(data).c_str()), alloc);
-        int64_t lastTime = 0;
-        if (!std::get<1>(data).empty()) lastTime = std::stoll(std::get<1>(data));
+        int lastTime = 0;
+        if (!std::get<1>(data).empty()) lastTime = std::stoi(std::get<1>(data));
         obj.AddMember("lastTime", lastTime, alloc);
         obj.AddMember("unread", std::get<2>(data), alloc);
         obj.AddMember("name", rapidjson::StringRef(username.c_str()), alloc);

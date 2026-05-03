@@ -41,7 +41,7 @@ void AsyncLog::setLevel(LogLevel level) {
 void AsyncLog::write(LogLevel level, const std::string& msg) {
     // 级别过滤
     if (level < minLevel_) return;
-    
+
     // 格式化日志行：时间 + 级别 + 消息
     auto now = std::chrono::system_clock::now();
     auto t = std::chrono::system_clock::to_time_t(now);
@@ -52,29 +52,37 @@ void AsyncLog::write(LogLevel level, const std::string& msg) {
         case LogLevel::WARN:  levelStr = "[WARN]";  break;
         case LogLevel::ERROR: levelStr = "[ERROR]"; break;
     }
-    
-    // 使用局部缓冲区减少锁内操作
+
+    // 使用线程安全的 localtime_r 替代 localtime
     char timeBuf[32];
-    std::strftime(timeBuf, sizeof(timeBuf), "%a %b %d %H:%M:%S %Y", std::localtime(&t));
+    struct tm tm_buf;
+    localtime_r(&t, &tm_buf);
+    std::strftime(timeBuf, sizeof(timeBuf), "%a %b %d %H:%M:%S %Y", &tm_buf);
     std::string logLine = std::string(timeBuf) + " " + levelStr + " " + msg + "\n";
-    
-    std::unique_lock<std::mutex> lock(mutex_);
-    // 如果当前缓冲区剩余空间不足，先交换
-    if (buffer_.size() + logLine.size() > BUFFER_SIZE) {
-        // 将当前缓冲区移到待写队列
-        buffers_.push_back(std::move(buffer_));
-        // 使用备用缓冲区作为新的当前缓冲区
-        if (!nextBuffer_.empty()) {
-            buffer_ = std::move(nextBuffer_);
-        } else {
-            buffer_.resize(BUFFER_SIZE);
-            buffer_.clear();
+
+    bool needNotify = false;
+    {
+        std::unique_lock<std::mutex> lock(mutex_);
+        // 如果当前缓冲区剩余空间不足，先交换
+        if (buffer_.size() + logLine.size() > BUFFER_SIZE) {
+            // 将当前缓冲区移到待写队列
+            buffers_.push_back(std::move(buffer_));
+            // 使用备用缓冲区作为新的当前缓冲区
+            if (!nextBuffer_.empty()) {
+                buffer_ = std::move(nextBuffer_);
+            } else {
+                buffer_.resize(BUFFER_SIZE);
+                buffer_.clear();
+            }
+            needNotify = true;
         }
-        // 通知后端线程有数据可写
+        // 将日志行追加到当前缓冲区
+        buffer_.insert(buffer_.end(), logLine.begin(), logLine.end());
+    }
+    // 通知后端线程（在锁作用域外，减少无效唤醒）
+    if (needNotify) {
         cond_.notify_one();
     }
-    // 将日志行追加到当前缓冲区
-    buffer_.insert(buffer_.end(), logLine.begin(), logLine.end());
 }
 
 void AsyncLog::stop() {

@@ -28,6 +28,7 @@ RedisClient顾名思义就是AeroChat中负责与Redis服务器交互,RedisClien
 #include <thread>
 #include <atomic>
 #include <memory>
+#include <condition_variable>
 
 class RedisClient {
 public:
@@ -69,8 +70,16 @@ public:
     std::vector<std::string> hvals(const std::string& key);
     long long hincrby(const std::string& key, const std::string& field, long long increment);
 
+    // Sorted Set 操作
+    long long zadd(const std::string& key, double score, const std::string& member);
+    long long zrem(const std::string& key, const std::string& member);
+    std::vector<std::string> zrevrange(const std::string& key, long long start, long long stop);
+    long long zcard(const std::string& key);
+
     // 批量操作
     std::vector<std::string> multiHget(const std::vector<std::string>& keys, const std::string& field);
+    void multiRpush(const std::string& key, const std::vector<std::string>& values);
+    void batchRpush(const std::vector<std::pair<std::string, std::string>>& keyValues);
 
     // 发布/订阅
     bool publish(const std::string& channel, const std::string& message);
@@ -87,6 +96,7 @@ private:
     int poolSize_;
     std::queue<redisContext*> pool_;
     std::mutex mutex_;
+    std::condition_variable cv_;
 
     // 订阅相关
     std::unique_ptr<std::thread> subThread_;

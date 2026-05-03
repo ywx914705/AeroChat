@@ -171,12 +171,15 @@ int MessageStore::saveMessage(int fromUserId, const std::string &fromUsername,
 //离线消息
 void MessageStore::pushToInbox(int msgId, const std::vector<int> &targetUserIds) {
     std::string msgIdStr = std::to_string(msgId);
+    // 一次 Pipeline 发送所有 RPUSH（N 次 Redis 往返 → 1 次）
+    std::vector<std::pair<std::string, std::string>> keyValues;
+    keyValues.reserve(targetUserIds.size());
     for (int uid : targetUserIds) {
-        std::string key = INBOX_KEY_PREFIX + std::to_string(uid);
-        redis_.rpush(key, msgIdStr);
-        LOG_INFO("[MessageStore] pushToInbox: msg=" + std::to_string(msgId) +
-                 " to user=" + std::to_string(uid));
+        keyValues.emplace_back(INBOX_KEY_PREFIX + std::to_string(uid), msgIdStr);
     }
+    RedisClient::instance().batchRpush(keyValues);
+    LOG_INFO("[MessageStore] pushToInbox: msg=" + std::to_string(msgId) +
+             " to " + std::to_string(targetUserIds.size()) + " users");
 }
 
 std::vector<int> MessageStore::pullOfflineMsgIds(int userId) {
@@ -229,38 +232,90 @@ std::vector<StoredMessage> MessageStore::getMessages(const std::vector<int> &msg
         return result;
     }
 
+    // 第一遍：收集所有行数据和需要查询的 account
+    struct RowData {
+        StoredMessage msg;
+        std::string fromAccount;
+        std::string toAccount; // 仅私聊消息使用
+    };
+    std::vector<RowData> rows;
+    std::unordered_map<std::string, int> accountToIdx; // account → 在 allAccounts 中的索引
+    std::vector<std::string> allAccounts;
+
     MYSQL_ROW row;
     while ((row = mysql_fetch_row(res))) {
-        StoredMessage msg;
-        msg.msgId = std::stoi(row[0]);
-        std::string fromAccount = row[1] ? row[1] : "";
-        msg.fromUserId = SessionManager::instance().getUserIdByAccount(fromAccount);
-        // 兼容旧数据：如果 fromAccount 是纯数字且查询失败，直接转换为 int
-        if (msg.fromUserId <= 0 && !fromAccount.empty() &&
-            std::all_of(fromAccount.begin(), fromAccount.end(), ::isdigit)) {
-            msg.fromUserId = std::stoi(fromAccount);
-        }
-        msg.fromUsername = row[2] ? row[2] : "";
-        msg.fromAvatar = row[3] ? row[3] : "";
+        RowData rd;
+        rd.msg.msgId = std::stoi(row[0]);
+        rd.fromAccount = row[1] ? row[1] : "";
+        rd.msg.fromUsername = row[2] ? row[2] : "";
+        rd.msg.fromAvatar = row[3] ? row[3] : "";
         if (row[7] && std::stoi(row[7]) == 0) {
-            // 群聊消息
-            msg.toId = (row[4] ? std::stoi(row[4]) : 0);
+            rd.msg.toId = (row[4] ? std::stoi(row[4]) : 0);
+            rd.msg.type = 0;
         } else {
-            // 私聊消息：toId 存储对方用户ID
-            std::string toAccount = row[4] ? row[4] : "";
-            msg.toId = SessionManager::instance().getUserIdByAccount(toAccount);
-            if (msg.toId <= 0 && !toAccount.empty() &&
-                std::all_of(toAccount.begin(), toAccount.end(), ::isdigit)) {
-                msg.toId = std::stoi(toAccount);
-            }
+            rd.toAccount = row[4] ? row[4] : "";
+            rd.msg.toId = 0; // 稍后填充
+            rd.msg.type = 1;
         }
-        msg.content = row[5] ? row[5] : "";
-        msg.sendTime = std::stol(row[6]);
-        msg.type = row[7] ? std::stoi(row[7]) : 0;
-        result.push_back(msg);
+        rd.msg.content = row[5] ? row[5] : "";
+        rd.msg.sendTime = std::stol(row[6]);
+
+        // 收集需要查询的 account
+        if (accountToIdx.find(rd.fromAccount) == accountToIdx.end()) {
+            accountToIdx[rd.fromAccount] = allAccounts.size();
+            allAccounts.push_back(rd.fromAccount);
+        }
+        if (rd.msg.type == 1 && accountToIdx.find(rd.toAccount) == accountToIdx.end()) {
+            accountToIdx[rd.toAccount] = allAccounts.size();
+            allAccounts.push_back(rd.toAccount);
+        }
+        rows.push_back(std::move(rd));
     }
     mysql_free_result(res);
     db_.releaseConnection(conn);
+
+    // 批量查询 account→userId 映射（一次 Redis Pipeline 调用）
+    std::vector<int> userIds(allAccounts.size(), 0);
+    if (!allAccounts.empty()) {
+        std::vector<std::string> userKeys;
+        userKeys.reserve(allAccounts.size());
+        for (const auto& acc : allAccounts) {
+            userKeys.push_back("user:" + acc);
+        }
+        auto userIdStrs = RedisClient::instance().multiHget(userKeys, "user_id");
+        for (size_t i = 0; i < userIdStrs.size(); ++i) {
+            if (!userIdStrs[i].empty()) {
+                try { userIds[i] = std::stoi(userIdStrs[i]); } catch (...) {}
+            }
+        }
+    }
+
+    // 第二遍：填充 userId 并构建结果
+    result.reserve(rows.size());
+    for (auto& rd : rows) {
+        // 填充 fromUserId
+        auto it = accountToIdx.find(rd.fromAccount);
+        if (it != accountToIdx.end()) {
+            rd.msg.fromUserId = userIds[it->second];
+        }
+        // 兼容旧数据：如果 fromAccount 是纯数字且查询失败，直接转换为 int
+        if (rd.msg.fromUserId <= 0 && !rd.fromAccount.empty() &&
+            std::all_of(rd.fromAccount.begin(), rd.fromAccount.end(), ::isdigit)) {
+            rd.msg.fromUserId = std::stoi(rd.fromAccount);
+        }
+        // 填充 toId（私聊消息）
+        if (rd.msg.type == 1) {
+            auto it2 = accountToIdx.find(rd.toAccount);
+            if (it2 != accountToIdx.end()) {
+                rd.msg.toId = userIds[it2->second];
+            }
+            if (rd.msg.toId <= 0 && !rd.toAccount.empty() &&
+                std::all_of(rd.toAccount.begin(), rd.toAccount.end(), ::isdigit)) {
+                rd.msg.toId = std::stoi(rd.toAccount);
+            }
+        }
+        result.push_back(std::move(rd.msg));
+    }
     return result;
 }
 
@@ -339,27 +394,81 @@ std::vector<StoredMessage> MessageStore::loadHistoryPaginated(const std::string 
         return result;
     }
 
-    while (mysql_stmt_fetch(stmt) == 0) {
-        StoredMessage msg;
-        msg.msgId = msgId;
-        msg.fromUserId = SessionManager::instance().getUserIdByAccount(fromAccount);
-        if (msg.fromUserId <= 0 && std::all_of(fromAccount, fromAccount+strlen(fromAccount), ::isdigit)) {
-            msg.fromUserId = std::stoi(fromAccount);
-        }
-        msg.fromUsername = fromUsername;
-        msg.fromAvatar = fromAvatar;
-        msg.toId = SessionManager::instance().getUserIdByAccount(toAccount);
-        if (msg.toId <= 0 && std::all_of(toAccount, toAccount+strlen(toAccount), ::isdigit)) {
-            msg.toId = std::stoi(toAccount);
-        }
-        msg.content = content;
-        msg.sendTime = sendTime;
-        msg.type = type;
-        result.push_back(msg);
-    }
+    // 第一遍：收集行和所有 account
+    struct RowData {
+        int msgId, type;
+        long sendTime;
+        std::string fromAccount, toAccount, fromUsername, fromAvatar, content;
+    };
+    std::vector<RowData> rows;
+    std::vector<std::string> allAccounts;
+    std::unordered_map<std::string, size_t> accountToIdx;
 
+    while (mysql_stmt_fetch(stmt) == 0) {
+        RowData rd;
+        rd.msgId = msgId;
+        rd.type = type;
+        rd.sendTime = sendTime;
+        rd.fromAccount = fromAccount;
+        rd.toAccount = toAccount;
+        rd.fromUsername = fromUsername;
+        rd.fromAvatar = fromAvatar;
+        rd.content = content;
+
+        if (accountToIdx.find(rd.fromAccount) == accountToIdx.end()) {
+            accountToIdx[rd.fromAccount] = allAccounts.size();
+            allAccounts.push_back(rd.fromAccount);
+        }
+        if (accountToIdx.find(rd.toAccount) == accountToIdx.end()) {
+            accountToIdx[rd.toAccount] = allAccounts.size();
+            allAccounts.push_back(rd.toAccount);
+        }
+        rows.push_back(std::move(rd));
+    }
     mysql_stmt_close(stmt);
     db_.releaseConnection(conn);
+
+    // 批量查询 account→userId
+    std::vector<int> userIds(allAccounts.size(), 0);
+    if (!allAccounts.empty()) {
+        std::vector<std::string> userKeys;
+        userKeys.reserve(allAccounts.size());
+        for (const auto& acc : allAccounts) {
+            userKeys.push_back("user:" + acc);
+        }
+        auto userIdStrs = RedisClient::instance().multiHget(userKeys, "user_id");
+        for (size_t i = 0; i < userIdStrs.size(); ++i) {
+            if (!userIdStrs[i].empty()) {
+                try { userIds[i] = std::stoi(userIdStrs[i]); } catch (...) {}
+            }
+        }
+    }
+
+    // 第二遍：填充 userId 并构建结果
+    result.reserve(rows.size());
+    for (auto& rd : rows) {
+        StoredMessage msg;
+        msg.msgId = rd.msgId;
+        auto it = accountToIdx.find(rd.fromAccount);
+        if (it != accountToIdx.end()) msg.fromUserId = userIds[it->second];
+        if (msg.fromUserId <= 0 && !rd.fromAccount.empty() &&
+            std::all_of(rd.fromAccount.begin(), rd.fromAccount.end(), ::isdigit)) {
+            msg.fromUserId = std::stoi(rd.fromAccount);
+        }
+        msg.fromUsername = rd.fromUsername;
+        msg.fromAvatar = rd.fromAvatar;
+        auto it2 = accountToIdx.find(rd.toAccount);
+        if (it2 != accountToIdx.end()) msg.toId = userIds[it2->second];
+        if (msg.toId <= 0 && !rd.toAccount.empty() &&
+            std::all_of(rd.toAccount.begin(), rd.toAccount.end(), ::isdigit)) {
+            msg.toId = std::stoi(rd.toAccount);
+        }
+        msg.content = rd.content;
+        msg.sendTime = rd.sendTime;
+        msg.type = rd.type;
+        result.push_back(std::move(msg));
+    }
+
     LOG_INFO("[MessageStore] loadHistoryPaginated(single) count=" + std::to_string(result.size()));
     return result;
 }
@@ -433,26 +542,74 @@ std::vector<StoredMessage> MessageStore::loadHistoryPaginated(int groupId,
         return result;
     }
 
-    while (mysql_stmt_fetch(stmt) == 0) {
-        StoredMessage msg;
-        msg.msgId = msgId;
-        // FIXED: 将 fromAccount 转换为 userId，支持账号和兼容纯数字
-        int fromId = SessionManager::instance().getUserIdByAccount(fromAccount);
-        if (fromId <= 0 && std::all_of(fromAccount, fromAccount+strlen(fromAccount), ::isdigit)) {
-            fromId = std::stoi(fromAccount);
-        }
-        msg.fromUserId = fromId;
-        msg.fromUsername = fromUsername;
-        msg.fromAvatar = fromAvatar;
-        msg.toId = groupIdOut;
-        msg.content = content;
-        msg.sendTime = sendTime;
-        msg.type = type;
-        result.push_back(msg);
-    }
+    // 第一遍：收集行和所有 account
+    struct RowData {
+        int msgId, type, groupIdOut;
+        long sendTime;
+        std::string fromAccount, fromUsername, fromAvatar, content;
+    };
+    std::vector<RowData> rows;
+    std::vector<std::string> allAccounts;
+    std::unordered_map<std::string, size_t> accountToIdx;
 
+    while (mysql_stmt_fetch(stmt) == 0) {
+        RowData rd;
+        rd.msgId = msgId;
+        rd.type = type;
+        rd.groupIdOut = groupIdOut;
+        rd.sendTime = sendTime;
+        rd.fromAccount = fromAccount;
+        rd.fromUsername = fromUsername;
+        rd.fromAvatar = fromAvatar;
+        rd.content = content;
+
+        if (accountToIdx.find(rd.fromAccount) == accountToIdx.end()) {
+            accountToIdx[rd.fromAccount] = allAccounts.size();
+            allAccounts.push_back(rd.fromAccount);
+        }
+        rows.push_back(std::move(rd));
+    }
     mysql_stmt_close(stmt);
     db_.releaseConnection(conn);
+
+    // 批量查询 account→userId
+    std::vector<int> userIds(allAccounts.size(), 0);
+    if (!allAccounts.empty()) {
+        std::vector<std::string> userKeys;
+        userKeys.reserve(allAccounts.size());
+        for (const auto& acc : allAccounts) {
+            userKeys.push_back("user:" + acc);
+        }
+        auto userIdStrs = RedisClient::instance().multiHget(userKeys, "user_id");
+        for (size_t i = 0; i < userIdStrs.size(); ++i) {
+            if (!userIdStrs[i].empty()) {
+                try { userIds[i] = std::stoi(userIdStrs[i]); } catch (...) {}
+            }
+        }
+    }
+
+    // 第二遍：填充 userId 并构建结果
+    result.reserve(rows.size());
+    for (auto& rd : rows) {
+        StoredMessage msg;
+        msg.msgId = rd.msgId;
+        int fromId = 0;
+        auto it = accountToIdx.find(rd.fromAccount);
+        if (it != accountToIdx.end()) fromId = userIds[it->second];
+        if (fromId <= 0 && !rd.fromAccount.empty() &&
+            std::all_of(rd.fromAccount.begin(), rd.fromAccount.end(), ::isdigit)) {
+            fromId = std::stoi(rd.fromAccount);
+        }
+        msg.fromUserId = fromId;
+        msg.fromUsername = rd.fromUsername;
+        msg.fromAvatar = rd.fromAvatar;
+        msg.toId = rd.groupIdOut;
+        msg.content = rd.content;
+        msg.sendTime = rd.sendTime;
+        msg.type = rd.type;
+        result.push_back(std::move(msg));
+    }
+
     LOG_INFO("[MessageStore] loadHistoryPaginated(group) count=" + std::to_string(result.size()));
     return result;
 }
@@ -634,6 +791,20 @@ void MessageStore::rebuildConversations(int userId, bool force) {
 
     std::unordered_map<std::string, std::pair<std::string, time_t>> groupMap;
     for (int gid_val : groupIds) {
+        // 使用 Redis 缓存（优化 4 已在 doGroupMessage 中维护 group:last_msg:{groupId}）
+        std::string cacheKey = "group:last_msg:" + std::to_string(gid_val);
+        std::string lastMsg = RedisClient::instance().hget(cacheKey, "content");
+        std::string lastTimeStr = RedisClient::instance().hget(cacheKey, "time");
+
+        if (!lastMsg.empty() && !lastTimeStr.empty()) {
+            std::string field = "group:" + std::to_string(gid_val);
+            try {
+                groupMap[field] = {lastMsg, std::stol(lastTimeStr)};
+            } catch (...) {}
+            continue;
+        }
+
+        // 缓存未命中，回退到 MySQL 查询
         sql = "SELECT content, UNIX_TIMESTAMP(create_time) FROM chat_group_messages "
               "WHERE group_id = ? ORDER BY create_time DESC LIMIT 1";
         stmt = mysql_stmt_init(conn);

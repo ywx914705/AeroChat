@@ -75,6 +75,12 @@ bool SessionManager::login(int fd, const std::string& account, int userId,
         LOG_WARN("[SessionManager] Redis expire user:" + account + " failed");
     }
 
+    // 写入 Sorted Set（用于分页查询在线用户）
+    {
+        double score = static_cast<double>(std::time(nullptr));
+        redis_.zadd("online_users_zset", score, account);
+    }
+
     // 写入内存
     {
         std::unique_lock lock(memoryMutex_);
@@ -106,6 +112,8 @@ void SessionManager::logout(int fd) {
     if (!redis_.hdel("online_users_info", account)) {
         LOG_WARN("[SessionManager] Redis hdel online_users_info failed for account=" + account);
     }
+    // 从 Sorted Set 中移除
+    redis_.zrem("online_users_zset", account);
     if (!username.empty()) {
         if (!redis_.hdel("username_to_account", username)) {
             LOG_WARN("[SessionManager] Redis hdel username_to_account failed for username=" + username);
@@ -427,8 +435,38 @@ std::vector<std::tuple<std::string, std::string, std::string>> SessionManager::g
     return result;
 }
 
+// 分页获取在线用户（使用 Sorted Set，O(logN) 复杂度）
+std::vector<OnlineUserInfo> SessionManager::getOnlineUsersPaginated(int offset, int limit) const {
+    std::vector<OnlineUserInfo> result;
+    if (limit <= 0) return result;
+
+    // 从 Sorted Set 分页获取 account 列表
+    auto accounts = redis_.zrevrange("online_users_zset", offset, offset + limit - 1);
+    if (accounts.empty()) return result;
+
+    // 批量获取 account 对应的 username 和 avatar
+    std::vector<std::string> userKeys;
+    userKeys.reserve(accounts.size());
+    for (const auto& acc : accounts) {
+        userKeys.push_back("user:" + acc);
+    }
+    auto usernames = redis_.multiHget(userKeys, "username");
+    auto avatars = redis_.multiHget(userKeys, "avatar");
+
+    result.reserve(accounts.size());
+    for (size_t i = 0; i < accounts.size(); ++i) {
+        OnlineUserInfo info;
+        info.account = accounts[i];
+        info.username = (i < usernames.size()) ? usernames[i] : "";
+        info.avatarUrl = (i < avatars.size()) ? avatars[i] : "";
+        if (info.username.empty()) info.username = info.account;
+        result.push_back(std::move(info));
+    }
+    return result;
+}
+
 int SessionManager::getOnlineCount() const {
-    return redis_.hlen("online_users_info");
+    return redis_.zcard("online_users_zset");
 }
 
 std::vector<int> SessionManager::getFdsByAccounts(const std::vector<std::string>& accounts) const {

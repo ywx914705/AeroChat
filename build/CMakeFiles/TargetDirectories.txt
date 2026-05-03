@@ -1,3 +1,3 @@
-/home/ywx/shareproject/AeroChat/build/CMakeFiles/AeroChat.dir
-/home/ywx/shareproject/AeroChat/build/CMakeFiles/edit_cache.dir
-/home/ywx/shareproject/AeroChat/build/CMakeFiles/rebuild_cache.dir
+/home/ywx/AeroChat/build/CMakeFiles/AeroChat.dir
+/home/ywx/AeroChat/build/CMakeFiles/edit_cache.dir
+/home/ywx/AeroChat/build/CMakeFiles/rebuild_cache.dir

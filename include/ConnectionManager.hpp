@@ -23,6 +23,8 @@ public:
 
     bool sendToUser(int fd, const std::string& message);
     void broadcastMessage(const std::string& message);
+    // 检查空闲连接，返回需要关闭的 fd 列表（按 loop 分组）
+    std::unordered_map<EventLoop*, std::vector<int>> getIdleConnections(time_t timeout) const;
 
 private:
     ConnectionManager() = default;

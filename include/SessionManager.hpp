@@ -49,6 +49,8 @@ public:
     bool updateUsername(int fd, const std::string& new_username);
 
     std::vector<std::tuple<std::string, std::string, std::string>> getAllOnlineUserInfos() const;
+    // 分页获取在线用户（使用 Sorted Set，O(logN) 复杂度）
+    std::vector<OnlineUserInfo> getOnlineUsersPaginated(int offset, int limit) const;
     std::vector<OnlineUserInfo> searchOnlineUsers(const std::string& keyword, int limit = 20) const;
     std::vector<OnlineUserInfo> searchAllUsers(const std::string& keyword, int limit = 20) const;
 

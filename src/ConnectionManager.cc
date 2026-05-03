@@ -122,3 +122,24 @@ std::vector<std::shared_ptr<User>> ConnectionManager::getUsers(const std::vector
   }
   return result;
 }
+
+std::unordered_map<EventLoop*, std::vector<int>> ConnectionManager::getIdleConnections(time_t timeout) const {
+  std::unordered_map<EventLoop*, std::vector<int>> result;
+  time_t now = time(nullptr);
+
+  std::shared_lock lock(mutex_);
+  for (auto& [loop, vec] : loopUsers_) {
+    std::vector<int> idleFds;
+    for (auto& weak : vec) {
+      auto user = weak.lock();
+      if (!user) continue;
+      if (!user->isAlive() || now - user->lastActiveTime() > timeout) {
+        idleFds.push_back(user->fd());
+      }
+    }
+    if (!idleFds.empty()) {
+      result[loop] = std::move(idleFds);
+    }
+  }
+  return result;
+}

@@ -24,7 +24,7 @@
 const int MAX_CONNECTIONS = 25000; // AeroChat接收的最大连接数 (8GB内存安全上限)
 const int SOCKET_SNDBUF = 262144; // socket发送缓冲区的大小
 const int SOCKET_RCVBUF = 262144; // socket接收缓冲区的大小
-const int DB_POOL_SIZE = 500;     // MySQL连接池的大小  根据内存调整
+const int DB_POOL_SIZE = 128;     // MySQL连接池的大小（MySQL默认max_connections=151）
 const int SUB_REACTOR_NUM =std::max(4, static_cast<int>(std::thread::hardware_concurrency()));
 
 // 线程数由CPU核数所决定
@@ -58,15 +58,6 @@ ChatServer::ChatServer(EventLoop *loop, uint16_t port, int numSubReactors)
   DBManager::getInstance().connect("localhost", "root", "123456", "chat_db",3306);
   SessionManager::instance().initEmpty();
 
-  int totalThreads = SUB_REACTOR_NUM + 1; // 主 + 子
-  perLoopUsers_.resize(totalThreads); // perLoopUsers_是一个vector结果,使用resize来分配空间
-  // 每个线程都创建一个perLoopUsers,从名字上就能看出来,一个User一个Loop
-  for (int i = 0; i < totalThreads; ++i) {
-    perLoopUsers_[i] = std::make_unique<PerLoopUsers>();
-    perLoopUsers_[i]->map.reserve(MAX_CONNECTIONS / totalThreads + 100);
-    // 此项目中这里最大连接数是1.6W/(线程数+100)
-    // +100是一个安全缓冲,防止因分配不均导致实际连接数 超过均值
-  }
   GroupManager::instance().initPresetGroups(); // 初始化8个预设群组
   GroupManager::instance().loadAllGroupsFromDB();
   LOG_INFO("ChatServer初始化完成");
@@ -93,17 +84,6 @@ void ChatServer::start() {
 
   // 1、启动线程池
   threadPool_->start();
-  auto loops = threadPool_->getAllLoops(); // 获取所有线程的Loop指针
-  if (loops.size() + 1 > perLoopUsers_.size()) {
-    perLoopUsers_.resize(loops.size() + 1);
-    for (size_t i = 0; i < perLoopUsers_.size(); ++i) {
-      if (!perLoopUsers_[i]) {
-        perLoopUsers_[i] = std::make_unique<PerLoopUsers>();
-      } // 为每个线程的 map 预分配内存,避免运行时rehash。每个线程平均处理
-        // MAX_CONNECTIONS / totalThreads 个连接, 加 100 作为安全缓冲。
-      perLoopUsers_[i]->map.reserve(MAX_CONNECTIONS / (loops.size() + 1) + 100);
-    }
-  }
 
   // 2、创建监听socket
   listenFd_ = sock_.Socket();
@@ -201,13 +181,6 @@ void ChatServer::handleNewConn(int connFd, EventLoop *subLoop,
   fcntl(connFd, F_SETFL, flags | O_NONBLOCK | FD_CLOEXEC);
 
   auto user = std::make_shared<User>(connFd, subLoop); // 创建User对象
-  int idx = subLoop->getIndex();
-  if (idx < 0 || static_cast<size_t>(idx) >= perLoopUsers_.size() ||
-      !perLoopUsers_[idx]) {
-    LOG_ERROR("handleNewConn: invalid index " + std::to_string(idx));
-    close(connFd);
-    return;
-  }
 
   ConnectionManager::instance().addUser(connFd, user);
 
@@ -217,19 +190,13 @@ void ChatServer::handleNewConn(int connFd, EventLoop *subLoop,
       MessageRouter::instance().onMessage(fd, msg, u);
   });
 
-  user->setErrorCallback([this, idx](int fd) {
+  user->setErrorCallback([](int fd) {
     // 先调用 SessionManager 登出，清除 Redis 中的在线状态
     SessionManager::instance().logout(fd);
     ConnectionManager::instance().removeUser(fd);
-    removeUser(fd);
   });
 
   user->start();
-
-  {
-    std::unique_lock lock(perLoopUsers_[idx]->mutex);
-    perLoopUsers_[idx]->map[connFd] = user;
-  }
   connCount_++;
 
   rapidjson::Document welcome;
@@ -247,28 +214,8 @@ void ChatServer::handleNewConn(int connFd, EventLoop *subLoop,
 }
 
 void ChatServer::removeUser(int fd) {
-  int targetIdx = -1;
-  for (size_t i = 0; i < perLoopUsers_.size(); ++i) {
-    if (!perLoopUsers_[i])
-      continue;
-    std::shared_lock lock(perLoopUsers_[i]->mutex);
-    if (perLoopUsers_[i]->map.count(fd)) {
-      targetIdx = i;
-      break;
-    }
-  }
-  if (targetIdx == -1)
-    return;
-
-  auto loops = threadPool_->getAllLoops();
-  EventLoop *targetLoop = (targetIdx == 0) ? loop_ : loops[targetIdx - 1];
-  targetLoop->runInLoop([this, targetIdx, fd] {
-    if (!perLoopUsers_[targetIdx])
-      return;
-    std::unique_lock lock(perLoopUsers_[targetIdx]->mutex);
-    perLoopUsers_[targetIdx]->map.erase(fd);
-    connCount_--;
-  });
+  // ConnectionManager 已经处理了用户删除，这里只需减少连接计数
+  connCount_--;
 }
 
 void ChatServer::checkIdleConnections() {
@@ -276,31 +223,19 @@ void ChatServer::checkIdleConnections() {
   ssize_t nr = read(timerFd_, &exp, sizeof(exp));
   (void)nr;
 
-  time_t now = time(nullptr);
-  for (auto &perLoop : perLoopUsers_) {
-    if (!perLoop)
-      continue;
-    std::vector<int> toClose;
-    {
-      std::shared_lock lock(perLoop->mutex);
-      for (const auto &[fd, user] : perLoop->map) {
-        if (!user->isAlive()) {
-          toClose.push_back(fd);
-          continue;
-        }
-        if (now - user->lastActiveTime() > kIdleTimeoutSeconds) {
-          toClose.push_back(fd);
+  // 使用 ConnectionManager 的 getIdleConnections 获取空闲连接（按 loop 分组）
+  auto idleByLoop = ConnectionManager::instance().getIdleConnections(kIdleTimeoutSeconds);
+
+  // 按 loop 分组关闭空闲连接
+  for (auto &[loop, fds] : idleByLoop) {
+    loop->runInLoop([fds]() {
+      for (int fd : fds) {
+        auto user = ConnectionManager::instance().getUser(fd);
+        if (user) {
+          user->handleError();
         }
       }
-    }
-    for (int fd : toClose) {
-      std::shared_lock lock(perLoop->mutex);
-      auto it = perLoop->map.find(fd);
-      if (it != perLoop->map.end()) {
-        auto user = it->second;
-        user->getLoop()->runInLoop([user] { user->handleError(); });
-      }
-    }
+    });
   }
 }
 

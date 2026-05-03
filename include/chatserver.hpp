@@ -47,14 +47,6 @@ private:
     Sock sock_;//Sock封装 用于创建、绑定、监听也就是linux中tcp服务器常用函数socket()、bind()、listen()
     int epollTimeout_;//epoll_wait超时时间
 
-    // 每个子Reactor对应的用户映射 + 读写锁
-    struct PerLoopUsers {
-        std::shared_mutex mutex;//读写锁:保护本线程的用户映射
-        std::unordered_map<int, std::shared_ptr<User>> map;//fd->User 一个fd对应一个User也就是一个用户
-    };
-    // 使用 unique_ptr 使 PerLoopUsers 可移动（因为 mutex 不可移动）
-    std::vector<std::unique_ptr<PerLoopUsers>> perLoopUsers_;//所以Reactor(线程的)PerLoopUsers
-
     // 空闲超时相关
     int timerFd_;
     std::unique_ptr<Channel> timerChannel_;

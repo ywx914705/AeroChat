@@ -31,9 +31,12 @@ bool RedisClient::init(const std::string& host, int port, int poolSize) {
 }
 
 redisContext* RedisClient::getContext() {
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::unique_lock<std::mutex> lock(mutex_);
     if (pool_.empty()) {
-        return nullptr;
+        // 连接池耗尽，等待最多 3 秒
+        if (!cv_.wait_for(lock, std::chrono::seconds(3), [this] { return !pool_.empty(); })) {
+            return nullptr; // 超时返回 nullptr
+        }
     }
     redisContext* ctx = pool_.front();
     pool_.pop();
@@ -42,8 +45,11 @@ redisContext* RedisClient::getContext() {
 
 void RedisClient::releaseContext(redisContext* ctx) {
     if (!ctx) return;
-    std::lock_guard<std::mutex> lock(mutex_);
-    pool_.push(ctx);
+    {
+        std::lock_guard<std::mutex> lock(mutex_);
+        pool_.push(ctx);
+    }
+    cv_.notify_one();
 }
 
 bool RedisClient::set(const std::string& key, const std::string& value) {
@@ -353,10 +359,98 @@ std::vector<std::string> RedisClient::multiHget(const std::vector<std::string>& 
     return result;
 }
 
+void RedisClient::multiRpush(const std::string& key, const std::vector<std::string>& values) {
+    if (values.empty()) return;
+
+    redisContext* ctx = getContext();
+    if (!ctx) return;
+
+    // 使用 Pipeline 批量发送 RPUSH 命令
+    for (const auto& val : values) {
+        redisAppendCommand(ctx, "RPUSH %s %s", key.c_str(), val.c_str());
+    }
+
+    // 逐一读取响应
+    for (size_t i = 0; i < values.size(); ++i) {
+        redisReply* reply = nullptr;
+        if (redisGetReply(ctx, (void**)&reply) == REDIS_OK && reply) {
+            freeReplyObject(reply);
+        }
+    }
+    releaseContext(ctx);
+}
+
+void RedisClient::batchRpush(const std::vector<std::pair<std::string, std::string>>& keyValues) {
+    if (keyValues.empty()) return;
+
+    redisContext* ctx = getContext();
+    if (!ctx) return;
+
+    // Pipeline: 一次性发送所有 RPUSH 命令
+    for (const auto& [key, val] : keyValues) {
+        redisAppendCommand(ctx, "RPUSH %s %s", key.c_str(), val.c_str());
+    }
+
+    // 逐一读取响应
+    for (size_t i = 0; i < keyValues.size(); ++i) {
+        redisReply* reply = nullptr;
+        if (redisGetReply(ctx, (void**)&reply) == REDIS_OK && reply) {
+            freeReplyObject(reply);
+        }
+    }
+    releaseContext(ctx);
+}
+
 long long RedisClient::hincrby(const std::string& key, const std::string& field, long long increment) {
     redisContext* ctx = getContext();
     if (!ctx) return -1;
     redisReply* reply = (redisReply*)redisCommand(ctx, "HINCRBY %s %s %lld", key.c_str(), field.c_str(), increment);
+    long long ret = (reply && reply->type == REDIS_REPLY_INTEGER) ? reply->integer : -1;
+    if (reply) freeReplyObject(reply);
+    releaseContext(ctx);
+    return ret;
+}
+
+// Sorted Set 操作
+long long RedisClient::zadd(const std::string& key, double score, const std::string& member) {
+    redisContext* ctx = getContext();
+    if (!ctx) return -1;
+    redisReply* reply = (redisReply*)redisCommand(ctx, "ZADD %s %f %s", key.c_str(), score, member.c_str());
+    long long ret = (reply && reply->type == REDIS_REPLY_INTEGER) ? reply->integer : -1;
+    if (reply) freeReplyObject(reply);
+    releaseContext(ctx);
+    return ret;
+}
+
+long long RedisClient::zrem(const std::string& key, const std::string& member) {
+    redisContext* ctx = getContext();
+    if (!ctx) return -1;
+    redisReply* reply = (redisReply*)redisCommand(ctx, "ZREM %s %s", key.c_str(), member.c_str());
+    long long ret = (reply && reply->type == REDIS_REPLY_INTEGER) ? reply->integer : -1;
+    if (reply) freeReplyObject(reply);
+    releaseContext(ctx);
+    return ret;
+}
+
+std::vector<std::string> RedisClient::zrevrange(const std::string& key, long long start, long long stop) {
+    redisContext* ctx = getContext();
+    std::vector<std::string> result;
+    if (!ctx) return result;
+    redisReply* reply = (redisReply*)redisCommand(ctx, "ZREVRANGE %s %lld %lld", key.c_str(), start, stop);
+    if (reply && reply->type == REDIS_REPLY_ARRAY) {
+        for (size_t i = 0; i < reply->elements; ++i) {
+            result.emplace_back(reply->element[i]->str, reply->element[i]->len);
+        }
+    }
+    if (reply) freeReplyObject(reply);
+    releaseContext(ctx);
+    return result;
+}
+
+long long RedisClient::zcard(const std::string& key) {
+    redisContext* ctx = getContext();
+    if (!ctx) return -1;
+    redisReply* reply = (redisReply*)redisCommand(ctx, "ZCARD %s", key.c_str());
     long long ret = (reply && reply->type == REDIS_REPLY_INTEGER) ? reply->integer : -1;
     if (reply) freeReplyObject(reply);
     releaseContext(ctx);
